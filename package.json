@@ -1,5 +1,5 @@
 {
-  "name": "lego",
+  "name": "letgo",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
@@ -47,15 +47,17 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "rtc:token": "node tools/livekit-token.mjs",
+    "prebuild:android": "expo prebuild --platform android"
   },
   "private": true
 }

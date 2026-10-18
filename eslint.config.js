@@ -7,4 +7,15 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*', 'node_modules/*', '.expo/*', 'web-build/*'],
   },
+  {
+    // Node-only developer tooling. Never bundled into the app.
+    files: ['tools/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        Buffer: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+  },
 ]);

@@ -13,6 +13,12 @@ export interface AppEnv {
   environment: AppEnvironment;
   /** Backend API base URL, or null while no backend exists. */
   apiBaseUrl: string | null;
+  /**
+   * LiveKit WebSocket URL used to prefill the dev RTC spike screen, or null.
+   * Tokens are deliberately NOT read from env: they are short-lived and are
+   * minted per session, never bundled.
+   */
+  livekitUrl: string | null;
 }
 
 const APP_ENVIRONMENTS: readonly AppEnvironment[] = ['development', 'production', 'test'];
@@ -42,6 +48,7 @@ export function parseAppEnv(source: Record<string, string | undefined> = process
   return {
     environment: environment as AppEnvironment,
     apiBaseUrl: normalize(source.EXPO_PUBLIC_API_BASE_URL) ?? null,
+    livekitUrl: normalize(source.EXPO_PUBLIC_LIVEKIT_URL) ?? null,
   };
 }
 

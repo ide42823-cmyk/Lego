@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   PermissionsAndroid,
@@ -10,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { env } from '@/core/config/env';
 import {
   createVoiceRoomAdapter,
   type VoiceConnectionState,
@@ -23,6 +25,11 @@ import {
  * A throwaway harness for exercising the LiveKit adapter on a real device. It is
  * not part of the product UI and will be deleted once P5 builds the real room.
  * Paste a short-lived token from a LiveKit server; never paste a long-lived key.
+ *
+ * For automation, `url` and `token` may also be supplied as deep-link query
+ * parameters so a device harness can be driven without typing a JWT on-device:
+ *   adb shell am start -a android.intent.action.VIEW \
+ *     -d "letgo://dev/rtc-spike?token=<jwt>"
  */
 
 async function ensureMicrophonePermission(): Promise<boolean> {
@@ -35,9 +42,10 @@ async function ensureMicrophonePermission(): Promise<boolean> {
 }
 
 export default function RtcSpikeScreen() {
+  const params = useLocalSearchParams<{ url?: string; token?: string }>();
   const adapterRef = useRef<VoiceRoomAdapter | null>(null);
-  const [url, setUrl] = useState('');
-  const [token, setToken] = useState('');
+  const [url, setUrl] = useState(params.url ?? env.livekitUrl ?? '');
+  const [token, setToken] = useState(params.token ?? '');
   const [connectionState, setConnectionState] = useState<VoiceConnectionState>('idle');
   const [participants, setParticipants] = useState<VoiceParticipant[]>([]);
   const [micEnabled, setMicEnabled] = useState(true);
@@ -131,7 +139,7 @@ export default function RtcSpikeScreen() {
           onChangeText={setUrl}
           autoCapitalize="none"
           autoCorrect={false}
-          placeholder="wss://your-project.livekit.cloud"
+          placeholder="ws://192.168.3.16:7880"
           placeholderTextColor="#8A8A8E"
         />
 

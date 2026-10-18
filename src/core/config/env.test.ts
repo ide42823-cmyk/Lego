@@ -18,6 +18,14 @@ describe('parseAppEnv', () => {
   it('treats blank values as absent', () => {
     expect(parseAppEnv({ EXPO_PUBLIC_API_BASE_URL: '   ' }).apiBaseUrl).toBeNull();
     expect(parseAppEnv({ EXPO_PUBLIC_APP_ENV: '   ' }).environment).toBe('development');
+    expect(parseAppEnv({ EXPO_PUBLIC_LIVEKIT_URL: '   ' }).livekitUrl).toBeNull();
+  });
+
+  it('defaults livekitUrl to null and reads it when present', () => {
+    expect(parseAppEnv({}).livekitUrl).toBeNull();
+    expect(parseAppEnv({ EXPO_PUBLIC_LIVEKIT_URL: ' ws://192.168.3.16:7880 ' }).livekitUrl).toBe(
+      'ws://192.168.3.16:7880',
+    );
   });
 
   it('throws on an unknown environment', () => {

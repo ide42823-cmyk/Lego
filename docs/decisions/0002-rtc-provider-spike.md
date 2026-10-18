@@ -1,7 +1,7 @@
 # 0002 — RTC provider spike (P2)
 
 **Date:** 2026-10-18
-**Status:** Partially verified — provider selected provisionally; on-device audio NOT TESTED
+**Status:** DONE — provider confirmed; RTC verified end to end on a physical Android device
 **Phase:** P2 — native/RTC compatibility spike
 
 ## Decision
@@ -30,30 +30,43 @@ early development), and exposes a plain React Native WebRTC layer that fits our
 |---|---|
 | `npm run typecheck` | PASS |
 | `npm run lint` | PASS |
-| `npm test` | 5/5 PASS |
+| `npm test` | 6/6 PASS |
 | `npx prettier --check .` | PASS |
 | `npx expo export --platform ios` | PASS — Metro bundles the LiveKit graph (5.7 MB Hermes bundle vs 3.7 MB before) |
 | `npx expo config --type introspect` | PASS — resolved native config contains `NSMicrophoneUsageDescription`, `NSCameraUsageDescription`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `CAMERA`, and the `react-native-webrtc` plugin |
+| **On-device RTC** (Xiaomi, Android 14, self-hosted server) | PASS — see [0003](0003-android-toolchain-and-local-rtc.md) |
+| • connection state | `connecting -> connected` |
+| • transport | `ice: connected`, `dtls: connected`, `route: host/udp -> host`, RTT **11 ms** |
+| • microphone published | `codec: audio/opus`, `bytesSent: 271619`, `audioLevel: 0.015` |
+| • remote participant | discovered and rendered (`participants: 2`) |
+| • survives backgrounding | yes — still publishing while the app was backgrounded |
 
-## NOT TESTED (and why)
+The **provisional provider choice is now confirmed for Android**, and the
+vendor-isolation design held up: no feature code had to know that LiveKit exists.
 
-- **Native dev build** — this Windows machine has **no JDK, no Android SDK, no
-  `adb`**, and iOS cannot be built off macOS. Therefore no APK/IPA was produced.
-- **Multi-user audio, mute/unmute, Bluetooth routing, background, reconnect** —
-  require ≥2 physical devices and a running LiveKit server/Cloud key.
+## Still NOT TESTED (and why)
+
+- **Mute/unmute/leave on-device**, **audible two-way audio between two humans**,
+  **reconnect after a real network drop**, and **Bluetooth routing** — publishing
+  is proven, but these need a second person or on-device tapping, and MIUI
+  currently blocks input injection from the host (see 0003).
+- **iOS** — cannot be built on Windows; needs a Mac.
 - **New Architecture support** for `@livekit/react-native-webrtc@150` under RN 0.88
-  is unconfirmed.
+  is confirmed on Android at compile time *and* runtime, but not on iOS.
 
 ## Risks / notes
 
 - `machina@7.0.1` (LiveKit dependency) declares `node >=22.22`; this machine runs
   22.16. Installed with a warning; may matter at native build time.
-- The provider choice is provisional until the device spike passes.
+- The provider choice is confirmed for Android; re-check on iOS before release.
 
-## How to finish P2 (requires a different machine)
+## How P2 was finished
 
-1. Install JDK 17 + Android Studio/SDK (and/or use a Mac for iOS).
-2. `npx expo run:android` (or `eas build --profile development`).
-3. Start a LiveKit server or LiveKit Cloud project; issue short-lived tokens.
-4. Open the dev link on Home, connect two devices, verify connect / mute /
-   unmute / reconnect / leave, then record results here.
+1. Installed JDK 17 + Android SDK — see
+   [`0003`](0003-android-toolchain-and-local-rtc.md).
+2. Built a single-ABI debug APK with `tools/android-build.ps1` and installed it
+   on a physical phone (`npx expo run:android` also works).
+3. Started a self-hosted `livekit-server --dev` and minted tokens with
+   `npm run rtc:token` — no vendor account required.
+4. Opened `dev/rtc-spike` via deep link and confirmed connect / publish /
+   subscribe. Remaining matrix items are listed under "Still NOT TESTED".
