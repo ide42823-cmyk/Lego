@@ -14,6 +14,7 @@ import {
   FIXTURE_CONVERSATIONS,
   FIXTURE_ME,
   FIXTURE_MOMENTS,
+  FIXTURE_PROFILES,
   FIXTURE_ROOMS,
   FIXTURE_USERS,
 } from './fixtures';
@@ -31,6 +32,7 @@ import type {
   RoomMode,
   RoomRelationshipFilter,
   RoomSummary,
+  UserProfile,
   UserSummary,
 } from './types';
 
@@ -52,6 +54,14 @@ export interface DataSource {
   listContacts(filter: ContactsFilter, request?: PageRequest): Promise<Page<UserSummary>>;
   listMoments(mode: MomentsMode, request?: PageRequest): Promise<Page<MomentPost>>;
   getMe(): Promise<MeDashboard>;
+  /** One member's public profile. Rejects for an unknown id. */
+  getProfile(userId: string): Promise<UserProfile>;
+  /**
+   * Sends a greeting. Returns the *confirmed* state, which the UI reconciles to —
+   * the same contract as `setMomentLiked`. A client never decides on its own that
+   * a greeting landed.
+   */
+  sendGreeting(userId: string): Promise<{ greeted: boolean }>;
   /** Returns the server-confirmed like state. Optimistic UI must reconcile to it. */
   setMomentLiked(
     momentId: string,
@@ -68,6 +78,13 @@ export const devControls = {
   /** When > 0, that many subsequent reads reject. Decremented per failure. */
   failReads: 0,
 };
+
+/**
+ * Stands in for the greeting table on the server. Reset never happens, which is
+ * deliberate: sending a greeting twice must be idempotent, exactly as it will be
+ * against the real API.
+ */
+const GREETED = new Set<string>();
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -217,6 +234,28 @@ export const fixtureDataSource: DataSource = {
 
   getMe() {
     return simulate(() => ({ ...FIXTURE_ME }));
+  },
+
+  getProfile(userId) {
+    return simulate(() => {
+      const profile = FIXTURE_PROFILES.find((item) => item.id === userId);
+      if (!profile) {
+        throw new Error(`Unknown member: ${userId}`);
+      }
+      // Shallow copy. The nested posts stay the *same* objects the Moments feed
+      // renders, so a like confirmed in one surface is visible in the other.
+      return { ...profile };
+    });
+  },
+
+  sendGreeting(userId) {
+    return simulate(() => {
+      if (!FIXTURE_USERS.some((user) => user.id === userId)) {
+        throw new Error(`Unknown member: ${userId}`);
+      }
+      GREETED.add(userId);
+      return { greeted: true };
+    });
   },
 
   setMomentLiked(momentId, liked) {

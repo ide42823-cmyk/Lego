@@ -285,3 +285,140 @@ tabs by deep link, with the UI tree and screenshots read back each time.
 - **iOS.** Cannot be built on Windows.
 - **Light scheme on device.** The washes and tints are scheme-keyed and the light
   values are reviewed, but the handset was left in dark mode for this pass.
+
+---
+
+## P4 — public profile (2026-10-19)
+
+**Scope:** one page, `src/app/person/[id].tsx`, against reference screens 001 and
+018 / 021–028. Everything else in the app is untouched except where the new page
+had to be made reachable from it.
+
+### Decisions
+
+- **The page is reachable from every surface that shows a member.** People rows
+  (Home), contact rows (Messages), post authors (Moments) and post authors inside
+  the profile's own Moments tab all push the same route. The three "the profile
+  for X arrives later" toasts those rows used to raise are gone — they were dead
+  ends, which is what this pass exists to remove.
+- **One growth path for the header.** The cover scrolls away and a compact header
+  fades in over it, driven by `react-native-reanimated`'s
+  `useAnimatedScrollHandler` rather than React Native's `Animated`. Two reasons:
+  the repo already animates with Reanimated (`animated-icon.tsx`), and staying on
+  the UI thread means the fade costs no JS frames. `runOnJS` fires only when the
+  offset crosses the compact threshold — `compact` gates hit testing and the
+  accessibility tree, neither of which needs a per-frame update.
+- **The section strip is genuinely pinned.** `stickyHeaderIndices` is used because
+  four separate captures of the same profile (023–026) show the strip at an
+  identical offset under the compact header; if it merely scrolled, four different
+  tabs would not agree to the pixel.
+- **The data seam grew two methods, not a new seam.** `getProfile(userId)` returns
+  a `UserProfile`, and `sendGreeting(userId)` returns the confirmed greeting state
+  — the same contract as `setMomentLiked`. A greeting is a server fact, so the
+  button reports what the response said, never what the user tapped.
+- **Profile fixtures are derived from the directory fixtures.** Names, avatars,
+  levels, ages, genders and badges are *the same objects* the directories render,
+  so a row can never open a profile that contradicts it. Profile-only values come
+  from a separate PRNG stream (`20261020 + index`) precisely so that adding
+  profile data cannot shift a single value the existing directories generate.
+- **Copy is real.** `expo-clipboard` was added and the app rebuilt, because the
+  alternative was an ID row with a copy icon that cannot copy. This is the only
+  dependency this page added.
+- **`Tints.gender` replaces a duplicated constant.** The male/female glyph tint was
+  a `MALE_TINT` literal in both `people-row.tsx` and `moment-card.tsx`; the profile
+  needs the same tint, so it moved into the scheme-keyed tint set.
+
+### Deliberately not copied
+
+- **The honour walls' ornate art.** The reference frames each wall with metallic
+  badge, title and gift artwork. That is proprietary art, so the framing here is a
+  flat tinted panel with a bordered title plate, and every trophy is one of our own
+  glyphs. What is reproduced is the structure the analysis calls out: a titled
+  wall, a preview row, a count that opens the full collection, and empty
+  placeholder slots.
+- **The family crest and badge crest imagery**, replaced with our own `rank` and
+  `diamonds` glyphs and a text label.
+- **The minimised live-room widget** that floats over the cover in screen 001. It
+  is bound to a live room session, and no session exists yet — rendering it now
+  would be a control with nothing behind it. It belongs to the room phase.
+- **The unlabelled decorative chips beside the name** in screen 001. Their meaning
+  cannot be determined from the capture, and inventing one would be worse than
+  omitting them. The chip row is built from data we actually hold: age, level,
+  rank and family.
+
+### Deliberate deviations
+
+- **The strip pins below the compact bar rather than the bar overlapping it.** The
+  reference's collapsed state puts both in one block; ours reserves the bar's
+  height in the sticky block and pulls it back with an equal negative margin, which
+  produces the same pinned layout *and* the same unpinned spacing without a
+  layout-animating header.
+- **Nationality and address are country-level only** (`Nationality Morocco`,
+  `Current Address Morocco`), matching the privacy rule the directory rows already
+  follow. Neither field ever carries a precise location, and a test asserts the
+  address row contains no digits.
+- **The Moments tab reuses the shared `MomentCard`.** The reference draws a
+  narrower, left-aligned post on the profile than in the feed. Reusing the one card
+  keeps a single post rhythm across both surfaces and avoids a second variant of
+  the component that would drift from the first.
+- **Call, Message, honour collections, relationship detail and invite, report and
+  block** raise a "arrives in a later pass" toast. They are not faked, and none of
+  them implies a server state change.
+
+### Notable implementation points
+
+- **The sticky offset arithmetic.** The strip's block has `paddingTop: insets.top +
+  COMPACT_BAR_HEIGHT` and `marginTop: -COMPACT_BAR_HEIGHT`. Unpinned, the two cancel
+  and the strip sits `insets.top` below the identity block, matching the reference;
+  pinned, the block starts at zero and the strip lands exactly below the compact
+  bar. The block itself stays transparent in its padding band, so the identity
+  scrolls out from under it rather than being clipped by it.
+- **Empty states are exercised by the fixtures, not by a code path nobody runs.**
+  Roughly a third of members have no couple, some have no friends, and the titles
+  wall is empty for about a third of them — so the Relationships empty state and
+  the placeholder trophy slots render with real data.
+- **Accessibility.** Age, level, rank and family each carry their own label; the
+  copy control is a full 44pt target named after what it copies; empty trophy slots
+  are hidden from assistive technology so "Empty" is never announced as a control;
+  and the invisible compact overlay removes itself from hit testing *and* the
+  accessibility tree until it is actually visible.
+- **Likes reconcile to the server.** The profile's posts are the same objects the
+  Moments feed renders, so a like confirmed on one surface is visible on the other;
+  the optimistic value is replaced by the confirmed counts, and rolled back on
+  failure.
+
+### Verified on device (2026-10-19)
+
+Rebuilt arm64-v8a (the `expo-clipboard` native module is new), reinstalled with
+`adb install -r`, and driven through the page by deep link, reading the UI tree
+and a screenshot back at each step.
+
+The handset refuses input injection (`INJECT_EVENTS` is not granted to the shell,
+and MIUI will not grant it), so taps and scrolls cannot be synthesised. The page
+was therefore driven by a **temporary, deep-link-only harness** — read `tab`,
+`scroll`, `fail` and `copy` from the URL, then set the tab, scroll with
+Reanimated's `scrollTo`, fail the next read, or fire the copy control. It was
+removed before this commit; the tree is clean of it.
+
+| Check | Result |
+|---|---|
+| All four sections render with real fixture data — About, Honor, Moments, Relationships | PASS |
+| The section strip stays pinned under the compact header while the body scrolls beneath it | PASS |
+| The compact header cross-fades in over the scrolled cover, and lands the strip exactly below itself | PASS |
+| Shortcuts, tags and the full information stack render (ID, height, weight, occupation, nationality, address, birthday, constellation, registration) | PASS |
+| The ID copy control writes to the clipboard — the toast reports the copied value, i.e. the success branch, not the failure branch | PASS |
+| Relationships renders a couple plus friends *and*, for a member with neither, the empty state | PASS |
+| The error path renders `Profile unavailable` with a "Try again" control | PASS |
+| Structural RTL: the Arabic signature right-aligns, the Latin one left-aligns | PASS |
+| Gender, level, family and VIP tier each take their own tint; the online dot and verified badge draw | PASS |
+| Heading, tab strip, bodies and the action bar all survive a cold start (no stale bundle) | PASS |
+| Dark scheme (the device is set to dark) | PASS |
+
+### NOT verified in P4
+
+- **A literal finger tap on the copy row.** The handler ran, the native module
+  resolved and the clipboard write reported success, but the touch itself cannot
+  be synthesised on this handset. The same applies to every other control on the
+  page: they are verified as rendered, labelled and wired, not as pressed.
+- **Light scheme on device**, unchanged from P3.1 — the handset stays in dark mode.
+- **iOS.** Cannot be built on Windows.

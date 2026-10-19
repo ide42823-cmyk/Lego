@@ -174,6 +174,85 @@ describe('setMomentLiked', () => {
   });
 });
 
+describe('getProfile', () => {
+  it('returns the profile for a member the directories also list', async () => {
+    const page = await fixtureDataSource.listPeople('recommend', { limit: 1 });
+    const first = page.items.flatMap((item) => (item.kind === 'user' ? [item.user] : []))[0];
+    expect(first).toBeDefined();
+
+    const profile = await fixtureDataSource.getProfile(first.id);
+
+    // The profile can never contradict the row that opened it.
+    expect(profile.id).toBe(first.id);
+    expect(profile.displayName).toBe(first.displayName);
+    expect(profile.level).toBe(first.level);
+    expect(profile.badges).toEqual(first.badges);
+  });
+
+  it('always exposes all three honour walls', async () => {
+    const profile = await fixtureDataSource.getProfile('user-1');
+
+    expect(profile.honor.map((wall) => wall.key)).toEqual(['badges', 'titles', 'gifts']);
+  });
+
+  it('keeps an honour wall that is empty rather than dropping the section', async () => {
+    // Walls are derived from the member's own badges and titles, so an empty
+    // collection is a real state. The fixtures must exercise it, otherwise the
+    // placeholder slots would be a path nothing ever renders.
+    const profiles = await Promise.all(
+      Array.from({ length: 12 }, (_, index) => fixtureDataSource.getProfile(`user-${index + 1}`)),
+    );
+
+    expect(profiles.every((profile) => profile.honor.length === 3)).toBe(true);
+    expect(profiles.some((profile) => profile.honor[1].entries.length === 0)).toBe(true);
+  });
+
+  it('carries the member number on the ID row and nowhere else', async () => {
+    const profile = await fixtureDataSource.getProfile('user-1');
+    const idRows = profile.info.filter((row) => row.copyable);
+
+    expect(idRows).toHaveLength(1);
+    expect(idRows[0].text).toMatch(/^ID \d{9}$/);
+    expect(idRows[0].copyValue).toBe(idRows[0].text.replace('ID ', ''));
+  });
+
+  it('never exposes a precise address', async () => {
+    const profile = await fixtureDataSource.getProfile('user-1');
+    const address = profile.info.find((row) => row.key === 'address');
+
+    // Country level only: the same privacy rule the directory rows follow.
+    expect(address?.text).not.toMatch(/\d/);
+  });
+
+  it('shares post objects with the moments feed', async () => {
+    const profile = await fixtureDataSource.getProfile('user-1');
+    const feed = await fixtureDataSource.listMoments('recommend', { limit: 50 });
+    const shared = feed.items.find((post) =>
+      profile.moments.some((moment) => moment.id === post.id),
+    );
+
+    if (shared) {
+      const own = profile.moments.find((moment) => moment.id === shared.id);
+      expect(own).toBe(shared);
+    }
+  });
+
+  it('rejects an unknown member', async () => {
+    await expect(fixtureDataSource.getProfile('nope')).rejects.toThrow(/Unknown member/);
+  });
+});
+
+describe('sendGreeting', () => {
+  it('is idempotent and reports the confirmed state', async () => {
+    await expect(fixtureDataSource.sendGreeting('user-1')).resolves.toEqual({ greeted: true });
+    await expect(fixtureDataSource.sendGreeting('user-1')).resolves.toEqual({ greeted: true });
+  });
+
+  it('rejects an unknown member', async () => {
+    await expect(fixtureDataSource.sendGreeting('nope')).rejects.toThrow(/Unknown member/);
+  });
+});
+
 describe('failure simulation', () => {
   it('rejects the configured number of reads and then recovers', async () => {
     devControls.failReads = 1;

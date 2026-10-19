@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -25,6 +26,7 @@ import type {
   UserSummary,
 } from '@/core/data/types';
 import { usePaginated } from '@/hooks/use-async';
+import { useGreet } from '@/hooks/use-greet';
 import { useTints } from '@/hooks/use-tints';
 
 /**
@@ -68,6 +70,8 @@ const FAMILY_PROMO: PromoBannerModel = {
 export default function MessagesScreen() {
   const tints = useTints();
   const toast = useToast();
+  const router = useRouter();
+  const greet = useGreet();
 
   const [section, setSection] = useState<MessagesTab>('messages');
   const [conversationFilter, setConversationFilter] = useState<ConversationFilter>('all');
@@ -91,6 +95,11 @@ export default function MessagesScreen() {
   );
 
   const notYet = useCallback((what: string) => toast.show(`${what} arrives later.`), [toast]);
+
+  const openProfile = useCallback(
+    (userId: string) => router.push({ pathname: '/person/[id]', params: { id: userId } }),
+    [router],
+  );
 
   const active = section === 'messages' ? conversations : contacts;
   const unreadTotal = conversations.items.reduce((total, item) => total + item.unreadCount, 0);
@@ -231,8 +240,8 @@ export default function MessagesScreen() {
           renderItem={({ item }) => (
             <PeopleRow
               user={item}
-              onOpenProfile={(userId) => notYet(`The profile for ${userId}`)}
-              onGreet={(userId) => notYet(`Greeting ${userId}`)}
+              onOpenProfile={openProfile}
+              onGreet={(userId) => greet(userId, item.displayName)}
             />
           )}
         />

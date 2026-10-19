@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -12,6 +13,7 @@ import { Spacing } from '@/constants/theme';
 import { fixtureDataSource } from '@/core/data/repository';
 import type { MomentPost, MomentsMode } from '@/core/data/types';
 import { usePaginated } from '@/hooks/use-async';
+import { useGreet } from '@/hooks/use-greet';
 
 /**
  * Moments feed (reference screen 085).
@@ -35,6 +37,8 @@ export default function MomentsScreen() {
   const [mode, setMode] = useState<MomentsMode>('recommend');
   const [likeOverrides, setLikeOverrides] = useState<Record<string, LikeOverride>>({});
   const toast = useToast();
+  const router = useRouter();
+  const greet = useGreet();
 
   const list = usePaginated<MomentPost>(
     (cursor) => fixtureDataSource.listMoments(mode, { cursor, limit: 8 }),
@@ -122,8 +126,10 @@ export default function MomentsScreen() {
               <MomentCard
                 post={post}
                 onToggleLike={toggleLike}
-                onOpenAuthor={(userId) => notYet(`The profile for ${userId}`)}
-                onGreet={(userId) => notYet(`Greeting ${userId}`)}
+                onOpenAuthor={(userId) =>
+                  router.push({ pathname: '/person/[id]', params: { id: userId } })
+                }
+                onGreet={(userId) => greet(userId, post.authorName)}
                 onMore={() => notYet('Post options')}
               />
             );

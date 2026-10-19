@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Spacing } from '@/constants/theme';
 import type { UserSummary } from '@/core/data/types';
 import { formatDistanceKm } from '@/core/format';
-import { useTheme } from '@/hooks/use-theme';
+import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from './themed-text';
 import { RANK_BADGES, UserBadgeItem, UserBadges } from './user-badges';
@@ -30,13 +30,11 @@ export interface PeopleRowProps {
   onGreet?: (userId: string) => void;
 }
 
-const MALE_TINT = '#2B6CE0';
-
 export function PeopleRow({ user, onOpenProfile, onGreet }: PeopleRowProps) {
-  const theme = useTheme();
+  const tints = useTints();
   const rank = RANK_BADGES.find((badge) => user.badges.includes(badge));
   const distance = user.distanceKm === undefined ? null : formatDistanceKm(user.distanceKm);
-  const genderColor = user.gender === 'female' ? theme.accent : MALE_TINT;
+  const genderColor = user.gender ? tints.gender[user.gender] : undefined;
 
   return (
     <AppCard style={styles.card}>

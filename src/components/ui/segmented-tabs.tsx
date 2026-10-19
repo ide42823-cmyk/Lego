@@ -18,9 +18,10 @@ export interface SegmentedTabsProps<T extends string> {
   label: string;
   /**
    * `underline` matches the directory-style headers (a bold label with a short
-   * heavy rule beneath it); `pill` is for compact inline switches.
+   * curved rule beneath it); `bar` is the full-width straight rule used by the
+   * profile's section strip; `pill` is for compact inline switches.
    */
-  variant?: 'underline' | 'pill';
+  variant?: 'underline' | 'bar' | 'pill';
 }
 
 /**
@@ -87,14 +88,14 @@ export function SegmentedTabs<T extends string>({
             >
               {item.label}
             </ThemedText>
-            {variant === 'underline' ? (
+            {variant === 'pill' ? null : (
               <View
                 style={[
-                  styles.underline,
+                  variant === 'bar' ? styles.bar : styles.underline,
                   { borderBottomColor: selected ? theme.text : 'transparent' },
                 ]}
               />
-            ) : null}
+            )}
           </Pressable>
         );
       })}
@@ -124,6 +125,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
+  },
+  // The profile's section strip uses a straight rule that spans the label.
+  bar: {
+    alignSelf: 'stretch',
+    height: 3,
+    marginTop: Spacing.two,
+    borderBottomWidth: 3,
   },
   pill: {
     paddingHorizontal: Spacing.three,

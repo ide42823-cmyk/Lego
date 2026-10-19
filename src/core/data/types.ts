@@ -159,3 +159,146 @@ export interface Page<T> {
   /** Cursor for the next page; null when the list is exhausted. */
   nextCursor: string | null;
 }
+
+/* -------------------------------------------------------------------------
+ * Public profile (reference screens 001, 018, 021–028)
+ *
+ * The icon-ish fields below are *meanings*, not icon names. Keeping them out of
+ * the icon seam means this module stays dependency-free and the glyph set can
+ * change without touching the data layer.
+ * ---------------------------------------------------------------------- */
+
+/** An interest/hobby pill. The emoji is decoration; the label carries meaning. */
+export interface ProfileTag {
+  emoji: string;
+  label: string;
+}
+
+/**
+ * A profile shortcut tile — the member's room or family.
+ *
+ * `tone` is a role, not a colour: the component decides how a room tile and a
+ * family tile should read, and the theme owns the actual values.
+ */
+export interface ProfileShortcut {
+  kind: 'room' | 'family';
+  /** Entity id; the tile deep-links to it. */
+  id: string;
+  label: string;
+  memberCount: number;
+  tone: 'room' | 'family';
+}
+
+export type ProfileInfoIcon =
+  | 'mutual'
+  | 'id'
+  | 'height'
+  | 'weight'
+  | 'occupation'
+  | 'nationality'
+  | 'address'
+  | 'birthday'
+  | 'constellation'
+  | 'registered';
+
+export interface ProfileInfoRow {
+  key: string;
+  icon: ProfileInfoIcon;
+  /**
+   * One complete line of copy, e.g. "Height 165cm" or "You're now mutual
+   * followers". The reference renders label and value as a single run beside the
+   * icon, so they are stored as one string rather than reassembled in the view.
+   * Never contains a precise location.
+   */
+  text: string;
+  /** Offers copy-to-clipboard. Only ever set for a non-sensitive identifier. */
+  copyable?: boolean;
+  /** The value written to the clipboard when `copyable` is set. */
+  copyValue?: string;
+}
+
+/** Decorative art for an honour entry, resolved to a glyph by the UI. */
+export type HonorArt = 'crown' | 'star' | 'shield' | 'trophy' | 'gem' | 'sparkle' | 'rank' | 'gift';
+
+export interface HonorEntry {
+  id: string;
+  label: string;
+  art: HonorArt;
+  /** Grade letter badge (S/A/B) where the reference shows one. */
+  grade?: string;
+  /** Rarity tag, e.g. "Rare". */
+  rarity?: string;
+}
+
+/**
+ * One collection on the Honour tab (reference screen 025).
+ *
+ * There are always three walls even when a collection is empty — the reference
+ * keeps the wall's framing and shows placeholder slots rather than collapsing
+ * the section.
+ */
+export interface HonorWall {
+  key: 'badges' | 'titles' | 'gifts';
+  title: string;
+  /** Total in the full collection; the wall only previews a few. */
+  count: number;
+  entries: HonorEntry[];
+  /** Number of empty placeholder slots to draw after the entries. */
+  emptySlots?: number;
+}
+
+export interface RelationshipRecord {
+  id: string;
+  kind: 'couple' | 'friend';
+  peerId: string;
+  peerName: string;
+  /** Relationship level, e.g. 34 renders as "Couple Lv.34". */
+  level: number;
+  /** Days the relationship has lasted. */
+  days: number;
+}
+
+/**
+ * Everything the public profile screen renders.
+ *
+ * Compliance note: `following`/`mutual`/relationship records are read-only
+ * presentation here. Whether two members are actually linked is a server fact,
+ * and no screen may derive it locally.
+ */
+export interface UserProfile {
+  id: string;
+  displayName: string;
+  avatarUrl?: string;
+  coverUrl?: string;
+  /** Short status/bio line, also used for the accessible name. */
+  status: string;
+  /** Last activity, ISO-8601. The header prints it as "59 minutes ago". */
+  lastActiveAt: string;
+  age?: number;
+  gender?: Gender;
+  level?: number;
+  vipTier?: number;
+  badges: UserBadge[];
+  isOnline: boolean;
+  /** Family crest label shown last in the chip row, when the member has one. */
+  familyName?: string;
+
+  /** Free-text signature above the information rows. */
+  signature: string;
+  tags: ProfileTag[];
+  /** Absent when the member does not hold a room. */
+  roomShortcut?: ProfileShortcut;
+  familyShortcut?: ProfileShortcut;
+  info: ProfileInfoRow[];
+  honor: HonorWall[];
+  /** Posts shown on the Profile > Moments tab. */
+  moments: MomentPost[];
+  /** Total post count; the tab label prints it. Kept separate from the page. */
+  momentCount: number;
+  /** Absent for members with no couple. */
+  couple?: RelationshipRecord;
+  friends: RelationshipRecord[];
+
+  following: boolean;
+  mutual: boolean;
+}

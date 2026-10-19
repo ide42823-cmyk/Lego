@@ -1,4 +1,10 @@
-import { countryFlag, formatCompactCount, formatDistanceKm, formatRelativeTime } from './index';
+import {
+  countryFlag,
+  formatCompactCount,
+  formatDistanceKm,
+  formatElapsedLong,
+  formatRelativeTime,
+} from './index';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z').getTime();
 const at = (offsetMs: number) => new Date(NOW - offsetMs).toISOString();
@@ -77,6 +83,32 @@ describe('formatDistanceKm', () => {
   it('returns an empty string for invalid input', () => {
     expect(formatDistanceKm(Number.NaN)).toBe('');
     expect(formatDistanceKm(-1)).toBe('');
+  });
+});
+
+describe('formatElapsedLong', () => {
+  it('reports anything under a minute as "Just now"', () => {
+    expect(formatElapsedLong(at(0), NOW)).toBe('Just now');
+  });
+
+  it('spells out minutes, hours and days', () => {
+    expect(formatElapsedLong(at(59 * MINUTE), NOW)).toBe('59 minutes ago');
+    expect(formatElapsedLong(at(3 * HOUR), NOW)).toBe('3 hours ago');
+    expect(formatElapsedLong(at(2 * DAY), NOW)).toBe('2 days ago');
+  });
+
+  it('does not pluralise a single unit', () => {
+    expect(formatElapsedLong(at(1 * MINUTE), NOW)).toBe('1 minute ago');
+    expect(formatElapsedLong(at(1 * HOUR), NOW)).toBe('1 hour ago');
+    expect(formatElapsedLong(at(1 * DAY), NOW)).toBe('1 day ago');
+  });
+
+  it('falls back to a date once a week has passed', () => {
+    expect(formatElapsedLong(at(30 * DAY), NOW)).toMatch(/^Active \d{1,2} [A-Z][a-z]{2}$/);
+  });
+
+  it('returns an empty string for invalid input', () => {
+    expect(formatElapsedLong('not-a-date', NOW)).toBe('');
   });
 });
 

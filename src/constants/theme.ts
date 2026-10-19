@@ -138,6 +138,8 @@ export interface AppTints {
   tier: Record<TierTintKey, { from: string; to: string; text: string }>;
   /** Age/gender pill on discovery and feed rows. */
   age: { background: string; text: string };
+  /** Gender glyph tint beside a display name. */
+  gender: { female: string; male: string };
   /** Level emblem beside a display name. */
   level: { from: string; to: string; text: string };
   /** Presence dot. */
@@ -173,6 +175,7 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       aristocracy: { from: '#E2F6E8', to: '#2E9E5B', text: '#0E4023' },
     },
     age: { background: '#FFE3F0', text: '#D6336C' },
+    gender: { female: '#D6336C', male: '#2B6CE0' },
     level: { from: '#FFE9A8', to: '#F0A500', text: '#5A3B00' },
     online: '#22C55E',
     hi: { background: '#FFDCEA', text: '#E5307A', icon: '#F04088' },
@@ -202,6 +205,7 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       aristocracy: { from: '#12331E', to: '#1F7A44', text: '#DFF5E4' },
     },
     age: { background: '#3A1D2B', text: '#FF9EC4' },
+    gender: { female: '#FF9EC4', male: '#8FBCFF' },
     level: { from: '#4A3A0E', to: '#C98A00', text: '#FFE9A8' },
     online: '#4ADE80',
     hi: { background: '#3A1D2B', text: '#FF9EC4', icon: '#FF9EC4' },

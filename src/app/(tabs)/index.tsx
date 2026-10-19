@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -12,6 +13,7 @@ import { Spacing } from '@/constants/theme';
 import { fixtureDataSource } from '@/core/data/repository';
 import type { DirectoryFeedItem, PeopleMode } from '@/core/data/types';
 import { usePaginated } from '@/hooks/use-async';
+import { useGreet } from '@/hooks/use-greet';
 
 /**
  * Home — people discovery (reference screens 097–100).
@@ -31,6 +33,8 @@ const MODES: readonly SegmentedTabItem<PeopleMode>[] = [
 export default function HomeScreen() {
   const [mode, setMode] = useState<PeopleMode>('recommend');
   const toast = useToast();
+  const router = useRouter();
+  const greet = useGreet();
 
   const list = usePaginated<DirectoryFeedItem>(
     (cursor) => fixtureDataSource.listPeople(mode, { cursor, limit: 12 }),
@@ -42,6 +46,11 @@ export default function HomeScreen() {
       toast.show(`${what} arrives with the backend phase.`);
     },
     [toast],
+  );
+
+  const openProfile = useCallback(
+    (userId: string) => router.push({ pathname: '/person/[id]', params: { id: userId } }),
+    [router],
   );
 
   return (
@@ -92,8 +101,8 @@ export default function HomeScreen() {
             item.kind === 'user' ? (
               <PeopleRow
                 user={item.user}
-                onOpenProfile={(userId) => notYet(`The profile for ${userId}`)}
-                onGreet={(userId) => notYet(`Greeting ${userId}`)}
+                onOpenProfile={openProfile}
+                onGreet={(userId) => greet(userId, item.user.displayName)}
               />
             ) : (
               <PromoBanner banner={item.banner} onPress={() => notYet(item.banner.title)} />

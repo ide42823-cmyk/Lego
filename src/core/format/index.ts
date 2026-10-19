@@ -56,6 +56,41 @@ export function formatRelativeTime(iso: string, now: number = Date.now()): strin
   return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]}`;
 }
 
+/**
+ * Long-form age of a timestamp: `Just now`, `59 minutes ago`, `3 hours ago`,
+ * `2 days ago`, then `Active 12 Mar`.
+ *
+ * Distinct from `formatRelativeTime` on purpose: a feed wants the compact form so
+ * cards stay scannable, while a profile header states presence in words. `now` is
+ * injectable so tests do not depend on the wall clock.
+ */
+export function formatElapsedLong(iso: string, now: number = Date.now()): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) {
+    return '';
+  }
+
+  const elapsed = Math.max(0, now - then);
+  if (elapsed < MINUTE) {
+    return 'Just now';
+  }
+
+  const plural = (value: number, unit: string) => `${value} ${unit}${value === 1 ? '' : 's'} ago`;
+
+  if (elapsed < HOUR) {
+    return plural(Math.floor(elapsed / MINUTE), 'minute');
+  }
+  if (elapsed < DAY) {
+    return plural(Math.floor(elapsed / HOUR), 'hour');
+  }
+  if (elapsed < 7 * DAY) {
+    return plural(Math.floor(elapsed / DAY), 'day');
+  }
+
+  const date = new Date(then);
+  return `Active ${date.getDate()} ${SHORT_MONTHS[date.getMonth()]}`;
+}
+
 /** `1234` → `1.2k`. Used for follower and participant counts. */
 export function formatCompactCount(value: number): string {
   if (!Number.isFinite(value)) {

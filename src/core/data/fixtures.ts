@@ -15,13 +15,19 @@
 
 import type {
   ConversationSummary,
+  HonorEntry,
+  HonorWall,
   MeDashboard,
   MomentPost,
+  ProfileInfoRow,
+  ProfileTag,
   PromoBanner,
+  RelationshipRecord,
   RoomBadge,
   RoomCategory,
   RoomSummary,
   UserBadge,
+  UserProfile,
   UserSummary,
 } from './types';
 
@@ -286,3 +292,413 @@ export const FIXTURE_ME: MeDashboard = {
     },
   ],
 };
+
+/* -------------------------------------------------------------------------
+ * Public profile fixtures (reference screens 001, 018, 021–028)
+ * ---------------------------------------------------------------------- */
+
+const PROFILE_SIGNATURES = [
+  'Coffee, playlists and long walks.',
+  'هنا للدردشة والضحك، أهلاً بك.',
+  'Learning a new language this year.',
+  'أحب الموسيقى الهادئة والقراءة.',
+  'Always up for a good room.',
+  'أبحث عن أصدقاء جدد من كل مكان.',
+  'Night owl, early riser. Somehow both.',
+  'الرياضيات ممتعة، صدقني.',
+] as const;
+
+const PROFILE_TAGS: readonly ProfileTag[] = [
+  { emoji: '🌅', label: 'Early Bird' },
+  { emoji: '✈️', label: 'Traveling' },
+  { emoji: '💃', label: 'Dancing' },
+  { emoji: '💄', label: 'Makeup' },
+  { emoji: '🏊', label: 'Swimming' },
+  { emoji: '🎻', label: 'Classical' },
+  { emoji: '🐴', label: 'Horses' },
+  { emoji: '☕', label: 'Coffee' },
+  { emoji: '🌹', label: 'Romance' },
+  { emoji: '💗', label: 'Emotional' },
+  { emoji: '🏀', label: 'Basketball' },
+  { emoji: '📚', label: 'Reading' },
+  { emoji: '🎮', label: 'Gaming' },
+  { emoji: '🍜', label: 'Food' },
+] as const;
+
+const OCCUPATIONS = [
+  'Engineer',
+  'Student',
+  'Designer',
+  'Teacher',
+  'Photographer',
+  'Nurse',
+] as const;
+
+const FAMILY_NAMES = [
+  'Ember Court',
+  'عائلة الامبراطور',
+  'Silver Line',
+  'عائلة القمر',
+  'North Star',
+] as const;
+
+const TITLES = [
+  'Rising Host',
+  'Top Listener',
+  'Room Founder',
+  'Event Captain',
+  'Golden Voice',
+] as const;
+
+const GIFTS: readonly { label: string; art: HonorEntry['art']; rarity?: string }[] = [
+  { label: 'Ember Rose', art: 'gift' },
+  { label: 'Cloud Palace', art: 'gem', rarity: 'Rare' },
+  { label: 'Solar Bull', art: 'crown' },
+  { label: 'Night Lantern', art: 'star' },
+  { label: 'Silk Ribbon', art: 'sparkle' },
+] as const;
+
+/**
+ * Coarse locale *names*. Deliberately country-level: the profile shows a
+ * nationality and a country, never a precise address — the same privacy rule the
+ * directory rows follow.
+ */
+const LOCALE_NAMES: Record<string, string> = {
+  SA: 'Saudi Arabia',
+  AE: 'United Arab Emirates',
+  EG: 'Egypt',
+  MA: 'Morocco',
+  GB: 'United Kingdom',
+  DE: 'Germany',
+  JP: 'Japan',
+  US: 'United States',
+  TR: 'Türkiye',
+  IN: 'India',
+};
+
+/** Sign boundaries in calendar order; later entries win, so the scan is linear. */
+const ZODIAC_BOUNDARIES: readonly { sign: string; month: number; day: number }[] = [
+  { sign: 'Capricorn', month: 1, day: 1 },
+  { sign: 'Aquarius', month: 1, day: 20 },
+  { sign: 'Pisces', month: 2, day: 19 },
+  { sign: 'Aries', month: 3, day: 21 },
+  { sign: 'Taurus', month: 4, day: 20 },
+  { sign: 'Gemini', month: 5, day: 21 },
+  { sign: 'Cancer', month: 6, day: 21 },
+  { sign: 'Leo', month: 7, day: 23 },
+  { sign: 'Virgo', month: 8, day: 23 },
+  { sign: 'Libra', month: 9, day: 23 },
+  { sign: 'Scorpio', month: 10, day: 23 },
+  { sign: 'Sagittarius', month: 11, day: 22 },
+  { sign: 'Capricorn', month: 12, day: 22 },
+];
+
+function zodiacFor(month: number, day: number): string {
+  let sign = 'Capricorn';
+  for (const boundary of ZODIAC_BOUNDARIES) {
+    if (month > boundary.month || (month === boundary.month && day >= boundary.day)) {
+      sign = boundary.sign;
+    }
+  }
+  return sign;
+}
+
+function pad2(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+/**
+ * Maps a member's real badge to the art shown on the Badges Wall, so the wall
+ * can never show a trophy the member does not hold.
+ */
+function badgeHonorEntries(user: UserSummary): HonorEntry[] {
+  const art: Partial<Record<UserBadge, { label: string; art: HonorEntry['art'] }>> = {
+    level: { label: user.level ? `Level ${user.level}` : 'Level', art: 'star' },
+    vip: { label: user.vipTier ? `VIP${user.vipTier}` : 'VIP', art: 'crown' },
+    svip: { label: 'SVIP', art: 'crown' },
+    aristocracy: { label: 'Aristocracy', art: 'shield' },
+    verified: { label: 'Verified', art: 'shield' },
+    new: { label: 'Newcomer', art: 'sparkle' },
+  };
+
+  return user.badges
+    .flatMap((badge) => {
+      const entry = art[badge];
+      return entry ? [{ id: `honor-${user.id}-${badge}`, label: entry.label, art: entry.art }] : [];
+    })
+    .slice(0, 3);
+}
+
+function buildHonor(user: UserSummary, random: () => number): HonorWall[] {
+  const badges = badgeHonorEntries(user);
+  const titles = random() > 0.35 ? [pick(random, TITLES)] : [];
+  const giftCount = 3;
+  const gifts: HonorEntry[] = Array.from({ length: giftCount }, (_, index) => {
+    const source = GIFTS[(index + Math.floor(random() * GIFTS.length)) % GIFTS.length] as {
+      label: string;
+      art: HonorEntry['art'];
+      rarity?: string;
+    };
+    return {
+      id: `honor-${user.id}-gift-${index + 1}`,
+      label: source.label,
+      art: source.art,
+      // Grades read as a coarse quality band, never a price.
+      grade: index === 0 ? 'B' : 'A',
+      rarity: source.rarity,
+    };
+  });
+
+  return [
+    {
+      key: 'badges',
+      title: 'Badges Wall',
+      count: badges.length + 6 + Math.floor(random() * 8),
+      entries: badges,
+      emptySlots: Math.max(0, 3 - badges.length),
+    },
+    {
+      key: 'titles',
+      title: 'Titles Wall',
+      count: titles.length,
+      entries: titles.map((label, index) => ({
+        id: `honor-${user.id}-title-${index + 1}`,
+        label,
+        art: 'trophy' as const,
+      })),
+      emptySlots: Math.max(0, 3 - titles.length),
+    },
+    {
+      key: 'gifts',
+      title: 'Gifts Honor Wall',
+      count: 40 + Math.floor(random() * 260),
+      entries: gifts,
+    },
+  ];
+}
+
+function buildInfo(
+  user: UserSummary,
+  memberNumber: string,
+  random: () => number,
+  birthday: { month: number; day: number },
+  registered: Date,
+): ProfileInfoRow[] {
+  const country = LOCALE_NAMES[user.locale ?? ''] ?? '—';
+  const rows: ProfileInfoRow[] = [];
+
+  rows.push({
+    key: 'id',
+    icon: 'id',
+    text: `ID ${memberNumber}`,
+    copyable: true,
+    copyValue: memberNumber,
+  });
+
+  // Height/weight are round, coarse values — the reference shows the same, and a
+  // profile never needs false precision.
+  if (random() > 0.15) {
+    rows.push({
+      key: 'height',
+      icon: 'height',
+      text: `Height ${150 + Math.floor(random() * 40)}cm`,
+    });
+  }
+  if (random() > 0.25) {
+    rows.push({
+      key: 'weight',
+      icon: 'weight',
+      text: `Weight ${45 + Math.floor(random() * 40)}kg`,
+    });
+  }
+  // A member may leave occupation blank; the row is then omitted entirely rather
+  // than rendered as "Occupation —".
+  if (random() > 0.3) {
+    rows.push({
+      key: 'occupation',
+      icon: 'occupation',
+      text: `Occupation ${pick(random, OCCUPATIONS)}`,
+    });
+  }
+  rows.push({ key: 'nationality', icon: 'nationality', text: `Nationality ${country}` });
+  rows.push({ key: 'address', icon: 'address', text: `Current Address ${country}` });
+  rows.push({
+    key: 'birthday',
+    icon: 'birthday',
+    text: `Birthday ${pad2(birthday.month)}/${pad2(birthday.day)}`,
+  });
+  rows.push({
+    key: 'constellation',
+    icon: 'constellation',
+    text: `Constellation ${zodiacFor(birthday.month, birthday.day)}`,
+  });
+  rows.push({
+    key: 'registered',
+    icon: 'registered',
+    text: `Registration Time ${registered.getFullYear()}/${pad2(registered.getMonth() + 1)}/${pad2(
+      registered.getDate(),
+    )}`,
+  });
+
+  return rows;
+}
+
+function buildRelationship(
+  user: UserSummary,
+  peer: UserSummary,
+  kind: RelationshipRecord['kind'],
+  level: number,
+  days: number,
+): RelationshipRecord {
+  return {
+    id: `${kind}-${user.id}-${peer.id}`,
+    kind,
+    peerId: peer.id,
+    peerName: peer.displayName,
+    level,
+    days,
+  };
+}
+
+/**
+ * Builds one member's public profile.
+ *
+ * Everything derives from the member's directory entry plus a dedicated PRNG
+ * stream, so a profile can never contradict that person's row: the name, avatar,
+ * level, age, gender and badges are the same objects the directories render.
+ *
+ * `women`/`friends` are deliberately absent for some members — the screen has to
+ * render its no-couple and no-friends states with real data, not a code path that
+ * is never exercised.
+ */
+function buildProfile(user: UserSummary, index: number, users: UserSummary[]): UserProfile {
+  // A separate stream from `buildUsers`, so adding profile data cannot shift any
+  // value the directories already generated.
+  const random = createRandom(20261020 + index);
+
+  const month = 1 + Math.floor(random() * 12);
+  const day = 1 + Math.floor(random() * 27);
+  const birthday = { month, day };
+  const registered = new Date(NOW - (30 + Math.floor(random() * 900)) * DAY);
+
+  const tags = pickSome(random, PROFILE_TAGS, 6);
+
+  const couplePeer = users[(index + 7) % users.length] as UserSummary;
+  const friendA = users[(index + 3) % users.length] as UserSummary;
+  const friendB = users[(index + 11) % users.length] as UserSummary;
+
+  const hasCouple = index % 3 !== 0;
+  const friendCount = index % 5 === 0 ? 0 : 2;
+
+  const friends = [friendA, friendB]
+    .slice(0, friendCount)
+    .map((peer, friendIndex) =>
+      buildRelationship(
+        user,
+        peer,
+        'friend',
+        20 + Math.floor(random() * 20),
+        60 + friendIndex * 40 + Math.floor(random() * 90),
+      ),
+    );
+
+  const moments = buildProfileMoments(user, random);
+  const locale = user.locale ?? 'SA';
+  /**
+   * The member-facing number the reference prints on the ID row. Derived, stable,
+   * and unrelated to `user.id` — that one is the routing key and never shown.
+   */
+  const memberNumber = String(231000000 + ((index * 7919) % 8_000_000));
+
+  return {
+    id: user.id,
+    displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
+    status: user.status,
+    // Presence recency: online members are "Just now", others range over days.
+    lastActiveAt: new Date(
+      user.isOnline ? NOW - 30_000 : NOW - Math.floor(5 + random() * 4_000) * MINUTE,
+    ).toISOString(),
+    age: user.age,
+    gender: user.gender,
+    level: user.level,
+    vipTier: user.vipTier,
+    badges: user.badges,
+    isOnline: user.isOnline,
+    familyName: random() > 0.35 ? pick(random, FAMILY_NAMES) : undefined,
+
+    signature: pick(random, PROFILE_SIGNATURES),
+    tags,
+    roomShortcut: {
+      kind: 'room',
+      // Deep-links to a real room in the directory fixtures.
+      id: (FIXTURE_ROOMS[index % FIXTURE_ROOMS.length] as RoomSummary).id,
+      label: 'Room',
+      memberCount: Math.floor(random() * 40),
+      tone: 'room',
+    },
+    familyShortcut: {
+      kind: 'family',
+      id: `family-${(index % 6) + 1}`,
+      label: 'Family',
+      memberCount: 20 + Math.floor(random() * 70),
+      tone: 'family',
+    },
+    info: [
+      // The mutual-follower line only exists when the relationship is mutual.
+      ...(index % 4 === 0
+        ? [{ key: 'mutual', icon: 'mutual' as const, text: "You're now mutual followers" }]
+        : []),
+      ...buildInfo({ ...user, locale }, memberNumber, random, birthday, registered),
+    ],
+    honor: buildHonor(user, random),
+    moments,
+    momentCount: moments.length,
+    couple: hasCouple
+      ? buildRelationship(
+          user,
+          couplePeer,
+          'couple',
+          12 + Math.floor(random() * 30),
+          30 + Math.floor(random() * 200),
+        )
+      : undefined,
+    friends,
+    following: index % 3 !== 1,
+    mutual: index % 4 === 0,
+  };
+}
+
+/**
+ * The posts shown on a member's profile.
+ *
+ * Prefers the posts that member already wrote in the shared Moments feed, so the
+ * same post cannot read differently in two places. Members the feed generator did
+ * not pick get their own deterministic posts instead of an empty tab.
+ */
+function buildProfileMoments(user: UserSummary, random: () => number): MomentPost[] {
+  const existing = FIXTURE_MOMENTS.filter((post) => post.authorId === user.id);
+  if (existing.length > 0) {
+    return existing;
+  }
+
+  const count = 1 + Math.floor(random() * 3);
+  return Array.from({ length: count }, (_, index) => ({
+    id: `moment-${user.id}-${index + 1}`,
+    authorId: user.id,
+    authorName: user.displayName,
+    authorLevel: user.level,
+    authorAge: user.age,
+    authorGender: user.gender,
+    badges: user.badges,
+    text: pick(random, MOMENT_TEXTS),
+    createdAt: new Date(NOW - Math.floor(random() * 6 * DAY)).toISOString(),
+    likeCount: Math.floor(random() * 90),
+    commentCount: Math.floor(random() * 14),
+    likedByMe: false,
+  }));
+}
+
+export const FIXTURE_PROFILES: UserProfile[] = FIXTURE_USERS.map((user, index) =>
+  buildProfile(user, index, FIXTURE_USERS),
+);

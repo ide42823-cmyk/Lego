@@ -13,6 +13,8 @@ export interface AvatarProps extends ViewProps {
   name: string;
   uri?: string;
   size?: number;
+  /** Corner radius. Defaults to a circle; the profile avatar is a rounded square. */
+  radius?: number;
   /** Draws a ring, used for active speakers and selected members. */
   ringColor?: string;
   /** Show a presence dot. */
@@ -57,6 +59,7 @@ export function Avatar({
   name,
   uri,
   size = 56,
+  radius,
   ringColor,
   online,
   videoCall,
@@ -67,6 +70,7 @@ export function Avatar({
   const tints = useTints();
 
   const backgroundColor = PLACEHOLDER_COLORS[hash(id) % PLACEHOLDER_COLORS.length];
+  const corner = radius ?? size / 2;
   const ring = ringColor ? { borderWidth: 2, borderColor: ringColor } : null;
   const dot = Math.max(10, Math.round(size * 0.24));
 
@@ -74,7 +78,7 @@ export function Avatar({
     <View
       style={[
         styles.wrapper,
-        { width: size, height: size, borderRadius: size / 2, backgroundColor },
+        { width: size, height: size, borderRadius: corner, backgroundColor },
         ring,
         style,
       ]}
@@ -83,7 +87,7 @@ export function Avatar({
       {uri ? (
         <Image
           source={{ uri }}
-          style={{ width: size, height: size, borderRadius: size / 2 }}
+          style={{ width: size, height: size, borderRadius: corner }}
           contentFit="cover"
           // Purely decorative; the row supplies the accessible name.
           accessible={false}

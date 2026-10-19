@@ -3,6 +3,7 @@ import Award from 'lucide-react-native/icons/award';
 import Backpack from 'lucide-react-native/icons/backpack';
 import BadgeCheck from 'lucide-react-native/icons/badge-check';
 import Bell from 'lucide-react-native/icons/bell';
+import Briefcase from 'lucide-react-native/icons/briefcase';
 import Cake from 'lucide-react-native/icons/cake';
 import CalendarDays from 'lucide-react-native/icons/calendar-days';
 import Camera from 'lucide-react-native/icons/camera';
@@ -12,6 +13,7 @@ import ChevronLeft from 'lucide-react-native/icons/chevron-left';
 import ChevronRight from 'lucide-react-native/icons/chevron-right';
 import CircleAlert from 'lucide-react-native/icons/circle-alert';
 import Coins from 'lucide-react-native/icons/coins';
+import Copy from 'lucide-react-native/icons/copy';
 import Crown from 'lucide-react-native/icons/crown';
 import Dices from 'lucide-react-native/icons/dices';
 import Ellipsis from 'lucide-react-native/icons/ellipsis';
@@ -25,6 +27,7 @@ import HeartHandshake from 'lucide-react-native/icons/heart-handshake';
 import House from 'lucide-react-native/icons/house';
 import Inbox from 'lucide-react-native/icons/inbox';
 import ListChecks from 'lucide-react-native/icons/list-checks';
+import MapPin from 'lucide-react-native/icons/map-pin';
 import Mars from 'lucide-react-native/icons/mars';
 import Menu from 'lucide-react-native/icons/menu';
 import MessageCircle from 'lucide-react-native/icons/message-circle';
@@ -32,8 +35,10 @@ import MessageSquare from 'lucide-react-native/icons/message-square';
 import Mic from 'lucide-react-native/icons/mic';
 import Orbit from 'lucide-react-native/icons/orbit';
 import PartyPopper from 'lucide-react-native/icons/party-popper';
+import Phone from 'lucide-react-native/icons/phone';
 import Radio from 'lucide-react-native/icons/radio';
 import RefreshCw from 'lucide-react-native/icons/refresh-cw';
+import Ruler from 'lucide-react-native/icons/ruler';
 import Search from 'lucide-react-native/icons/search';
 import Settings from 'lucide-react-native/icons/settings';
 import Share2 from 'lucide-react-native/icons/share-2';
@@ -46,11 +51,13 @@ import Store from 'lucide-react-native/icons/store';
 import ThumbsUp from 'lucide-react-native/icons/thumbs-up';
 import Ticket from 'lucide-react-native/icons/ticket';
 import Trophy from 'lucide-react-native/icons/trophy';
+import UserPlus from 'lucide-react-native/icons/user-plus';
 import UserRound from 'lucide-react-native/icons/user-round';
 import Users from 'lucide-react-native/icons/users';
 import Venus from 'lucide-react-native/icons/venus';
 import Video from 'lucide-react-native/icons/video';
 import WavesHorizontal from 'lucide-react-native/icons/waves-horizontal';
+import Weight from 'lucide-react-native/icons/weight';
 import X from 'lucide-react-native/icons/x';
 import type { LucideIcon } from 'lucide-react-native';
 
@@ -130,7 +137,15 @@ export type IconName =
   | 'visitors'
   | 'rank'
   | 'settings'
-  | 'share';
+  | 'share'
+  // Profile contact and attribute rows
+  | 'phone'
+  | 'copy'
+  | 'height'
+  | 'weight'
+  | 'occupation'
+  | 'address'
+  | 'invite';
 
 const ICONS: Record<IconName, LucideIcon> = {
   home: House,
@@ -189,6 +204,14 @@ const ICONS: Record<IconName, LucideIcon> = {
   rank: HeartHandshake,
   settings: Settings,
   share: Share2,
+
+  phone: Phone,
+  copy: Copy,
+  height: Ruler,
+  weight: Weight,
+  occupation: Briefcase,
+  address: MapPin,
+  invite: UserPlus,
 };
 
 export interface IconProps {

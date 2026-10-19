@@ -31,12 +31,10 @@ export interface MomentCardProps {
   onMore?: (momentId: string) => void;
 }
 
-const MALE_TINT = '#2B6CE0';
-
 export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet, onMore }: MomentCardProps) {
   const theme = useTheme();
   const tints = useTints();
-  const genderColor = post.authorGender === 'female' ? theme.accent : MALE_TINT;
+  const genderColor = post.authorGender ? tints.gender[post.authorGender] : undefined;
   const likeColor = post.likedByMe ? theme.accent : theme.textSecondary;
 
   return (
