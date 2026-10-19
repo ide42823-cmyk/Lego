@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="drop" cx="50%" cy="58%" r="50%">
+      <stop offset="55%" stop-color="#3A0E20" stop-opacity="0.30" />
+      <stop offset="100%" stop-color="#3A0E20" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="petalGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFE6A8" />
+      <stop offset="55%" stop-color="#F6C55A" />
+      <stop offset="100%" stop-color="#D99B2B" />
+    </linearGradient>
+    <linearGradient id="petalRose" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFC2DA" />
+      <stop offset="60%" stop-color="#F27BA6" />
+      <stop offset="100%" stop-color="#C93E75" />
+    </linearGradient>
+    <linearGradient id="ringGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE9B4" />
+      <stop offset="45%" stop-color="#F7C85F" />
+      <stop offset="100%" stop-color="#C98A24" />
+    </linearGradient>
+    <radialGradient id="pearl" cx="34%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#FFFDF4" />
+      <stop offset="70%" stop-color="#F6D98C" />
+      <stop offset="100%" stop-color="#C79433" />
+    </radialGradient>
+    <radialGradient id="enamel" cx="38%" cy="30%" r="78%">
+      <stop offset="0%" stop-color="#FFC6DD" />
+      <stop offset="45%" stop-color="#FB84B1" />
+      <stop offset="100%" stop-color="#D63373" />
+    </radialGradient>
+    <linearGradient id="gem" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFD6E6" />
+      <stop offset="50%" stop-color="#F2689C" />
+      <stop offset="100%" stop-color="#B92D63" />
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="286" rx="238" ry="214" fill="url(#drop)" />
+  <path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(0 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(22.5 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(45 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(67.5 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(90 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(112.5 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(135 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(157.5 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(180 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(202.5 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(225 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(247.5 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(270 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(292.5 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalGold)" transform="rotate(315 256 256)" /><path d="M256 40 C288 92 296 130 256 172 C216 130 224 92 256 40 Z"
+      fill="url(#petalRose)" transform="rotate(337.5 256 256)" />
+  <circle cx="256" cy="256" r="172" fill="none" stroke="url(#ringGold)" stroke-width="9" />
+  <circle cx="256" cy="84" r="6.5" fill="url(#pearl)" /><circle cx="377.62" cy="134.38" r="6.5" fill="url(#pearl)" /><circle cx="428" cy="256" r="6.5" fill="url(#pearl)" /><circle cx="377.62" cy="377.62" r="6.5" fill="url(#pearl)" /><circle cx="256" cy="428" r="6.5" fill="url(#pearl)" /><circle cx="134.38" cy="377.62" r="6.5" fill="url(#pearl)" /><circle cx="84" cy="256" r="6.5" fill="url(#pearl)" /><circle cx="134.38" cy="134.38" r="6.5" fill="url(#pearl)" />
+  <circle cx="256" cy="256" r="160" fill="#FFE3EE" />
+  <circle cx="256" cy="256" r="150" fill="url(#enamel)" />
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="3" />
+  <ellipse cx="206" cy="196" rx="62" ry="40" fill="#FFFFFF" fill-opacity="0.26" transform="rotate(-28 206 196)" />
+
+  <!-- No emblem inside the enamel: the screen draws the member's own glyph there. -->
+  <g transform="translate(256 398)">
+    <path d="M0 -34 L26 0 L0 34 L-26 0 Z" fill="url(#gem)" stroke="url(#ringGold)" stroke-width="5" />
+    <path d="M0 -18 L11 0 L0 18 L-11 0 Z" fill="#FFFFFF" fill-opacity="0.45" />
+  </g>
+</svg>

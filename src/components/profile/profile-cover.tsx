@@ -57,7 +57,11 @@ export function ProfileCover({
         borderRadius={0}
         style={StyleSheet.absoluteFill}
       />
-      <ScreenGradient color={tints.tab.moments} height={height} />
+      {/*
+        The wash only stands in for a missing photo. Over real photography it
+        would flatten the subject, so the scrim below is the only overlay then.
+      */}
+      {profile.coverUrl ? null : <ScreenGradient color={tints.tab.moments} height={height} />}
       {/*
         Bare white controls need a surface that can hold them. This is the
         reference's invisible technique, not a visible plate.

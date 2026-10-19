@@ -13,8 +13,11 @@
  * `src/core/data/repository.ts` should import it.
  */
 
+import { mediaRef, type MediaFolder } from '@/core/media/images';
+
 import type {
   ConversationSummary,
+  Gender,
   HonorArt,
   HonorEntry,
   HonorWall,
@@ -58,32 +61,70 @@ function pickSome<T>(random: () => number, list: readonly T[], max: number): T[]
   return out;
 }
 
-const DISPLAY_NAMES = [
+/**
+ * Names are split by gender so a member's name, chips ("Her Room"), cover and
+ * avatar photo all agree. Each pool is long enough for the 12 members per gender
+ * that `buildUsers` creates.
+ */
+const FEMALE_NAMES = [
   'Maya K.',
-  'Leo',
   'ليان',
   'Ivy',
-  'عبدالله',
-  'Noah',
   'نورة',
-  'Theo',
   'سارة',
-  'Milo',
-  'فهد',
   'Zara',
   'ريم',
-  'Kenji',
-  'خالد',
   'Amara',
   'هيا',
-  'Diego',
   'لمى',
-  'Yusuf',
   'دانة',
   'Priya',
   'منال',
-  'Oskar',
 ] as const;
+
+const MALE_NAMES = [
+  'Leo',
+  'عبدالله',
+  'Noah',
+  'Theo',
+  'Milo',
+  'فهد',
+  'Kenji',
+  'خالد',
+  'Diego',
+  'Yusuf',
+  'Oskar',
+  'Omar',
+] as const;
+
+function mediaPool(folder: MediaFolder, prefix: string, count: number): string[] {
+  return Array.from({ length: count }, (_, index) =>
+    mediaRef(folder, `${prefix}${String(index + 1).padStart(2, '0')}`),
+  );
+}
+
+/**
+ * Test photography, split by the gender the photo presents. The counts differ
+ * because that is what the sources offered; a pool repeats rather than leaving a
+ * member without an image.
+ */
+const PORTRAITS: Record<Gender, string[]> = {
+  female: mediaPool('portraits', 'f', 12),
+  male: mediaPool('portraits', 'm', 12),
+};
+
+const COVERS: Record<Gender, string[]> = {
+  female: mediaPool('covers', 'f', 3),
+  male: mediaPool('covers', 'm', 4),
+};
+
+const POST_PHOTOS: Record<Gender, string[]> = {
+  female: mediaPool('posts', 'f', 6),
+  male: mediaPool('posts', 'm', 2),
+};
+
+/** Room atmosphere art, shared across the list rather than tied to a member. */
+const ROOM_COVERS = mediaPool('rooms', 'r', 8);
 
 const STATUS_LINES = [
   'Coffee, playlists and long walks.',
@@ -186,14 +227,21 @@ function buildUsers(count: number): UserSummary[] {
   return Array.from({ length: count }, (_, index): UserSummary => {
     const level = 1 + Math.floor(random() * 60);
     const badges = ['level', ...pickSome(random, BADGE_POOL, 2)].slice(0, 3) as UserBadge[];
+    // Gender first: the name, the chips the profile derives from it, the cover
+    // and the portrait all follow from this one decision.
+    const gender: Gender = index % 2 === 0 ? 'female' : 'male';
+    const names = gender === 'female' ? FEMALE_NAMES : MALE_NAMES;
+    const portraits = PORTRAITS[gender];
+    const slot = Math.floor(index / 2);
     return {
       id: `user-${index + 1}`,
-      displayName: DISPLAY_NAMES[index % DISPLAY_NAMES.length] as string,
+      displayName: names[slot % names.length] as string,
+      avatarUrl: portraits[slot % portraits.length],
       status: pick(random, STATUS_LINES),
       locale: pick(random, LOCALES),
       level,
       age: 18 + Math.floor(random() * 22),
-      gender: random() > 0.5 ? 'female' : 'male',
+      gender,
       // Only a member who holds a paid rank gets a number to display.
       vipTier: badges.includes('vip') ? 1 + Math.floor(random() * 5) : undefined,
       videoCall: random() > 0.7,
@@ -216,6 +264,7 @@ function buildRooms(count: number): RoomSummary[] {
       id: `room-${index + 1}`,
       name: pick(random, ROOM_NAMES),
       description: pick(random, ROOM_DESCRIPTIONS),
+      coverUrl: ROOM_COVERS[index % ROOM_COVERS.length],
       hostName: pick(random, HOST_NAMES),
       hostLevel: 1 + Math.floor(random() * 60),
       category,
@@ -228,18 +277,24 @@ function buildRooms(count: number): RoomSummary[] {
   });
 }
 
-function buildConversations(count: number): ConversationSummary[] {
+function buildConversations(users: UserSummary[], count: number): ConversationSummary[] {
   const random = createRandom(31337);
-  return Array.from({ length: count }, (_, index): ConversationSummary => ({
-    id: `conversation-${index + 1}`,
-    peerId: `user-${((index * 3) % 24) + 1}`,
-    peerName: DISPLAY_NAMES[(index * 5) % DISPLAY_NAMES.length] as string,
-    locale: LOCALES[(index * 5) % LOCALES.length],
-    snippet: pick(random, CONVERSATION_SNIPPETS),
-    lastMessageAt: new Date(NOW - Math.floor(random() * 5 * DAY)).toISOString(),
-    unreadCount: random() > 0.6 ? 1 + Math.floor(random() * 9) : 0,
-    isOnline: random() > 0.5,
-  }));
+  return Array.from({ length: count }, (_, index): ConversationSummary => {
+    // The peer is a real directory entry, so the inbox row cannot disagree with
+    // that member's name, photo or locale anywhere else in the app.
+    const peer = users[(index * 3) % users.length] as UserSummary;
+    return {
+      id: `conversation-${index + 1}`,
+      peerId: peer.id,
+      peerName: peer.displayName,
+      avatarUrl: peer.avatarUrl,
+      locale: peer.locale,
+      snippet: pick(random, CONVERSATION_SNIPPETS),
+      lastMessageAt: new Date(NOW - Math.floor(random() * 5 * DAY)).toISOString(),
+      unreadCount: random() > 0.6 ? 1 + Math.floor(random() * 9) : 0,
+      isOnline: random() > 0.5,
+    };
+  });
 }
 
 /**
@@ -252,6 +307,9 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
   const random = createRandom(99001);
   return Array.from({ length: count }, (_, index) => {
     const author = users[(index * 7) % users.length] as UserSummary;
+    const gender = author.gender ?? 'female';
+    const posts = POST_PHOTOS[gender];
+    const hasMedia = index % 3 !== 1;
     return {
       id: `moment-${index + 1}`,
       authorId: author.id,
@@ -260,9 +318,13 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
       authorLevel: author.level,
       authorAge: author.age,
       authorGender: author.gender,
+      avatarUrl: author.avatarUrl,
       badges: author.badges,
       hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
-      hasMedia: index % 3 !== 1,
+      hasMedia,
+      // Media is the author's own photo pool, so a card never shows a stranger's
+      // face as the author's post.
+      mediaUrl: hasMedia ? posts[index % posts.length] : undefined,
       text: pick(random, MOMENT_TEXTS),
       createdAt: new Date(NOW - Math.floor(random() * 3 * DAY)).toISOString(),
       likeCount: Math.floor(random() * 320),
@@ -274,7 +336,7 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
 
 export const FIXTURE_USERS = buildUsers(24);
 export const FIXTURE_ROOMS = buildRooms(18);
-export const FIXTURE_CONVERSATIONS = buildConversations(14);
+export const FIXTURE_CONVERSATIONS = buildConversations(FIXTURE_USERS, 14);
 export const FIXTURE_MOMENTS = buildMoments(FIXTURE_USERS, 10);
 
 export const FIXTURE_BANNERS: PromoBanner[] = BANNERS;
@@ -283,6 +345,7 @@ export const FIXTURE_ME: MeDashboard = {
   userId: 'user-me',
   displayName: 'My Account',
   handle: '@myaccount',
+  avatarUrl: mediaRef('portraits', 'self'),
   followingCount: 128,
   friendCount: 42,
   followersCount: 311,
@@ -567,6 +630,9 @@ function buildRelationship(
     kind,
     peerId: peer.id,
     peerName: peer.displayName,
+    // The card shows the peer's face, so it must be the same photo the rest of
+    // the app shows for that member.
+    peerAvatarUrl: peer.avatarUrl,
     level,
     days,
   };
@@ -616,16 +682,23 @@ function buildProfile(user: UserSummary, index: number, users: UserSummary[]): U
 
   const moments = buildProfileMoments(user, random);
   const locale = user.locale ?? 'SA';
+  const gender = user.gender ?? 'female';
   /**
    * The member-facing number the reference prints on the ID row. Derived, stable,
    * and unrelated to `user.id` — that one is the routing key and never shown.
    */
   const memberNumber = String(231000000 + ((index * 7919) % 8_000_000));
 
+  const covers = COVERS[gender];
+  const albumPhotos = POST_PHOTOS[gender];
+
   return {
     id: user.id,
     displayName: user.displayName,
     avatarUrl: user.avatarUrl,
+    // A member's cover is a portrait crop of the same person, the way the
+    // reference's hero is.
+    coverUrl: covers[index % covers.length],
     status: user.status,
     // Presence recency: online members are "Just now", others range over days.
     lastActiveAt: new Date(
@@ -639,9 +712,12 @@ function buildProfile(user: UserSummary, index: number, users: UserSummary[]): U
     isOnline: user.isOnline,
     familyName: random() > 0.35 ? pick(random, FAMILY_NAMES) : undefined,
 
-    // Two cover thumbnails, as the reference shows. The first doubles as the
-    // avatar in the compact header, so the profile never has two identities.
-    photos: [{ id: `${user.id}-photo-1`, imageUrl: user.avatarUrl }, { id: `${user.id}-photo-2` }],
+    // Two cover thumbnails, as the reference shows. The first is the avatar, so
+    // the compact header and the strip can never show two different people.
+    photos: [
+      { id: `${user.id}-photo-1`, imageUrl: user.avatarUrl },
+      { id: `${user.id}-photo-2`, imageUrl: albumPhotos[index % albumPhotos.length] },
+    ],
     charmLevel: 1 + Math.floor(random() * 30),
     wealthLevel: 1 + Math.floor(random() * 20),
     agency:
@@ -709,23 +785,30 @@ function buildProfileMoments(user: UserSummary, random: () => number): MomentPos
   }
 
   const count = 1 + Math.floor(random() * 3);
-  return Array.from({ length: count }, (_, index) => ({
-    id: `moment-${user.id}-${index + 1}`,
-    authorId: user.id,
-    authorName: user.displayName,
-    authorVipTier: user.vipTier,
-    authorLevel: user.level,
-    authorAge: user.age,
-    authorGender: user.gender,
-    badges: user.badges,
-    hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
-    hasMedia: index % 3 !== 1,
-    text: pick(random, MOMENT_TEXTS),
-    createdAt: new Date(NOW - Math.floor(random() * 6 * DAY)).toISOString(),
-    likeCount: Math.floor(random() * 90),
-    commentCount: Math.floor(random() * 14),
-    likedByMe: false,
-  }));
+  const gender = user.gender ?? 'female';
+  const posts = POST_PHOTOS[gender];
+  return Array.from({ length: count }, (_, index) => {
+    const hasMedia = index % 3 !== 1;
+    return {
+      id: `moment-${user.id}-${index + 1}`,
+      authorId: user.id,
+      authorName: user.displayName,
+      authorVipTier: user.vipTier,
+      authorLevel: user.level,
+      authorAge: user.age,
+      authorGender: user.gender,
+      avatarUrl: user.avatarUrl,
+      badges: user.badges,
+      hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
+      hasMedia,
+      mediaUrl: hasMedia ? posts[index % posts.length] : undefined,
+      text: pick(random, MOMENT_TEXTS),
+      createdAt: new Date(NOW - Math.floor(random() * 6 * DAY)).toISOString(),
+      likeCount: Math.floor(random() * 90),
+      commentCount: Math.floor(random() * 14),
+      likedByMe: false,
+    };
+  });
 }
 
 export const FIXTURE_PROFILES: UserProfile[] = FIXTURE_USERS.map((user, index) =>

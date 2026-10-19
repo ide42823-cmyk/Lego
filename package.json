@@ -36,6 +36,7 @@
     "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@testing-library/react-native": "^14.1.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
@@ -60,6 +61,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "rtc:token": "node tools/livekit-token.mjs",
+    "media:fetch": "node tools/fetch-test-media.mjs",
+    "art:build": "node tools/build-art.mjs",
     "prebuild:android": "expo prebuild --platform android"
   },
   "private": true

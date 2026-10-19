@@ -516,3 +516,97 @@ injection), removed before this commit.
 - **A two-digit agency rank at the smallest font scale** — the chip is measured at the
   default scale only.
 - **iOS.** Cannot be built on Windows.
+
+## P4.2 — relationships cards and real test media (2026-10-19)
+
+**Scope:** the profile's Relationships tab, and every surface that shows an image.
+No route, no data-method signature and no other screen's layout changed.
+
+Two things drove this pass. The reference keeps the couple card and the friend row on
+screen whether or not the member has any relationship — the cards *are* the empty
+state — and a UI reviewed against colour blocks cannot answer the questions the layout
+actually raises: does white text clear a real photo, does a face survive the cover crop,
+does the strip balance against a busy background.
+
+### What changed
+
+- **The Relationships tab has no empty state.** The couple card always renders, and with
+  no couple its second slot is the invitation; the friend row always renders and always
+  ends in the invite tile. A member with nothing yet sees two live affordances instead of
+  a message. `CouplePanel` gained the art backdrop, the framed pair and the invite slot;
+  the friend cards gained the peer's photo.
+- **The app renders real photography.** `assets/media/` holds placeholder photos fetched
+  by `tools/fetch-test-media.mjs` — 24 portraits, 7 profile covers, 8 post images and 8
+  room covers — and the fixtures point at them. Everything is test content with a
+  permissive licence, documented in `assets/media/README.md`, and meant to be replaced.
+- **The decoration is generated, not borrowed.** `tools/build-art.mjs` authors four
+  pieces as SVG (crest, avatar frame, winged heart, cloud band) and rasterises them with
+  `@resvg/resvg-js` into `assets/media/art/`. The SVG sources stay in `assets/art/` so
+  the shapes remain editable. Nothing is cropped from the reference app.
+- **Images resolve in one place.** The data layer stores opaque references
+  (`asset:media/portraits/f01.jpg`); `src/core/media/images.ts` is the only module that
+  turns one into a bundler id, and anything it does not recognise is treated as a remote
+  URL. A backend can return `https://` through the same fields and no screen changes.
+  `Avatar` and `MediaThumb` accept either.
+- **The fixtures are internally coherent.** Gender is now decided first, and the name,
+  the pronouns the profile derives from it, the portrait, the cover and the post images
+  all follow from that one choice; the inbox peers, moment authors and relationship
+  records are copies of the same `UserSummary` objects the directories render, so a
+  member's face cannot differ between two screens. This also removed a latent defect: the
+  inbox previously paired a peer id with an unrelated name from a flat pool.
+- **`FramedAvatar` is a new primitive**, and `tints.couple` a new token group, so the
+  rose card and its ring art vary correctly between schemes rather than being hard-coded.
+- **The crest is now the generated medal.** `ProfileEmblem` keeps its structure — a large
+  crest beside the name carrying the member's honor glyph — but the medal is art rather
+  than concentric tinted rings.
+- **The cover wash only stands in for a missing photo.** Over photography it would flatten
+  the subject, so the top scrim is the only overlay then.
+- **Jest mocks `expo-image`** (`jest/expo-image-mock.js`): its native work escapes `act()`
+  and leaks between tests. Nothing under test asserts on image internals.
+
+### Deliberate deviations (new)
+
+- **The photos are placeholders and do not depict the fixture members.** They exist to
+  exercise crops, contrast and density, and every one is expected to be replaced. They
+  are grouped by the gender the photo presents purely so a row does not read as an
+  obvious mismatch while reviewing layout.
+- **Eight room covers are shared across eighteen rooms.** The room list is reviewed for
+  rhythm, not for eighteen distinct photographs.
+- **The friend cards wear the same ring as the couple card.** The reference decorates both;
+  the art is the app's own rather than a copy of the reference's frame.
+
+### Verified on device (2026-10-19, light and dark)
+
+**Not run yet: the handset was not attached.** Windows reported no Android USB device
+and neither `adb devices` nor `adb mdns services` found the phone, so `adb reverse` and
+the deep-link harness could not be used. The checks below are what the pass will cover;
+they are listed here so the gap is explicit rather than implied, and will be filled in
+from the handset before this section is treated as evidence.
+
+| Check | Result |
+|---|---|
+| Relationships for a member with no couple and no friends keeps both cards and both invites | not run |
+| Couple card: rose wash, cloud band, framed owner, winged heart between the members | not run |
+| A member with a couple shows the peer's photo and the level/duration line under the heart | not run |
+| Friend cards show the peer's photo inside the ring, with the level badge intact | not run |
+| Profile cover is real photography with bare white controls and the album strip legible | not run |
+| Moments feed: author photos, portrait media inset | not run |
+| Home and Messages rows show portraits; the inbox name matches the peer's photo | not run |
+| Rooms screen: real covers on the list and grid cards | not run |
+| Me tab shows the member's own photo | not run |
+| Crest medal renders with the member's honor glyph in the enamel | not run |
+| Light scheme end to end | not run |
+| Dark scheme end to end | not run |
+
+### NOT verified in P4.2
+
+- **The whole on-device pass above** — the phone was not reachable; see that table.
+- **Literal taps** — unchanged: `INJECT_EVENTS` is denied, so controls are verified as
+  rendered, labelled and wired, not as pressed.
+- **Every fixture member's photo** — the pass covers the members screens select, not all 24
+  portraits.
+- **The `media:fetch` script against a clean checkout** — it was run against the working
+  tree, where most files already existed, so the skip path is exercised but a full cold
+  fetch is not.
+- **iOS.** Cannot be built on Windows.
+

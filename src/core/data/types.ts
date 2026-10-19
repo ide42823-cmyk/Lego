@@ -288,6 +288,8 @@ export interface RelationshipRecord {
   kind: 'couple' | 'friend';
   peerId: string;
   peerName: string;
+  /** The peer's photo; the card shows the same face the directories show. */
+  peerAvatarUrl?: string;
   /** Relationship level, e.g. 34 renders as "Couple Lv.34". */
   level: number;
   /** Days the relationship has lasted. */

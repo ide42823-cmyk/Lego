@@ -12,6 +12,9 @@ module.exports = {
     // by TypeScript against Lucide's own types.
     '^lucide-react-native$': '<rootDir>/jest/lucide-mock.js',
     '^lucide-react-native/icons/(.*)$': '<rootDir>/jest/lucide-mock.js',
+    // `expo-image` does async native work that escapes `act()` in Jest; see the
+    // mock for why that is safe to replace.
+    '^expo-image$': '<rootDir>/jest/expo-image-mock.js',
   },
   // The Expo preset whitelists RN/Expo packages for Babel. Lucide ships ESM
   // only, so it must be transformed too or Jest trips over its `import`.

@@ -26,23 +26,38 @@ function profile(overrides: Partial<UserProfile> = {}): UserProfile {
 }
 
 describe('ProfileRelationshipsTab', () => {
-  it('shows a real empty state when there is no relationship at all', async () => {
+  it('keeps both cards when the member has no relationship at all', async () => {
     await render(
       <ProfileRelationshipsTab profile={profile()} onOpenRecord={jest.fn()} onInvite={jest.fn()} />,
     );
 
-    expect(screen.getByText('No relationships yet')).toBeTruthy();
+    // The invitation is the empty state: the couple card keeps a slot for it and
+    // the friend row keeps its trailing tile.
+    expect(screen.getByLabelText("Invite a member to be ليان's couple")).toBeTruthy();
+    expect(screen.getByLabelText('Invite a member to a relationship')).toBeTruthy();
+    expect(screen.queryByText('No relationships yet')).toBeNull();
   });
 
-  it('offers the invitation from the empty state', async () => {
+  it('invites from the couple card', async () => {
     const onInvite = jest.fn();
     await render(
       <ProfileRelationshipsTab profile={profile()} onOpenRecord={jest.fn()} onInvite={onInvite} />,
     );
 
-    fireEvent.press(screen.getByText('Invite'));
+    fireEvent.press(screen.getByLabelText("Invite a member to be ليان's couple"));
 
-    expect(onInvite).toHaveBeenCalled();
+    expect(onInvite).toHaveBeenCalledTimes(1);
+  });
+
+  it('invites from the trailing tile in the friend row', async () => {
+    const onInvite = jest.fn();
+    await render(
+      <ProfileRelationshipsTab profile={profile()} onOpenRecord={jest.fn()} onInvite={onInvite} />,
+    );
+
+    fireEvent.press(screen.getByLabelText('Invite a member to a relationship'));
+
+    expect(onInvite).toHaveBeenCalledTimes(1);
   });
 
   it('announces the couple with its level and duration', async () => {
@@ -64,7 +79,17 @@ describe('ProfileRelationshipsTab', () => {
       />,
     );
 
-    expect(screen.getByLabelText('Couple level 34 with MOHAMMED, 103 days')).toBeTruthy();
+    const couple = screen.getByLabelText('Couple level 34 with MOHAMMED, 103 days');
+    expect(couple).toBeTruthy();
+
+    // With a couple present the invitation slot is the peer's, not an invite.
+    expect(screen.queryByLabelText("Invite a member to be ليان's couple")).toBeNull();
+    expect(screen.getByText('Lv.34 · 103 days')).toBeTruthy();
+
+    fireEvent.press(couple);
+    expect(onOpenRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'couple-1', peerName: 'MOHAMMED' }),
+    );
   });
 
   it('lists friends and keeps the invite tile alongside them', async () => {
@@ -88,7 +113,7 @@ describe('ProfileRelationshipsTab', () => {
     );
 
     expect(screen.getByLabelText('Friend level 27 with Mira, 133 days')).toBeTruthy();
-    expect(screen.getByText('Invite')).toBeTruthy();
+    expect(screen.getByLabelText('Invite a member to a relationship')).toBeTruthy();
     expect(screen.queryByText('No relationships yet')).toBeNull();
   });
 });

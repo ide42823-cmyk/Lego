@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="256" viewBox="0 0 512 256">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="40%" stop-color="#FF7FAF" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#FF7FAF" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="heart" cx="36%" cy="26%" r="82%">
+      <stop offset="0%" stop-color="#FFC9DE" />
+      <stop offset="45%" stop-color="#FF6FA0" />
+      <stop offset="100%" stop-color="#C72463" />
+    </radialGradient>
+    <linearGradient id="feather" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#FFF0F6" />
+    </linearGradient>
+    <linearGradient id="featherWarm" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFF9FC" />
+      <stop offset="100%" stop-color="#FFC9DE" />
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="256" cy="122" rx="228" ry="92" fill="url(#glow)" />
+  <g transform="">
+      <path d="M300 118 C352 74 424 54 496 66 C446 100 384 130 316 140 Z" fill="url(#feather)" />
+      <path d="M302 128 C356 96 420 82 486 92 C436 118 378 140 312 146 Z" fill="url(#featherWarm)" fill-opacity="0.95" />
+      <path d="M306 140 C350 122 396 114 440 118 C400 138 356 150 318 152 Z" fill="#FFFFFF" fill-opacity="0.85" />
+      <path d="M300 118 C352 74 424 54 496 66" fill="none" stroke="#FFD9E8" stroke-width="3" />
+    </g>
+  <g transform="translate(512 0) scale(-1 1)">
+      <path d="M300 118 C352 74 424 54 496 66 C446 100 384 130 316 140 Z" fill="url(#feather)" />
+      <path d="M302 128 C356 96 420 82 486 92 C436 118 378 140 312 146 Z" fill="url(#featherWarm)" fill-opacity="0.95" />
+      <path d="M306 140 C350 122 396 114 440 118 C400 138 356 150 318 152 Z" fill="#FFFFFF" fill-opacity="0.85" />
+      <path d="M300 118 C352 74 424 54 496 66" fill="none" stroke="#FFD9E8" stroke-width="3" />
+    </g>
+
+  <path d="M256 196 C196 158 176 108 208 80 C232 59 252 70 256 90 C260 70 280 59 304 80 C336 108 316 158 256 196 Z"
+    fill="url(#heart)" stroke="#FFD3E4" stroke-width="5" />
+  <ellipse cx="232" cy="96" rx="17" ry="10" fill="#FFFFFF" fill-opacity="0.7" transform="rotate(-24 232 96)" />
+
+  <g fill="#FFFFFF">
+    <path d="M188 44 L193 58 L207 63 L193 68 L188 82 L183 68 L169 63 L183 58 Z" fill-opacity="0.9" />
+    <path d="M336 34 L340 45 L351 49 L340 53 L336 64 L332 53 L321 49 L332 45 Z" fill-opacity="0.75" />
+  </g>
+</svg>

@@ -155,6 +155,8 @@ export interface AppTints {
   gender: { female: string; male: string };
   /** Level emblem beside a display name. */
   level: { from: string; to: string; text: string };
+  /** The couple card on the relationships tab. */
+  couple: { from: string; to: string; text: string; muted: string };
   /** Presence dot. */
   online: string;
   /** The greeting control. */
@@ -193,6 +195,7 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     age: { background: '#FFE3F0', text: '#D6336C' },
     gender: { female: '#D6336C', male: '#2B6CE0' },
     level: { from: '#FFE9A8', to: '#F0A500', text: '#5A3B00' },
+    couple: { from: '#FF9EC6', to: '#F76BA8', text: '#FFFFFF', muted: 'rgba(255, 255, 255, 0.86)' },
     online: '#22C55E',
     hi: { background: '#FFDCEA', text: '#E5307A', icon: '#F04088' },
     cardShadow: 'rgba(46, 32, 84, 0.10)',
@@ -226,6 +229,7 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     age: { background: '#3A1D2B', text: '#FF9EC4' },
     gender: { female: '#FF9EC4', male: '#8FBCFF' },
     level: { from: '#4A3A0E', to: '#C98A00', text: '#FFE9A8' },
+    couple: { from: '#8C2A50', to: '#5C1B36', text: '#FFE3EF', muted: 'rgba(255, 227, 239, 0.8)' },
     online: '#4ADE80',
     hi: { background: '#3A1D2B', text: '#FF9EC4', icon: '#FF9EC4' },
     cardShadow: 'rgba(0, 0, 0, 0.5)',

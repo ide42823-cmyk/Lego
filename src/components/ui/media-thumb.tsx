@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type ViewProps } from 'react-native';
 
 import { Radius } from '@/constants/theme';
+import { imageSource } from '@/core/media/images';
 
 export interface MediaThumbProps extends ViewProps {
   /** Stable id used to pick a deterministic placeholder colour. */
@@ -25,9 +26,9 @@ function hash(value: string): number {
 }
 
 /**
- * Rectangular cover/thumbnail. Like `Avatar`, it renders a deterministic colour
- * block when no image URL exists, so cover art is never a network dependency in
- * development.
+ * Rectangular cover/thumbnail. Like `Avatar`, it resolves either a remote URL or
+ * a bundled `asset:` reference, and falls back to a deterministic colour block so
+ * a missing photo is never a broken image.
  */
 export function MediaThumb({
   id,
@@ -38,6 +39,7 @@ export function MediaThumb({
   style,
   ...rest
 }: MediaThumbProps) {
+  const source = imageSource(uri);
   const backgroundColor = PLACEHOLDER_COLORS[hash(id) % PLACEHOLDER_COLORS.length];
   const text = placeholderText ?? Array.from(label.trim())[0]?.toUpperCase() ?? '?';
 
@@ -49,9 +51,9 @@ export function MediaThumb({
       accessibilityLabel={label}
       {...rest}
     >
-      {uri ? (
+      {source ? (
         <Image
-          source={{ uri }}
+          source={source}
           style={[styles.image, { borderRadius }]}
           contentFit="cover"
           accessible={false}

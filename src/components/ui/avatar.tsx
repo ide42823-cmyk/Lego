@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type ViewProps } from 'react-native';
 
 import { Radius } from '@/constants/theme';
+import { imageSource } from '@/core/media/images';
 import { useTheme } from '@/hooks/use-theme';
 import { useTints } from '@/hooks/use-tints';
 
@@ -47,9 +48,9 @@ function initials(name: string): string {
 }
 
 /**
- * Renders a remote image when one exists, otherwise a deterministic monogram.
- * Fixtures ship without image URLs on purpose, so no external image host is
- * needed to review the UI.
+ * Renders a photograph when one exists, otherwise a deterministic monogram.
+ * `uri` may be a remote URL or a bundled `asset:` reference; the registry in
+ * `core/media/images` resolves both, so screens never care which one they hold.
  *
  * Presence sits at the logical end edge and is ringed in the page colour so it
  * appears to be cut out of the avatar — the reference's treatment.
@@ -69,6 +70,7 @@ export function Avatar({
   const theme = useTheme();
   const tints = useTints();
 
+  const source = imageSource(uri);
   const backgroundColor = PLACEHOLDER_COLORS[hash(id) % PLACEHOLDER_COLORS.length];
   const corner = radius ?? size / 2;
   const ring = ringColor ? { borderWidth: 2, borderColor: ringColor } : null;
@@ -84,9 +86,9 @@ export function Avatar({
       ]}
       {...rest}
     >
-      {uri ? (
+      {source ? (
         <Image
-          source={{ uri }}
+          source={source}
           style={{ width: size, height: size, borderRadius: corner }}
           contentFit="cover"
           // Purely decorative; the row supplies the accessible name.
