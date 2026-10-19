@@ -118,7 +118,20 @@ export const PremiumPalette = {
 export type TabTintKey = 'home' | 'moments' | 'rooms' | 'messages' | 'me';
 
 export type ChipTintKey =
-  'neutral' | 'chat' | 'families' | 'video' | 'friendship' | 'official' | 'featured' | 'trending';
+  | 'neutral'
+  | 'chat'
+  | 'families'
+  | 'video'
+  | 'friendship'
+  | 'official'
+  | 'featured'
+  | 'trending'
+  /** Charm progress (gem) on the profile identity row. */
+  | 'charm'
+  /** Wealth progress (star) on the profile identity row. */
+  | 'wealth'
+  /** Agency/rank badge on the profile identity row. */
+  | 'rank';
 
 export type TierTintKey = 'vip' | 'svip' | 'aristocracy';
 
@@ -168,6 +181,9 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       official: { background: '#EFE8FF', text: '#6D4AE0' },
       featured: { background: '#7C4DF0', text: '#FFFFFF' },
       trending: { background: '#FF5A8A', text: '#FFFFFF' },
+      charm: { background: '#DDF1FF', text: '#0E7FC0' },
+      wealth: { background: '#EDE4FF', text: '#7A4DD8' },
+      rank: { background: '#CFF6F4', text: '#0B8B86' },
     },
     tier: {
       vip: { from: '#FFE9A8', to: '#F5B301', text: '#6B4A00' },
@@ -198,6 +214,9 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       official: { background: '#251C40', text: '#B9A6FF' },
       featured: { background: '#5B34C8', text: '#FFFFFF' },
       trending: { background: '#C0335F', text: '#FFFFFF' },
+      charm: { background: '#102C3E', text: '#7FD4FF' },
+      wealth: { background: '#251C40', text: '#C0A8FF' },
+      rank: { background: '#0E3331', text: '#6FE0DA' },
     },
     tier: {
       vip: { from: '#4A3A0E', to: '#B98A00', text: '#FFE9A8' },

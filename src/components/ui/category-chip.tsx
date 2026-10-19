@@ -10,6 +10,8 @@ export interface CategoryChipProps extends ViewProps {
   label: string;
   tone?: ChipTintKey;
   icon?: IconName;
+  /** Capsule shape, as the profile's stat chips use. Defaults to the rectangle. */
+  pill?: boolean;
 }
 
 /**
@@ -18,12 +20,22 @@ export interface CategoryChipProps extends ViewProps {
  * Tone carries the meaning (a family room is green, a video room blue), so the
  * chip stays readable when the label is translated and changes width.
  */
-export function CategoryChip({ label, tone = 'neutral', icon, style, ...rest }: CategoryChipProps) {
+export function CategoryChip({
+  label,
+  tone = 'neutral',
+  icon,
+  pill = false,
+  style,
+  ...rest
+}: CategoryChipProps) {
   const tints = useTints();
   const colors = tints.chip[tone];
 
   return (
-    <View style={[styles.chip, { backgroundColor: colors.background }, style]} {...rest}>
+    <View
+      style={[styles.chip, pill && styles.pill, { backgroundColor: colors.background }, style]}
+      {...rest}
+    >
       {icon ? <Icon name={icon} size={11} strokeWidth={2.6} color={colors.text} /> : null}
       <ThemedText type="small" style={[styles.label, { color: colors.text }]}>
         {label}
@@ -42,5 +54,6 @@ const styles = StyleSheet.create({
     borderRadius: Radius.small,
     alignSelf: 'flex-start',
   },
+  pill: { borderRadius: Radius.pill },
   label: { fontSize: 11, lineHeight: 16, fontWeight: '700' },
 });

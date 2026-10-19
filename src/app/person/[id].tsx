@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Share, StyleSheet, View } from 'react-native';
+import { Share, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -49,9 +49,14 @@ import { useTheme } from '@/hooks/use-theme';
  * requests whose confirmed result the UI reconciles to.
  */
 
-const COVER_HEIGHT = 190;
-/** How far the avatar overlaps the cover. */
-const AVATAR_OVERLAP = 30;
+/**
+ * The reference gives the cover roughly the top half of the screen (a ~4:5
+ * portrait crop), which is what makes the profile read as a photo-first page.
+ * The clamp keeps it sane on very tall and very short windows.
+ */
+function coverHeightFor(windowHeight: number): number {
+  return Math.round(Math.min(Math.max(windowHeight * 0.54, 320), 520));
+}
 
 type ProfileTab = 'profile' | 'honor' | 'moments' | 'relationships';
 
@@ -70,6 +75,8 @@ export default function ProfileScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const toast = useToast();
+  const window = useWindowDimensions();
+  const coverHeight = coverHeightFor(window.height);
 
   const [tab, setTab] = useState<ProfileTab>('profile');
   const [greeted, setGreeted] = useState(false);
@@ -86,7 +93,7 @@ export default function ProfileScreen() {
 
   const state = useAsync(() => fixtureDataSource.getProfile(userId), `profile:${userId}`);
 
-  const compactThreshold = Math.max(0, COVER_HEIGHT - (insets.top + COMPACT_BAR_HEIGHT));
+  const compactThreshold = Math.max(0, coverHeight - (insets.top + COMPACT_BAR_HEIGHT));
 
   const onScroll = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -268,14 +275,15 @@ export default function ProfileScreen() {
       >
         <ProfileCover
           profile={profile}
-          height={COVER_HEIGHT}
+          height={coverHeight}
           topInset={insets.top}
           onBack={goBack}
           onShare={() => void share(profile)}
           onMore={() => setMenuOpen(true)}
+          onOpenPhoto={() => notYet('The photo viewer')}
         />
 
-        <ProfileIdentity profile={profile} overlap={AVATAR_OVERLAP} />
+        <ProfileIdentity profile={profile} />
 
         {/*
           The strip reserves the compact header's height so that, once pinned, it
@@ -288,12 +296,7 @@ export default function ProfileScreen() {
             { paddingTop: insets.top + COMPACT_BAR_HEIGHT, marginTop: -COMPACT_BAR_HEIGHT },
           ]}
         >
-          <View
-            style={[
-              styles.tabBar,
-              { backgroundColor: theme.background, borderBottomColor: theme.border },
-            ]}
-          >
+          <View style={[styles.tabBar, { backgroundColor: theme.background }]}>
             <SegmentedTabs
               items={tabs}
               value={tab}
@@ -403,8 +406,9 @@ const styles = StyleSheet.create({
   padded: { paddingHorizontal: Spacing.three },
   loadingHeader: { flexDirection: 'row', alignItems: 'center' },
   stickyStrip: { zIndex: 2 },
+  // No bottom rule: the reference separates the strip by spacing alone, and a
+  // hairline here would draw a second, competing line above the section body.
   tabBar: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: Spacing.three,
   },
   compactOverlay: {

@@ -45,7 +45,8 @@ const styles = StyleSheet.create({
     gap: 3,
     paddingHorizontal: Spacing.two,
     paddingVertical: 2,
-    borderRadius: Radius.small,
+    // The reference draws every identity chip as a capsule.
+    borderRadius: Radius.pill,
     alignSelf: 'flex-start',
   },
   label: { fontSize: 11, lineHeight: 16, fontWeight: '700' },

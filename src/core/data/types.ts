@@ -81,6 +81,13 @@ export interface MomentPost {
   id: string;
   authorId: string;
   authorName: string;
+  /** Paid rank, rendered as the tier chip under the author's name. */
+  authorVipTier?: number;
+  /**
+   * One topic tag. The reference draws it as a `#` pill beneath the post, so it
+   * is a single label rather than a full tag list.
+   */
+  hashtag?: string;
   /**
    * Mirrors the author's level in the discovery directories. Optional like
    * `UserSummary.level`: when it is absent the level badge is omitted rather
@@ -94,6 +101,12 @@ export interface MomentPost {
   badges: UserBadge[];
   text: string;
   mediaUrl?: string;
+  /**
+   * Whether the post carries media. Kept separate from `mediaUrl` so fixtures
+   * can exercise the media layout without an image host, exactly as the
+   * directories do for covers.
+   */
+  hasMedia?: boolean;
   createdAt: string;
   likeCount: number;
   commentCount: number;
@@ -187,6 +200,29 @@ export interface ProfileShortcut {
   label: string;
   memberCount: number;
   tone: 'room' | 'family';
+  /** Families can be official; the reference prints a check beside the title. */
+  verified?: boolean;
+}
+
+/**
+ * One photo on the member's cover strip.
+ *
+ * Fixtures carry no image host, so `id` alone lets the UI render a deterministic
+ * placeholder — the same rule the directories follow for avatars.
+ */
+export interface ProfilePhoto {
+  id: string;
+  imageUrl?: string;
+}
+
+/**
+ * The decorative crest the reference floats beside the display name. It is an
+ * owned presentation item, never an entitlement decision.
+ */
+export interface ProfileEmblem {
+  /** Glyph meaning; the view resolves it against its own art set. */
+  art: HonorArt;
+  label: string;
 }
 
 export type ProfileInfoIcon =
@@ -282,6 +318,19 @@ export interface UserProfile {
   isOnline: boolean;
   /** Family crest label shown last in the chip row, when the member has one. */
   familyName?: string;
+
+  /** Cover thumbnails. The first one doubles as the avatar. */
+  photos?: ProfilePhoto[];
+  /**
+   * Charm (gem) and wealth (star) progress, printed as chips beside the age
+   * pill. Presentation only — the real values live on the member's account.
+   */
+  charmLevel?: number;
+  wealthLevel?: number;
+  /** Agency badge, e.g. rank 5 of "NUMBER ONE". */
+  agency?: { rank: number; name: string };
+  /** Decorative crest rendered beside the display name. */
+  emblem?: ProfileEmblem;
 
   /** Free-text signature above the information rows. */
   signature: string;

@@ -337,14 +337,17 @@ had to be made reachable from it.
   wall, a preview row, a count that opens the full collection, and empty
   placeholder slots.
 - **The family crest and badge crest imagery**, replaced with our own `rank` and
-  `diamonds` glyphs and a text label.
+  `diamonds` glyphs and a text label. *(Superseded in P4.1: the reference's floating
+  crest is now reproduced as a flat tinted emblem, and the stat row names charm,
+  wealth, tier and agency instead of level and family.)*
 - **The minimised live-room widget** that floats over the cover in screen 001. It
   is bound to a live room session, and no session exists yet — rendering it now
   would be a control with nothing behind it. It belongs to the room phase.
 - **The unlabelled decorative chips beside the name** in screen 001. Their meaning
   cannot be determined from the capture, and inventing one would be worse than
   omitting them. The chip row is built from data we actually hold: age, level,
-  rank and family.
+  rank and family. *(Superseded in P4.1: the chips are age, charm, wealth, tier and
+  agency, which is what the capture actually prints — see P4.1.)*
 
 ### Deliberate deviations
 
@@ -421,4 +424,95 @@ removed before this commit; the tree is clean of it.
   be synthesised on this handset. The same applies to every other control on the
   page: they are verified as rendered, labelled and wired, not as pressed.
 - **Light scheme on device**, unchanged from P3.1 — the handset stays in dark mode.
+  *(Closed in P4.1: the handset was switched to light for the fidelity pass and both
+  schemes were verified end to end.)*
+- **iOS.** Cannot be built on Windows.
+
+## P4.1 — profile fidelity pass (2026-10-19)
+
+**Scope:** the same page, re-measured against reference screens 001 / 027 (top of the
+profile) and 023–026 (the scrolled states). No route, no data method and no other
+screen changed.
+
+The first pass matched the page's *sections* but not its proportions. Reading the
+captures again at their true scale showed three structural gaps: the cover was 0.22
+of the screen where the reference gives it 0.54; the identity carried a 68dp avatar
+the reference does not have; and the chip row named data the reference does not print
+(level, family) while omitting what it does (charm, wealth, agency).
+
+### What changed
+
+- **The cover is a photo-first hero.** Its height is derived from the window (54%,
+  clamped to 320–520dp) instead of a 190dp constant, which is what makes the page read
+  like the reference before any scrolling.
+- **The member's photos replace the overlapping avatar.** Two framed thumbnails sit at
+  the cover's bottom-left, as in the reference's album strip. The first one *is* the
+  compact header's avatar — same id, same placeholder colour — so the collapsed
+  identity cannot disagree with the strip the user just scrolled past.
+- **The crest floats at the end of the identity block**, overlapping the name and
+  presence rows, as an owned decoration drawn flat from the tier/age tints and our own
+  glyph set.
+- **The chip row is age · charm · wealth · tier · agency**, which is the set the
+  reference prints. Charm and wealth got their own tint keys and the agency a
+  dedicated two-part chip (figure + wordmark).
+- **Controls are bare, with the scrim on the surface.** The reference draws white
+  glyphs straight on the photo; `OverlayButton` is now unfilled, and the cover paints a
+  soft top gradient (new `opacity` on `ScreenGradient`) so white still clears the
+  contrast floor over any art.
+- **Shortcut tiles lead with a thumbnail**, not a glyph, and the family tile carries
+  the verified check.
+- **"Profile Tags" and "Information" are quiet grey labels**, not bold headings, and
+  the copy glyph now sits immediately after the ID value instead of at the row's far
+  edge.
+- **The post card matches the profile's post rhythm.** Age and tier chips stack under
+  the author's name (the name no longer repeats a gender glyph), media is a portrait
+  inset rather than a full-bleed banner, and `MomentPost` grew `hashtag`, `hasMedia`
+  and `authorVipTier` so the layout is data-driven rather than fabricated in the view.
+- **The invite tile is filled**, like the reference's, not a dashed placeholder.
+- **The section strip lost its hairline.** The reference separates it by spacing
+  alone; the rule drew a second line above the section body.
+- **Both schemes were verified.** The handset was switched to light for this pass
+  (the references are light), which also closes the light-scheme gap from P3.1/P4.
+
+### Deliberate deviations (new)
+
+- **The cover, thumbnails and post images are deterministic colour blocks.** We ship
+  no photographs and will not reuse the reference's subjects. They are the same
+  `MediaThumb` / `Avatar` placeholders every directory row already uses.
+- **The crest is flat.** The reference's is an enamel medal; ours is concentric tinted
+  rings around one of our glyphs. Mass and position match; the art does not.
+- **Album thumbnails raise a "photo viewer arrives in a later pass" toast.** There is
+  no viewer yet, and a thumbnail that does nothing would be a dead end.
+
+### Verified on device (2026-10-19, light and dark)
+
+Driving still needs the temporary deep-link harness (the handset denies input
+injection), removed before this commit.
+
+| Check | Result |
+|---|---|
+| Cover occupies ~54% of the window at rest, with the album thumbnails at its bottom-left | PASS |
+| White back/share/more glyphs stay legible over the scrimmed cover | PASS |
+| Identity: name + verified badge, presence, five-chip row (age, charm, wealth, VIP, agency), crest at the end | PASS |
+| A member with no tier/agency renders the shorter chip row without gaps | PASS |
+| Shortcut tiles show thumbnails, member counts and the family check | PASS |
+| Tags keep emoji-first pills; "Profile Tags" / "Information" are quiet grey labels | PASS |
+| Info rows: mutual-followers row first, copy glyph beside the ID value | PASS |
+| About body: the Arabic signature right-aligns, the Latin one left-aligns | PASS |
+| Moments: chips stacked under the name, portrait media inset, `#` chip, footer counts | PASS |
+| Honor: three titled walls with counts, entries and empty slots | PASS |
+| Relationships: couple panel, friend cards and the filled invite tile | PASS |
+| Relationships empty state for a member with no records | PASS |
+| Compact header fades in over the scrolled cover | PASS |
+| Light scheme end to end | PASS |
+| Dark scheme end to end | PASS |
+
+### NOT verified in P4.1
+
+- **Literal taps** — unchanged: `INJECT_EVENTS` is denied, so controls are verified as
+  rendered, labelled and wired, not as pressed.
+- **A scrolled state held by a real finger** — the offset was driven by the harness.
+  The fade is the same Reanimated interpolation either way.
+- **A two-digit agency rank at the smallest font scale** — the chip is measured at the
+  default scale only.
 - **iOS.** Cannot be built on Windows.

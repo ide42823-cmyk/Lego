@@ -15,6 +15,7 @@
 
 import type {
   ConversationSummary,
+  HonorArt,
   HonorEntry,
   HonorWall,
   MeDashboard,
@@ -150,6 +151,9 @@ const MOMENT_TEXTS = [
   'هدية من صديق، شكراً لك.',
 ] as const;
 
+/** One topic per post, printed as the `#` pill beneath the media. */
+const MOMENT_HASHTAGS = ['Love', 'Night', 'Coffee', 'Travel', 'Music', 'Vibes'] as const;
+
 const BANNERS: PromoBanner[] = [
   {
     id: 'banner-families',
@@ -252,10 +256,13 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
       id: `moment-${index + 1}`,
       authorId: author.id,
       authorName: author.displayName,
+      authorVipTier: author.vipTier,
       authorLevel: author.level,
       authorAge: author.age,
       authorGender: author.gender,
       badges: author.badges,
+      hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
+      hasMedia: index % 3 !== 1,
       text: pick(random, MOMENT_TEXTS),
       createdAt: new Date(NOW - Math.floor(random() * 3 * DAY)).toISOString(),
       likeCount: Math.floor(random() * 320),
@@ -349,6 +356,11 @@ const TITLES = [
   'Event Captain',
   'Golden Voice',
 ] as const;
+
+/** Agency names printed on the rank chip, above a figure such as "5". */
+const AGENCY_NAMES = ['NUMBER ONE', 'ROYAL STAR', 'GOLDEN LINE', 'SILK ROAD', 'NIGHT OWL'] as const;
+
+const EMBLEM_ARTS: readonly HonorArt[] = ['crown', 'star', 'gem', 'trophy', 'sparkle'];
 
 const GIFTS: readonly { label: string; art: HonorEntry['art']; rarity?: string }[] = [
   { label: 'Ember Rose', art: 'gift' },
@@ -627,22 +639,36 @@ function buildProfile(user: UserSummary, index: number, users: UserSummary[]): U
     isOnline: user.isOnline,
     familyName: random() > 0.35 ? pick(random, FAMILY_NAMES) : undefined,
 
+    // Two cover thumbnails, as the reference shows. The first doubles as the
+    // avatar in the compact header, so the profile never has two identities.
+    photos: [{ id: `${user.id}-photo-1`, imageUrl: user.avatarUrl }, { id: `${user.id}-photo-2` }],
+    charmLevel: 1 + Math.floor(random() * 30),
+    wealthLevel: 1 + Math.floor(random() * 20),
+    agency:
+      random() > 0.35
+        ? { rank: 1 + Math.floor(random() * 99), name: pick(random, AGENCY_NAMES) }
+        : undefined,
+    emblem:
+      random() > 0.25 ? { art: pick(random, EMBLEM_ARTS), label: 'Profile crest' } : undefined,
+
     signature: pick(random, PROFILE_SIGNATURES),
     tags,
     roomShortcut: {
       kind: 'room',
       // Deep-links to a real room in the directory fixtures.
       id: (FIXTURE_ROOMS[index % FIXTURE_ROOMS.length] as RoomSummary).id,
-      label: 'Room',
+      label: user.gender === 'male' ? 'His Room' : 'Her Room',
+      // A room can be empty, which is a real state the tile has to survive.
       memberCount: Math.floor(random() * 40),
       tone: 'room',
     },
     familyShortcut: {
       kind: 'family',
       id: `family-${(index % 6) + 1}`,
-      label: 'Family',
+      label: user.gender === 'male' ? 'His family' : 'Her family',
       memberCount: 20 + Math.floor(random() * 70),
       tone: 'family',
+      verified: index % 3 !== 0,
     },
     info: [
       // The mutual-follower line only exists when the relationship is mutual.
@@ -687,10 +713,13 @@ function buildProfileMoments(user: UserSummary, random: () => number): MomentPos
     id: `moment-${user.id}-${index + 1}`,
     authorId: user.id,
     authorName: user.displayName,
+    authorVipTier: user.vipTier,
     authorLevel: user.level,
     authorAge: user.age,
     authorGender: user.gender,
     badges: user.badges,
+    hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
+    hasMedia: index % 3 !== 1,
     text: pick(random, MOMENT_TEXTS),
     createdAt: new Date(NOW - Math.floor(random() * 6 * DAY)).toISOString(),
     likeCount: Math.floor(random() * 90),

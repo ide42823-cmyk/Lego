@@ -43,7 +43,7 @@ export function ProfileAboutTab({ profile, onOpenShortcut, onCopy }: ProfileAbou
       {profile.tags.length > 0 ? (
         <>
           <Divider inset />
-          <ThemedText type="smallBold" style={styles.sectionTitle}>
+          <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
             Profile Tags
           </ThemedText>
           <View style={styles.tags}>
@@ -55,7 +55,7 @@ export function ProfileAboutTab({ profile, onOpenShortcut, onCopy }: ProfileAbou
       ) : null}
 
       <Divider inset />
-      <ThemedText type="smallBold" style={styles.sectionTitle}>
+      <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
         Information
       </ThemedText>
 
@@ -79,7 +79,14 @@ export function ProfileAboutTab({ profile, onOpenShortcut, onCopy }: ProfileAbou
 const styles = StyleSheet.create({
   body: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.four },
   shortcuts: { flexDirection: 'row', gap: Spacing.three, paddingTop: Spacing.three },
-  sectionTitle: { paddingTop: Spacing.two, paddingBottom: Spacing.two },
+  // The reference sets these as quiet labels, not as headings: the rows below
+  // are the content, and a bold heading would outrank them.
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.two,
+  },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   signature: { paddingBottom: Spacing.two, lineHeight: 26 },
 });

@@ -7,6 +7,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { ThemedText } from '../themed-text';
 import { Avatar } from '../ui/avatar';
 import { IconButton } from '../ui/icon-button';
+import { MediaThumb } from '../ui/media-thumb';
 
 export const COMPACT_BAR_HEIGHT = 48;
 
@@ -35,6 +36,7 @@ export function ProfileCompactBar({
   onMore,
 }: ProfileCompactBarProps) {
   const theme = useTheme();
+  const photo = profile.photos?.[0];
 
   return (
     <View style={[styles.bar, { paddingTop: topInset, height: topInset + COMPACT_BAR_HEIGHT }]}>
@@ -48,14 +50,31 @@ export function ProfileCompactBar({
       </View>
 
       <View style={styles.center}>
-        <Avatar
-          id={profile.id}
-          name={profile.displayName}
-          uri={profile.avatarUrl}
-          size={28}
-          radius={9}
-          style={{ borderColor: theme.border, borderWidth: StyleSheet.hairlineWidth }}
-        />
+        {/*
+          The first cover thumbnail *is* the avatar — same id, same colour — so
+          the compact header cannot disagree with the strip the user just
+          scrolled past.
+        */}
+        {photo ? (
+          <MediaThumb
+            id={photo.id}
+            label=""
+            uri={photo.imageUrl}
+            placeholderText=""
+            style={styles.avatar}
+            borderRadius={14}
+            accessible={false}
+          />
+        ) : (
+          <Avatar
+            id={profile.id}
+            name={profile.displayName}
+            uri={profile.avatarUrl}
+            size={28}
+            radius={14}
+            style={{ borderColor: theme.border, borderWidth: StyleSheet.hairlineWidth }}
+          />
+        )}
         <ThemedText type="smallBold" numberOfLines={1} style={styles.name}>
           {profile.displayName}
         </ThemedText>
@@ -86,4 +105,5 @@ const styles = StyleSheet.create({
     height: COMPACT_BAR_HEIGHT,
   },
   name: { flexShrink: 1, fontSize: 15 },
+  avatar: { width: 28, height: 28 },
 });

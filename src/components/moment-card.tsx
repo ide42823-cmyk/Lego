@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Radius, Spacing } from '@/constants/theme';
 import type { MomentPost } from '@/core/data/types';
 import { formatCompactCount, formatRelativeTime } from '@/core/format';
+import { textAlignFor } from '@/core/i18n';
 import { useTheme } from '@/hooks/use-theme';
 import { useTints } from '@/hooks/use-tints';
 
@@ -13,6 +14,8 @@ import { Avatar } from './ui/avatar';
 import { HiButton } from './ui/hi-button';
 import { Icon } from './ui/icon';
 import { MediaThumb } from './ui/media-thumb';
+import { TagChip } from './ui/tag-chip';
+import { TierBadge } from './ui/tier-badge';
 
 /**
  * One post in the Moments feed (reference screen 085).
@@ -34,8 +37,11 @@ export interface MomentCardProps {
 export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet, onMore }: MomentCardProps) {
   const theme = useTheme();
   const tints = useTints();
-  const genderColor = post.authorGender ? tints.gender[post.authorGender] : undefined;
   const likeColor = post.likedByMe ? theme.accent : theme.textSecondary;
+  // The age pill already carries the gender glyph, and the level crest would
+  // duplicate the tier chip — the reference prints neither beside the name.
+  const nameBadges = post.badges.filter((badge) => badge !== 'level');
+  const showMeta = post.authorAge !== undefined || post.authorVipTier !== undefined;
 
   return (
     <View style={styles.card}>
@@ -52,31 +58,43 @@ export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet, onMore }
               <ThemedText type="smallBold" numberOfLines={1} style={styles.name}>
                 {post.authorName}
               </ThemedText>
-              {post.authorGender ? (
-                <Icon name={post.authorGender} size={13} strokeWidth={2.6} color={genderColor} />
-              ) : null}
-              <UserBadges badges={post.badges} level={post.authorLevel} variant="status" />
+              <UserBadges badges={nameBadges} level={post.authorLevel} variant="status" />
             </View>
-            {post.authorAge === undefined ? null : (
-              <AgePill age={post.authorAge} gender={post.authorGender} />
-            )}
+            {showMeta ? (
+              <View style={styles.metaRow}>
+                {post.authorAge === undefined ? null : (
+                  <AgePill age={post.authorAge} gender={post.authorGender} />
+                )}
+                {post.authorVipTier === undefined ? null : (
+                  <TierBadge tier="vip" label={`VIP${post.authorVipTier}`} crowned />
+                )}
+              </View>
+            ) : null}
           </View>
         </Pressable>
 
         <HiButton name={post.authorName} onPress={() => onGreet?.(post.authorId)} />
       </View>
 
-      <ThemedText type="default">{post.text}</ThemedText>
+      <ThemedText type="default" style={{ textAlign: textAlignFor(post.text) }}>
+        {post.text}
+      </ThemedText>
 
-      {post.mediaUrl ? (
+      {post.hasMedia || post.mediaUrl ? (
+        // The reference sets post media as a portrait inset rather than a
+        // full-bleed banner, and fixtures carry no image host, so the shared
+        // placeholder stands in.
         <MediaThumb
           id={post.id}
           label="Post media"
           uri={post.mediaUrl}
+          placeholderText=""
           style={styles.media}
           borderRadius={Radius.large}
         />
       ) : null}
+
+      {post.hashtag ? <TagChip label={post.hashtag} emoji="#" style={styles.hashtag} /> : null}
 
       <ThemedText type="small" themeColor="textSecondary">
         {formatRelativeTime(post.createdAt)}
@@ -132,7 +150,10 @@ const styles = StyleSheet.create({
   authorText: { flex: 1, gap: Spacing.one },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, flexWrap: 'wrap' },
   name: { flexShrink: 1 },
-  media: { width: '100%', aspectRatio: 4 / 3 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, flexWrap: 'wrap' },
+  media: { width: '40%', aspectRatio: 3 / 4, alignSelf: 'flex-start' },
+  /** A pill, not a rule: the chip must not stretch to the card's width. */
+  hashtag: { alignSelf: 'flex-start' },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',

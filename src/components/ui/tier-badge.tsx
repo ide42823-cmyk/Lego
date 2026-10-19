@@ -43,7 +43,8 @@ const styles = StyleSheet.create({
     gap: 3,
     paddingHorizontal: Spacing.two,
     paddingVertical: 1,
-    borderRadius: Radius.small,
+    // A capsule, so it sits in the identity row as one of the chips.
+    borderRadius: Radius.pill,
     borderWidth: StyleSheet.hairlineWidth * 2,
     alignSelf: 'flex-start',
   },

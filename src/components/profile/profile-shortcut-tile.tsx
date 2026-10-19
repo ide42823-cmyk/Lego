@@ -5,7 +5,8 @@ import type { ProfileShortcut } from '@/core/data/types';
 import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from '../themed-text';
-import { Icon, type IconName } from '../ui/icon';
+import { Icon } from '../ui/icon';
+import { MediaThumb } from '../ui/media-thumb';
 
 /**
  * Room and family tiles are the same component in the reference, distinguished
@@ -14,11 +15,6 @@ import { Icon, type IconName } from '../ui/icon';
 const TONES: Record<ProfileShortcut['tone'], ChipTintKey> = {
   room: 'chat',
   family: 'video',
-};
-
-const ART: Record<ProfileShortcut['tone'], IconName> = {
-  room: 'rooms',
-  family: 'rank',
 };
 
 export interface ProfileShortcutTileProps {
@@ -31,8 +27,13 @@ export interface ProfileShortcutTileProps {
 /**
  * The "Her Room" / "Her family" tile (reference screens 001, 027).
  *
- * Read-only metadata plus a deep link: the member count is decorative weight, and
- * nothing here is actionable except opening the entity.
+ * The reference leads each tile with a *photo thumbnail*, not a glyph — the tile
+ * is a preview of a place with people in it. The thumbnail is keyed off the
+ * entity id so it is stable across renders; fixtures have no image host, so the
+ * shared `MediaThumb` placeholder stands in.
+ *
+ * Read-only metadata plus a deep link: the member count is decorative weight,
+ * and nothing here is actionable except opening the entity.
  */
 export function ProfileShortcutTile({ shortcut, ownerName, onPress }: ProfileShortcutTileProps) {
   const tints = useTints();
@@ -41,7 +42,9 @@ export function ProfileShortcutTile({ shortcut, ownerName, onPress }: ProfileSho
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${ownerName}'s ${shortcut.label}. ${shortcut.memberCount} members`}
+      accessibilityLabel={`${ownerName}. ${shortcut.label}. ${shortcut.memberCount} members${
+        shortcut.verified ? ', verified' : ''
+      }`}
       onPress={() => onPress(shortcut)}
       style={({ pressed }) => [
         styles.tile,
@@ -49,13 +52,27 @@ export function ProfileShortcutTile({ shortcut, ownerName, onPress }: ProfileSho
         pressed && { opacity: 0.75 },
       ]}
     >
-      <View style={[styles.thumb, { backgroundColor: `${colors.text}1F` }]}>
-        <Icon name={ART[shortcut.tone]} size={20} strokeWidth={2.2} color={colors.text} />
-      </View>
+      <MediaThumb
+        id={`shortcut-${shortcut.kind}-${shortcut.id}`}
+        label=""
+        placeholderText=""
+        borderRadius={Radius.medium}
+        accessible={false}
+        style={styles.thumb}
+      />
       <View style={styles.copy}>
-        <ThemedText type="smallBold" numberOfLines={1} style={{ color: colors.text }}>
-          {shortcut.label}
-        </ThemedText>
+        <View style={styles.titleRow}>
+          <ThemedText
+            type="smallBold"
+            numberOfLines={1}
+            style={[styles.title, { color: colors.text }]}
+          >
+            {shortcut.label}
+          </ThemedText>
+          {shortcut.verified ? (
+            <Icon name="verified" size={13} strokeWidth={2.4} color={colors.text} />
+          ) : null}
+        </View>
         <View style={styles.countRow}>
           <Icon name="friends" size={13} strokeWidth={2.4} color={colors.text} />
           <ThemedText type="small" numberOfLines={1} style={{ color: colors.text }}>
@@ -77,12 +94,12 @@ const styles = StyleSheet.create({
     borderRadius: Radius.large,
   },
   thumb: {
-    width: 40,
-    height: 40,
+    width: 46,
+    height: 46,
     borderRadius: Radius.medium,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  copy: { flex: 1, gap: Spacing.half },
+  copy: { flex: 1, gap: Spacing.one },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one },
+  title: { fontSize: 15, flexShrink: 1 },
   countRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, opacity: 0.9 },
 });

@@ -53,6 +53,9 @@ export function ProfileInfoRow({ row, onCopy }: ProfileInfoRowProps) {
           label={`Copy ${row.text}`}
           tone="muted"
           size={18}
+          // The 44pt target stays; only its visual centre moves closer to the
+          // value, which is where the reference puts the copy glyph.
+          style={styles.copy}
           onPress={() => onCopy?.(row)}
         />
       ) : null}
@@ -68,5 +71,6 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingVertical: Spacing.two,
   },
-  text: { flex: 1, lineHeight: 22 },
+  text: { flexShrink: 1, lineHeight: 22 },
+  copy: { marginStart: -Spacing.two },
 });

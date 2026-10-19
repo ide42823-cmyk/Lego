@@ -157,9 +157,11 @@ export interface RelationshipInviteTileProps {
   onPress: () => void;
 }
 
-/** The dashed "Invite" tile that ends the relationship row. */
+/** The "Invite" tile that ends the relationship row. */
 export function RelationshipInviteTile({ onPress }: RelationshipInviteTileProps) {
   const theme = useTheme();
+  const tints = useTints();
+  const colors = tints.chip.chat;
 
   return (
     <Pressable
@@ -168,14 +170,14 @@ export function RelationshipInviteTile({ onPress }: RelationshipInviteTileProps)
       onPress={onPress}
       style={({ pressed }) => [
         styles.inviteTile,
-        { borderColor: theme.borderStrong, backgroundColor: theme.surfaceMuted },
+        { backgroundColor: colors.background },
         pressed && { opacity: 0.8 },
       ]}
     >
-      <View style={[styles.inviteCircle, { backgroundColor: theme.backgroundElement }]}>
-        <Icon name="invite" size={22} strokeWidth={2} color={theme.brand} />
+      <View style={[styles.inviteCircle, { backgroundColor: theme.background }]}>
+        <Icon name="invite" size={22} strokeWidth={2} color={colors.text} />
       </View>
-      <ThemedText type="small" style={styles.inviteLabel}>
+      <ThemedText type="small" style={[styles.inviteLabel, { color: colors.text }]}>
         Invite
       </ThemedText>
     </Pressable>
@@ -249,8 +251,8 @@ const styles = StyleSheet.create({
   inviteTile: {
     width: CARD_WIDTH,
     borderRadius: Radius.large,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
+    // A filled tile, like the reference: the row ends on an action, not on a
+    // dashed placeholder.
     padding: Spacing.two,
     alignItems: 'center',
     justifyContent: 'center',
