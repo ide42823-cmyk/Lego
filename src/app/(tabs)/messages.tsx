@@ -3,13 +3,14 @@ import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { ConversationRow } from '@/components/conversation-row';
 import { PeopleRow } from '@/components/people-row';
+import { PromoBanner } from '@/components/promo-banner';
 import { ThemedText } from '@/components/themed-text';
-import { AppScreen } from '@/components/ui/app-screen';
 import { AppButton } from '@/components/ui/app-button';
+import { AppScreen } from '@/components/ui/app-screen';
 import { Divider } from '@/components/ui/divider';
 import { FilterChips, type FilterChipItem } from '@/components/ui/filter-chips';
+import { FloatingAction } from '@/components/ui/floating-action';
 import { IconButton } from '@/components/ui/icon-button';
-import { ScreenHeader } from '@/components/ui/screen-header';
 import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
 import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
@@ -20,16 +21,18 @@ import type {
   ConversationFilter,
   ConversationSummary,
   MessagesTab,
+  PromoBanner as PromoBannerModel,
   UserSummary,
 } from '@/core/data/types';
 import { usePaginated } from '@/hooks/use-async';
-import { useTheme } from '@/hooks/use-theme';
+import { useTints } from '@/hooks/use-tints';
 
 /**
  * Messages — inbox and contacts (reference screen 082).
  *
  * Two sub-sections share one header. Only the active section loads, so opening
- * the inbox does not also fetch the contact list.
+ * the inbox does not also fetch the contact list. The rows are flat with rules
+ * between them because an inbox is a dense list, not a wall of cards.
  */
 const SECTIONS: readonly SegmentedTabItem<MessagesTab>[] = [
   { key: 'messages', label: 'Messages' },
@@ -51,8 +54,19 @@ const CONTACT_FILTERS: readonly FilterChipItem<ContactsFilter>[] = [
 
 const EMPTY_PAGE: { items: never[]; nextCursor: null } = { items: [], nextCursor: null };
 
+/**
+ * Fixed product copy, not user data: the family programme lives in the app, so
+ * it is a screen constant rather than something the repository has to invent.
+ */
+const FAMILY_PROMO: PromoBannerModel = {
+  id: 'family-invite',
+  title: 'Join a family to get Coins',
+  subtitle: 'Team up with friends and earn together',
+  ctaLabel: 'Join',
+};
+
 export default function MessagesScreen() {
-  const theme = useTheme();
+  const tints = useTints();
   const toast = useToast();
 
   const [section, setSection] = useState<MessagesTab>('messages');
@@ -79,36 +93,34 @@ export default function MessagesScreen() {
   const notYet = useCallback((what: string) => toast.show(`${what} arrives later.`), [toast]);
 
   const active = section === 'messages' ? conversations : contacts;
+  const unreadTotal = conversations.items.reduce((total, item) => total + item.unreadCount, 0);
 
   return (
-    <AppScreen padded={false}>
+    <AppScreen padded={false} tint="messages">
       <View style={styles.header}>
-        <ScreenHeader
-          title="Messages"
-          actions={
-            <>
-              <IconButton
-                symbol="magnifyingglass"
-                glyph="🔍"
-                label="Search messages"
-                onPress={() => notYet('Message search')}
-              />
-              <IconButton
-                symbol="ellipsis.circle"
-                glyph="⋯"
-                label="More options"
-                onPress={() => notYet('More message options')}
-              />
-            </>
-          }
-        />
-        <SegmentedTabs
-          items={SECTIONS}
-          value={section}
-          onChange={setSection}
-          label="Messages sections"
-          variant="pill"
-        />
+        <View style={styles.tabs}>
+          <SegmentedTabs
+            items={SECTIONS}
+            value={section}
+            onChange={setSection}
+            label="Messages sections"
+          />
+        </View>
+        <View style={styles.actions}>
+          <IconButton
+            name="search"
+            label="Search messages"
+            onPress={() => notYet('Message search')}
+          />
+          <IconButton
+            name="menu"
+            label="More options"
+            onPress={() => notYet('More message options')}
+          />
+        </View>
+      </View>
+
+      <View style={styles.chips}>
         <FilterChips
           items={section === 'messages' ? CONVERSATION_FILTERS : CONTACT_FILTERS}
           value={section === 'messages' ? conversationFilter : contactsFilter}
@@ -121,37 +133,6 @@ export default function MessagesScreen() {
           }}
           label="Message filters"
         />
-
-        {section === 'messages' && !promptDismissed ? (
-          <View
-            style={[styles.prompt, { backgroundColor: theme.brandSoft }]}
-            accessibilityRole="summary"
-          >
-            <View style={styles.promptCopy}>
-              <ThemedText type="smallBold" style={{ color: theme.brand }}>
-                Turn on notifications
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Know when someone replies or invites you to a room.
-              </ThemedText>
-            </View>
-            <AppButton
-              label="Enable"
-              variant="primary"
-              onPress={() => {
-                setPromptDismissed(true);
-                notYet('Notification permissions');
-              }}
-            />
-            <IconButton
-              symbol="xmark"
-              glyph="✕"
-              label="Dismiss"
-              tone="muted"
-              onPress={() => setPromptDismissed(true)}
-            />
-          </View>
-        ) : null}
       </View>
 
       {active.status === 'loading' ? (
@@ -176,6 +157,51 @@ export default function MessagesScreen() {
           contentContainerStyle={styles.listContent}
           accessibilityLabel="Conversations"
           ItemSeparatorComponent={Divider}
+          ListHeaderComponent={
+            <View style={styles.notices}>
+              {promptDismissed ? null : (
+                <View
+                  style={[styles.notice, { backgroundColor: tints.chip.chat.background }]}
+                  accessibilityRole="summary"
+                >
+                  <View style={styles.noticeCopy}>
+                    <ThemedText
+                      type="smallBold"
+                      style={{ color: tints.chip.chat.text }}
+                      numberOfLines={1}
+                    >
+                      Turn on notifications
+                    </ThemedText>
+                    <ThemedText
+                      type="small"
+                      style={[styles.noticeHint, { color: tints.chip.chat.text }]}
+                    >
+                      Know when someone replies or invites you to a room.
+                    </ThemedText>
+                  </View>
+                  <AppButton
+                    label="Go enable"
+                    variant="primary"
+                    onPress={() => {
+                      setPromptDismissed(true);
+                      notYet('Notification permissions');
+                    }}
+                  />
+                  <IconButton
+                    name="close"
+                    label="Dismiss"
+                    tone="muted"
+                    onPress={() => setPromptDismissed(true)}
+                  />
+                </View>
+              )}
+              <PromoBanner
+                banner={FAMILY_PROMO}
+                variant="row"
+                onPress={() => notYet('Joining a family')}
+              />
+            </View>
+          }
           refreshControl={
             <RefreshControl
               refreshing={conversations.isRefreshing}
@@ -197,7 +223,6 @@ export default function MessagesScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           accessibilityLabel="Contacts"
-          ItemSeparatorComponent={Divider}
           refreshControl={
             <RefreshControl refreshing={contacts.isRefreshing} onRefresh={contacts.refresh} />
           }
@@ -212,20 +237,40 @@ export default function MessagesScreen() {
           )}
         />
       )}
+
+      <View style={styles.fab} pointerEvents="box-none">
+        <FloatingAction
+          label="Notifications"
+          name="bell"
+          badge={unreadTotal}
+          onPress={() => notYet('Your notifications')}
+        />
+      </View>
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: Spacing.three, gap: Spacing.one },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.two,
+    paddingBottom: Spacing.two,
+  },
+  tabs: { flex: 1, paddingStart: Spacing.two },
+  actions: { flexDirection: 'row', alignItems: 'center' },
+  chips: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.one },
   padded: { paddingHorizontal: Spacing.three },
   listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
-  prompt: {
+  notices: { gap: Spacing.two, paddingBottom: Spacing.two },
+  notice: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
     padding: Spacing.three,
     borderRadius: Radius.large,
   },
-  promptCopy: { flex: 1, gap: Spacing.half },
+  noticeCopy: { flex: 1, gap: Spacing.half },
+  noticeHint: { opacity: 0.75 },
+  fab: { position: 'absolute', bottom: Spacing.four, end: Spacing.three },
 });

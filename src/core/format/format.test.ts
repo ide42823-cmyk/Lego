@@ -1,4 +1,4 @@
-import { formatCompactCount, formatDistanceKm, formatLevel, formatRelativeTime } from './index';
+import { countryFlag, formatCompactCount, formatDistanceKm, formatRelativeTime } from './index';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z').getTime();
 const at = (offsetMs: number) => new Date(NOW - offsetMs).toISOString();
@@ -80,12 +80,19 @@ describe('formatDistanceKm', () => {
   });
 });
 
-describe('formatLevel', () => {
-  it('renders a level label', () => {
-    expect(formatLevel(12)).toBe('Lv 12');
+describe('countryFlag', () => {
+  it('renders a country code as its flag', () => {
+    expect(countryFlag('SA')).toBe('🇸🇦');
   });
 
-  it('floors fractional levels', () => {
-    expect(formatLevel(12.9)).toBe('Lv 12');
+  it('accepts lowercase input', () => {
+    expect(countryFlag('de')).toBe('🇩🇪');
+  });
+
+  it('degrades to an empty string rather than a broken glyph', () => {
+    expect(countryFlag(undefined)).toBe('');
+    expect(countryFlag('')).toBe('');
+    expect(countryFlag('SAU')).toBe('');
+    expect(countryFlag('12')).toBe('');
   });
 });

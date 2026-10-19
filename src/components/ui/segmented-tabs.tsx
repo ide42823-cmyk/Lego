@@ -17,8 +17,8 @@ export interface SegmentedTabsProps<T extends string> {
   /** Accessible grouping name, e.g. "People discovery views". */
   label: string;
   /**
-   * `underline` matches the directory-style headers (strong underline on the
-   * active item); `pill` is for compact inline switches.
+   * `underline` matches the directory-style headers (a bold label with a short
+   * heavy rule beneath it); `pill` is for compact inline switches.
    */
   variant?: 'underline' | 'pill';
 }
@@ -26,6 +26,10 @@ export interface SegmentedTabsProps<T extends string> {
 /**
  * Top-level segmented navigation. Scrolls horizontally because Arabic and Latin
  * labels vary a lot in width.
+ *
+ * The underline variant deliberately does not mark the selected item with
+ * colour alone: the label also gains weight, which is what carries the state
+ * for anyone who cannot distinguish the two greys.
  */
 export function SegmentedTabs<T extends string>({
   items,
@@ -66,16 +70,20 @@ export function SegmentedTabs<T extends string>({
           >
             <ThemedText
               type={selected ? 'smallBold' : 'small'}
-              style={{
-                color:
-                  variant === 'pill'
-                    ? selected
-                      ? theme.onBrand
-                      : theme.textSecondary
-                    : selected
-                      ? theme.text
-                      : theme.textSecondary,
-              }}
+              style={
+                variant === 'pill'
+                  ? {
+                      color: selected ? theme.onBrand : theme.textSecondary,
+                      fontWeight: selected ? '700' : '600',
+                    }
+                  : [
+                      styles.tabLabel,
+                      {
+                        color: selected ? theme.text : theme.textSecondary,
+                        fontWeight: selected ? '800' : '600',
+                      },
+                    ]
+              }
             >
               {item.label}
             </ThemedText>
@@ -83,7 +91,7 @@ export function SegmentedTabs<T extends string>({
               <View
                 style={[
                   styles.underline,
-                  { backgroundColor: selected ? theme.brand : 'transparent' },
+                  { borderBottomColor: selected ? theme.text : 'transparent' },
                 ]}
               />
             ) : null}
@@ -98,11 +106,25 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    // Tight on purpose: the mode row shares the width with the header's action
+    // controls, so the gap is what decides whether a whole tab or half a word
+    // sits at the edge before the row scrolls.
     gap: Spacing.three,
     paddingVertical: Spacing.one,
   },
   item: { paddingBottom: Spacing.one, alignItems: 'center' },
-  underline: { height: 3, width: '100%', borderRadius: Radius.pill, marginTop: Spacing.one },
+  tabLabel: { fontSize: 17, lineHeight: 24 },
+  // The reference marks the active tab with a short, heavy *arc* rather than a
+  // full-width rule. A wide, short view whose only bottom border is rounded
+  // curves the same way without an SVG per tab.
+  underline: {
+    width: 30,
+    height: 6,
+    marginTop: Spacing.one,
+    borderBottomWidth: 3,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
   pill: {
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,

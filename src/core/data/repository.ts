@@ -27,6 +27,7 @@ import type {
   MomentsMode,
   Page,
   PeopleMode,
+  RoomFeedItem,
   RoomMode,
   RoomRelationshipFilter,
   RoomSummary,
@@ -43,7 +44,7 @@ export interface DataSource {
   listRooms(
     mode: RoomMode,
     options?: PageRequest & { relationship?: RoomRelationshipFilter },
-  ): Promise<Page<RoomSummary>>;
+  ): Promise<Page<RoomFeedItem>>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -110,10 +111,27 @@ function withBanners(users: readonly UserSummary[]): DirectoryFeedItem[] {
   return feed;
 }
 
+/**
+ * Puts the directory's promotion at the head of the room feed.
+ *
+ * The reference shows an event card above a room directory (and above the video
+ * grid) rather than between rooms, so it leads the feed and pagination keeps it
+ * on the first page.
+ */
+function withRoomBanner(rooms: readonly RoomSummary[]): RoomFeedItem[] {
+  const feed: RoomFeedItem[] = rooms.map((room) => ({ kind: 'room', id: room.id, room }));
+  const banner = FIXTURE_BANNERS[0];
+  if (!banner) {
+    return feed;
+  }
+  return [{ kind: 'banner', id: banner.id, banner }, ...feed];
+}
+
 function selectPeople(mode: PeopleMode): UserSummary[] {
   switch (mode) {
     case 'nearby':
-      // Nearby carries bucketed distance. Buckets are deliberately coarse.
+      // Nearby re-buckets by rank order so the list is genuinely closest-first.
+      // Buckets stay coarse and are never a precise position.
       return FIXTURE_USERS.slice(0, 14).map((user, index) => ({
         ...user,
         distanceKm: (index + 1) * 3,
@@ -177,7 +195,7 @@ export const fixtureDataSource: DataSource = {
 
   listRooms(mode, options) {
     const { relationship, ...request } = options ?? {};
-    return simulate(() => paginate(selectRooms(mode, relationship), request));
+    return simulate(() => paginate(withRoomBanner(selectRooms(mode, relationship)), request));
   },
 
   listConversations(filter, request) {

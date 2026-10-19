@@ -1,4 +1,5 @@
 import { devControls, fixtureDataSource } from './repository';
+import type { RoomFeedItem, RoomSummary } from './types';
 
 /**
  * The fixtures are a development seam, but the *contract* they implement is the
@@ -13,6 +14,11 @@ beforeAll(() => {
 afterEach(() => {
   devControls.failReads = 0;
 });
+
+/** Room entries of a feed, ignoring promoted content. */
+function roomsOf(items: readonly RoomFeedItem[]): RoomSummary[] {
+  return items.flatMap((item) => (item.kind === 'room' ? [item.room] : []));
+}
 
 describe('listPeople', () => {
   it('returns a page and a cursor for the next one', async () => {
@@ -47,24 +53,41 @@ describe('listPeople', () => {
     expect(kinds).toContain('banner');
   });
 
-  it('only attaches bucketed distance in the nearby directory', async () => {
-    const nearby = await fixtureDataSource.listPeople('nearby', { limit: 4 });
-    const nearbyUsers = nearby.items.filter((item) => item.kind === 'user');
-    expect(nearbyUsers).not.toHaveLength(0);
-    expect(nearbyUsers.every((item) => typeof item.user.distanceKm === 'number')).toBe(true);
+  it('attaches a bucketed distance to every directory row', async () => {
+    const modes = ['nearby', 'recommend', 'new', 'featured'] as const;
 
-    const recommend = await fixtureDataSource.listPeople('recommend', { limit: 4 });
-    const recommendUsers = recommend.items.filter((item) => item.kind === 'user');
-    expect(recommendUsers.every((item) => item.user.distanceKm === undefined)).toBe(true);
+    for (const mode of modes) {
+      const page = await fixtureDataSource.listPeople(mode, { limit: 6 });
+      const users = page.items.filter((item) => item.kind === 'user');
+
+      expect(users).not.toHaveLength(0);
+      expect(users.every((item) => typeof item.user.distanceKm === 'number')).toBe(true);
+    }
+  });
+
+  it('orders the nearby directory closest-first', async () => {
+    const page = await fixtureDataSource.listPeople('nearby', { limit: 6 });
+    const distances = page.items
+      .filter((item) => item.kind === 'user')
+      .map((item) => item.user.distanceKm ?? 0);
+
+    expect(distances).toEqual([...distances].sort((a, b) => a - b));
   });
 });
 
 describe('listRooms', () => {
+  it('leads the first page with the directory promotion', async () => {
+    const page = await fixtureDataSource.listRooms('recommend', { limit: 8 });
+
+    expect(page.items[0]?.kind).toBe('banner');
+  });
+
   it('restricts the video directory to video rooms', async () => {
     const page = await fixtureDataSource.listRooms('video', { limit: 50 });
+    const rooms = roomsOf(page.items);
 
-    expect(page.items.length).toBeGreaterThan(0);
-    expect(page.items.every((room) => room.category === 'video')).toBe(true);
+    expect(rooms.length).toBeGreaterThan(0);
+    expect(rooms.every((room) => room.category === 'video')).toBe(true);
   });
 
   it('returns fewer rooms for the joined filter than for following', async () => {
@@ -74,12 +97,12 @@ describe('listRooms', () => {
       relationship: 'following',
     });
 
-    expect(following.items.length).toBeGreaterThan(joined.items.length);
+    expect(roomsOf(following.items).length).toBeGreaterThan(roomsOf(joined.items).length);
   });
 
   it('sorts the recommend directory by participant count', async () => {
     const page = await fixtureDataSource.listRooms('recommend', { limit: 8 });
-    const counts = page.items.map((room) => room.participantCount);
+    const counts = roomsOf(page.items).map((room) => room.participantCount);
 
     expect(counts).toEqual([...counts].sort((a, b) => b - a));
   });

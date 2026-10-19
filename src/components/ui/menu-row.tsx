@@ -4,6 +4,7 @@ import { Spacing, TouchTarget } from '@/constants/theme';
 
 import { ThemedText } from '../themed-text';
 import { Badge, CountBadge } from './badge';
+import { Icon, type IconName } from './icon';
 
 /**
  * A standard navigational row (account tools, settings, feature directories).
@@ -15,8 +16,8 @@ export interface MenuRowProps {
   label: string;
   /** Short description under the label. */
   description?: string;
-  /** Leading glyph; decorative. */
-  glyph?: string;
+  /** Leading icon; decorative. */
+  name?: IconName;
   /** Trailing text value. */
   value?: string;
   /** Trailing counter. */
@@ -26,7 +27,7 @@ export interface MenuRowProps {
   onPress?: () => void;
 }
 
-export function MenuRow({ label, description, glyph, value, badge, tag, onPress }: MenuRowProps) {
+export function MenuRow({ label, description, name, value, badge, tag, onPress }: MenuRowProps) {
   const accessibleLabel = [label, description, value, badge ? `${badge} unread` : null]
     .filter(Boolean)
     .join('. ');
@@ -38,10 +39,10 @@ export function MenuRow({ label, description, glyph, value, badge, tag, onPress 
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}
     >
-      {glyph ? (
-        <ThemedText type="default" accessible={false} style={styles.glyph}>
-          {glyph}
-        </ThemedText>
+      {name ? (
+        <View style={styles.iconSlot}>
+          <Icon name={name} size={22} color="#7C4DF0" />
+        </View>
       ) : null}
       <View style={styles.copy}>
         <ThemedText type="default" numberOfLines={1}>
@@ -60,9 +61,7 @@ export function MenuRow({ label, description, glyph, value, badge, tag, onPress 
         </ThemedText>
       ) : null}
       {badge ? <CountBadge count={badge} /> : null}
-      <ThemedText type="small" themeColor="textSecondary" accessible={false}>
-        ›
-      </ThemedText>
+      <Icon name="forward" size={18} color="#9A96A8" />
     </Pressable>
   );
 }
@@ -75,6 +74,6 @@ const styles = StyleSheet.create({
     minHeight: TouchTarget,
     paddingVertical: Spacing.two,
   },
-  glyph: { width: 26, textAlign: 'center' },
+  iconSlot: { width: 26, alignItems: 'center' },
   copy: { flex: 1, gap: Spacing.half },
 });

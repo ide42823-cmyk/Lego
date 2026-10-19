@@ -18,6 +18,7 @@ import type {
   MeDashboard,
   MomentPost,
   PromoBanner,
+  RoomBadge,
   RoomCategory,
   RoomSummary,
   UserBadge,
@@ -169,24 +170,37 @@ const DAY = 24 * HOUR;
 
 function buildUsers(count: number): UserSummary[] {
   const random = createRandom(20261018);
-  return Array.from({ length: count }, (_, index) => {
+  // Distances come from a separate stream so adding them cannot shift the value
+  // of every other generated field.
+  const distance = createRandom(20261019);
+  return Array.from({ length: count }, (_, index): UserSummary => {
     const level = 1 + Math.floor(random() * 60);
+    const badges = ['level', ...pickSome(random, BADGE_POOL, 2)].slice(0, 3) as UserBadge[];
     return {
       id: `user-${index + 1}`,
       displayName: DISPLAY_NAMES[index % DISPLAY_NAMES.length] as string,
       status: pick(random, STATUS_LINES),
       locale: pick(random, LOCALES),
       level,
-      badges: ['level', ...pickSome(random, BADGE_POOL, 2)].slice(0, 3) as UserBadge[],
+      age: 18 + Math.floor(random() * 22),
+      gender: random() > 0.5 ? 'female' : 'male',
+      // Only a member who holds a paid rank gets a number to display.
+      vipTier: badges.includes('vip') ? 1 + Math.floor(random() * 5) : undefined,
+      videoCall: random() > 0.7,
+      badges,
       isOnline: random() > 0.45,
+      // Coarse buckets only. The reference prints a rough distance on every
+      // directory row, and a bucket is never a position.
+      distanceKm: 2 + Math.floor(distance() * 90) * 11,
     };
   });
 }
 
 function buildRooms(count: number): RoomSummary[] {
   const random = createRandom(777001);
-  const categories: RoomCategory[] = ['chat', 'families', 'video'];
-  return Array.from({ length: count }, (_, index) => {
+  const categories: RoomCategory[] = ['chat', 'families', 'friendship', 'video'];
+  const roomBadges: RoomBadge[] = ['official', 'featured', 'trending'];
+  return Array.from({ length: count }, (_, index): RoomSummary => {
     const category = pick(random, categories);
     return {
       id: `room-${index + 1}`,
@@ -198,6 +212,7 @@ function buildRooms(count: number): RoomSummary[] {
       participantCount: Math.floor(random() * 480),
       country: pick(random, LOCALES),
       language: random() > 0.5 ? 'ar' : 'en',
+      badges: pickSome(random, roomBadges, 1),
       tags: pickSome(random, ROOM_TAGS, 2),
     };
   });
@@ -205,10 +220,11 @@ function buildRooms(count: number): RoomSummary[] {
 
 function buildConversations(count: number): ConversationSummary[] {
   const random = createRandom(31337);
-  return Array.from({ length: count }, (_, index) => ({
+  return Array.from({ length: count }, (_, index): ConversationSummary => ({
     id: `conversation-${index + 1}`,
     peerId: `user-${((index * 3) % 24) + 1}`,
     peerName: DISPLAY_NAMES[(index * 5) % DISPLAY_NAMES.length] as string,
+    locale: LOCALES[(index * 5) % LOCALES.length],
     snippet: pick(random, CONVERSATION_SNIPPETS),
     lastMessageAt: new Date(NOW - Math.floor(random() * 5 * DAY)).toISOString(),
     unreadCount: random() > 0.6 ? 1 + Math.floor(random() * 9) : 0,
@@ -231,6 +247,8 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
       authorId: author.id,
       authorName: author.displayName,
       authorLevel: author.level,
+      authorAge: author.age,
+      authorGender: author.gender,
       badges: author.badges,
       text: pick(random, MOMENT_TEXTS),
       createdAt: new Date(NOW - Math.floor(random() * 3 * DAY)).toISOString(),
@@ -253,8 +271,10 @@ export const FIXTURE_ME: MeDashboard = {
   displayName: 'My Account',
   handle: '@myaccount',
   followingCount: 128,
-  fansCount: 42,
+  friendCount: 42,
   followersCount: 311,
+  coinBalance: 260,
+  notificationCount: 3,
   memberships: [
     { id: 'vip', label: 'VIP', status: 'active', detail: 'Renews in 12 days' },
     { id: 'svip', label: 'SVIP', status: 'available', detail: 'Unlock exclusive rooms' },

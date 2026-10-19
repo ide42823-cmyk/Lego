@@ -7,5 +7,15 @@ module.exports = {
     // `src/global.css` is a web-only side-effect import with no native
     // equivalent, and Jest has no CSS pipeline.
     '\\.css$': '<rootDir>/jest/style-mock.js',
+    // Lucide ships ESM only, so Jest cannot require it. A stub keeps unit tests
+    // fast; the real library is used by the app and the icon names are checked
+    // by TypeScript against Lucide's own types.
+    '^lucide-react-native$': '<rootDir>/jest/lucide-mock.js',
+    '^lucide-react-native/icons/(.*)$': '<rootDir>/jest/lucide-mock.js',
   },
+  // The Expo preset whitelists RN/Expo packages for Babel. Lucide ships ESM
+  // only, so it must be transformed too or Jest trips over its `import`.
+  transformIgnorePatterns: [
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|lucide-react-native)',
+  ],
 };

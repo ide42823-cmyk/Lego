@@ -1,18 +1,17 @@
 import { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
+import { PromoBanner } from '@/components/promo-banner';
 import { RoomCard } from '@/components/room-card';
 import { AppScreen } from '@/components/ui/app-screen';
-import { Divider } from '@/components/ui/divider';
 import { FilterChips, type FilterChipItem } from '@/components/ui/filter-chips';
 import { IconButton } from '@/components/ui/icon-button';
-import { ScreenHeader } from '@/components/ui/screen-header';
 import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
 import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
 import { Spacing } from '@/constants/theme';
 import { fixtureDataSource } from '@/core/data/repository';
-import type { RoomMode, RoomRelationshipFilter, RoomSummary } from '@/core/data/types';
+import type { RoomFeedItem, RoomMode, RoomRelationshipFilter } from '@/core/data/types';
 import { usePaginated } from '@/hooks/use-async';
 
 /**
@@ -20,6 +19,10 @@ import { usePaginated } from '@/hooks/use-async';
  *
  * Video is a two-column grid and every other mode is a list; the list is keyed
  * on the layout so `numColumns` can change without React Native complaining.
+ *
+ * `Global` is kept as a fifth mode rather than a pushed region screen: the
+ * reference reaches it from a region selector that does not exist yet, and
+ * inventing the route now would ship a screen with nothing to select.
  */
 const MODES: readonly SegmentedTabItem<RoomMode>[] = [
   { key: 'recommend', label: 'Recommend' },
@@ -51,7 +54,7 @@ export default function RoomsScreen() {
   const [relationship, setRelationship] = useState<RoomRelationshipFilter>('joined');
   const toast = useToast();
 
-  const list = usePaginated<RoomSummary>(
+  const list = usePaginated<RoomFeedItem>(
     (cursor) => fixtureDataSource.listRooms(mode, { cursor, limit: 10, relationship }),
     `rooms:${mode}:${relationship}`,
   );
@@ -59,45 +62,48 @@ export default function RoomsScreen() {
   const notYet = useCallback((what: string) => toast.show(`${what} arrives later.`), [toast]);
   const isGrid = mode === 'video';
 
+  // The promotion leads the feed, so it renders above the list — and above the
+  // grid, which has no full-width cell to put it in.
+  const promotion = list.items.find((item) => item.kind === 'banner');
+  const banner = promotion?.kind === 'banner' ? promotion.banner : undefined;
+  const rooms = list.items.flatMap((item) => (item.kind === 'room' ? [item.room] : []));
+  const openPromotion = () => {
+    if (banner) {
+      notYet(banner.title);
+    }
+  };
+
   return (
-    <AppScreen padded={false}>
+    <AppScreen padded={false} tint="rooms">
       <View style={styles.header}>
-        <ScreenHeader
-          title="Rooms"
-          subtitle="Live voice rooms"
-          actions={
-            <>
-              <IconButton
-                symbol="magnifyingglass"
-                glyph="🔍"
-                label="Search rooms"
-                onPress={() => notYet('Room search')}
-              />
-              <IconButton
-                symbol="plus.circle"
-                glyph="➕"
-                label="Create a room"
-                onPress={() => notYet('Creating a room')}
-              />
-              <IconButton
-                symbol="trophy"
-                glyph="🏆"
-                label="Room leaderboard"
-                onPress={() => notYet('The room leaderboard')}
-              />
-            </>
-          }
-        />
-        <SegmentedTabs items={MODES} value={mode} onChange={setMode} label="Room directories" />
-        {mode === 'me' ? (
+        <View style={styles.tabs}>
+          <SegmentedTabs items={MODES} value={mode} onChange={setMode} label="Room directories" />
+        </View>
+        <View style={styles.actions}>
+          <IconButton name="search" label="Search rooms" onPress={() => notYet('Room search')} />
+          <IconButton
+            name="create"
+            label="Create a room"
+            onPress={() => notYet('Creating a room')}
+          />
+          <IconButton
+            name="trophy"
+            label="Room leaderboard"
+            onPress={() => notYet('The room leaderboard')}
+          />
+        </View>
+      </View>
+
+      {mode === 'me' ? (
+        <View style={styles.chips}>
           <FilterChips
             items={RELATIONSHIP_FILTERS}
             value={relationship}
             onChange={setRelationship}
             label="Room relationships"
           />
-        ) : null}
-      </View>
+        </View>
+      ) : null}
 
       {list.status === 'loading' ? (
         <View style={styles.padded}>
@@ -105,18 +111,20 @@ export default function RoomsScreen() {
         </View>
       ) : list.status === 'error' ? (
         <ErrorState onRetry={list.reload} />
-      ) : list.items.length === 0 ? (
+      ) : rooms.length === 0 ? (
         <EmptyState title={EMPTY_COPY[mode].title} message={EMPTY_COPY[mode].message} />
       ) : (
         <FlatList
           key={isGrid ? 'grid' : 'list'}
-          data={list.items}
+          data={rooms}
           keyExtractor={(item) => item.id}
           numColumns={isGrid ? 2 : 1}
           columnWrapperStyle={isGrid ? styles.gridRow : undefined}
           contentContainerStyle={styles.listContent}
           accessibilityLabel="Rooms"
-          ItemSeparatorComponent={isGrid ? undefined : Divider}
+          ListHeaderComponent={
+            banner ? <PromoBanner banner={banner} onPress={openPromotion} /> : undefined
+          }
           refreshControl={
             <RefreshControl refreshing={list.isRefreshing} onRefresh={list.refresh} />
           }
@@ -143,9 +151,22 @@ export default function RoomsScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: Spacing.three, gap: Spacing.one },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.two,
+    paddingBottom: Spacing.one,
+  },
+  tabs: { flex: 1, paddingStart: Spacing.two },
+  actions: { flexDirection: 'row', alignItems: 'center' },
+  chips: { paddingHorizontal: Spacing.three },
   padded: { paddingHorizontal: Spacing.three },
-  listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
-  gridRow: { gap: Spacing.three, marginBottom: Spacing.three },
+  listContent: {
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.one,
+    paddingBottom: Spacing.six,
+    gap: Spacing.two,
+  },
+  gridRow: { gap: Spacing.three },
   footer: { paddingTop: Spacing.three },
 });

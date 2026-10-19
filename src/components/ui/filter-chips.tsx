@@ -1,7 +1,8 @@
-import { ScrollView, StyleSheet, Pressable } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
-import { Radius, Spacing } from '@/constants/theme';
+import { CardShadow, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from '../themed-text';
 
@@ -24,6 +25,9 @@ export interface FilterChipsProps<T extends string> {
  * A secondary filter row (All / Online / Most Chatted / Unread). Distinct from
  * `SegmentedTabs`: filters refine the current list, they do not change the
  * screen's primary mode.
+ *
+ * Selection is shown by an elevated white chip, matching the reference, so the
+ * row reads as a set of physical tabs rather than coloured buttons.
  */
 export function FilterChips<T extends string>({
   items,
@@ -32,6 +36,7 @@ export function FilterChips<T extends string>({
   label,
 }: FilterChipsProps<T>) {
   const theme = useTheme();
+  const tints = useTints();
 
   return (
     <ScrollView
@@ -43,6 +48,7 @@ export function FilterChips<T extends string>({
       {items.map((item) => {
         const selected = item.key === value;
         const text = item.count === undefined ? item.label : `${item.label} (${item.count})`;
+
         return (
           <Pressable
             key={item.key}
@@ -53,15 +59,18 @@ export function FilterChips<T extends string>({
             style={({ pressed }) => [
               styles.chip,
               {
-                backgroundColor: selected ? theme.brandSoft : theme.backgroundElement,
-                borderColor: selected ? theme.brand : 'transparent',
+                backgroundColor: selected ? theme.surface : theme.backgroundElement,
                 opacity: pressed ? 0.7 : 1,
               },
+              selected && { ...CardShadow, shadowColor: tints.cardShadow },
             ]}
           >
             <ThemedText
               type="small"
-              style={{ color: selected ? theme.brand : theme.textSecondary, fontWeight: '600' }}
+              style={{
+                color: selected ? theme.text : theme.textSecondary,
+                fontWeight: selected ? '700' : '600',
+              }}
             >
               {text}
             </ThemedText>
@@ -76,8 +85,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: Spacing.two, paddingVertical: Spacing.one },
   chip: {
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one + 2,
+    paddingVertical: Spacing.two,
     borderRadius: Radius.pill,
-    borderWidth: StyleSheet.hairlineWidth * 2,
   },
 });

@@ -5,9 +5,7 @@ import { PeopleRow } from '@/components/people-row';
 import { PromoBanner } from '@/components/promo-banner';
 import { AppScreen } from '@/components/ui/app-screen';
 import { IconButton } from '@/components/ui/icon-button';
-import { ScreenHeader } from '@/components/ui/screen-header';
 import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
-import { Divider } from '@/components/ui/divider';
 import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
 import { Spacing } from '@/constants/theme';
@@ -18,13 +16,15 @@ import { usePaginated } from '@/hooks/use-async';
 /**
  * Home — people discovery (reference screens 097–100).
  *
- * One screen with four directory modes. The mode is the only state that changes
- * the query, so switching is instant and each mode keeps nothing stale.
+ * The header is the mode row plus the three directory actions; there is no page
+ * title, which is what the reference does. One screen serves four directory
+ * modes: the mode is the only state that changes the query, so switching is
+ * instant and no mode keeps a stale list.
  */
 const MODES: readonly SegmentedTabItem<PeopleMode>[] = [
   { key: 'recommend', label: 'Recommend' },
   { key: 'nearby', label: 'Nearby' },
-  { key: 'new', label: 'New' },
+  { key: 'new', label: 'New users' },
   { key: 'featured', label: 'Featured' },
 ];
 
@@ -45,45 +45,30 @@ export default function HomeScreen() {
   );
 
   return (
-    <AppScreen padded={false}>
+    <AppScreen padded={false} tint="home">
       <View style={styles.header}>
-        <ScreenHeader
-          title="Discover"
-          subtitle="People near you and beyond"
-          actions={
-            <>
-              <IconButton
-                symbol="magnifyingglass"
-                glyph="🔍"
-                label="Search people"
-                onPress={() => notYet('People search')}
-              />
-              <IconButton
-                symbol="globe"
-                glyph="🌐"
-                label="Filter by region"
-                onPress={() => notYet('Region filtering')}
-              />
-              <IconButton
-                symbol="trophy"
-                glyph="🏆"
-                label="Leaderboard"
-                onPress={() => notYet('The leaderboard')}
-              />
-            </>
-          }
-        />
-        <SegmentedTabs
-          items={MODES}
-          value={mode}
-          onChange={setMode}
-          label="People discovery views"
-        />
+        <View style={styles.tabs}>
+          <SegmentedTabs
+            items={MODES}
+            value={mode}
+            onChange={setMode}
+            label="People discovery views"
+          />
+        </View>
+        <View style={styles.actions}>
+          <IconButton name="search" label="Search people" onPress={() => notYet('People search')} />
+          <IconButton
+            name="filter"
+            label="Filter people"
+            onPress={() => notYet('People filters')}
+          />
+          <IconButton name="trophy" label="Leaderboard" onPress={() => notYet('The leaderboard')} />
+        </View>
       </View>
 
       {list.status === 'loading' ? (
         <View style={styles.padded}>
-          <LoadingSkeleton rows={6} />
+          <LoadingSkeleton rows={5} />
         </View>
       ) : list.status === 'error' ? (
         <ErrorState onRetry={list.reload} />
@@ -98,7 +83,6 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           accessibilityLabel="People"
-          ItemSeparatorComponent={Divider}
           refreshControl={
             <RefreshControl refreshing={list.isRefreshing} onRefresh={list.refresh} />
           }
@@ -129,8 +113,20 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: Spacing.three, gap: Spacing.one },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.two,
+    paddingBottom: Spacing.one,
+  },
+  tabs: { flex: 1, paddingStart: Spacing.two },
+  actions: { flexDirection: 'row', alignItems: 'center' },
   padded: { paddingHorizontal: Spacing.three },
-  listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
+  listContent: {
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.one,
+    paddingBottom: Spacing.six,
+    gap: Spacing.two,
+  },
   footer: { paddingTop: Spacing.three },
 });

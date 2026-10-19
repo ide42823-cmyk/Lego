@@ -1,10 +1,9 @@
 import { Pressable, StyleSheet, type PressableProps } from 'react-native';
-import type { SFSymbol } from 'expo-symbols';
 
 import { Radius, TouchTarget } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-import { Icon } from './icon';
+import { Icon, type IconName } from './icon';
 
 export interface IconButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   /**
@@ -13,8 +12,7 @@ export interface IconButtonProps extends Omit<PressableProps, 'children' | 'styl
    * labels for icon-only buttons").
    */
   label: string;
-  symbol: SFSymbol;
-  glyph: string;
+  name: IconName;
   size?: number;
   /** Tint the icon; defaults to primary text. */
   tone?: 'default' | 'accent' | 'brand' | 'muted';
@@ -23,9 +21,8 @@ export interface IconButtonProps extends Omit<PressableProps, 'children' | 'styl
 
 export function IconButton({
   label,
-  symbol,
-  glyph,
-  size = 20,
+  name,
+  size = 22,
   tone = 'default',
   disabled,
   style,
@@ -57,7 +54,7 @@ export function IconButton({
       ]}
       {...rest}
     >
-      <Icon symbol={symbol} glyph={glyph} size={size} color={tones[tone]} />
+      <Icon name={name} size={size} color={tones[tone]} />
     </Pressable>
   );
 }

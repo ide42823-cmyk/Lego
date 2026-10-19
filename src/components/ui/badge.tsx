@@ -67,11 +67,11 @@ export function CountBadge({ count, max = 99, accessibilityLabel }: CountBadgePr
 
   return (
     <View
-      style={[styles.count, { backgroundColor: theme.accent }]}
+      style={[styles.count, { backgroundColor: theme.danger }]}
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel ?? `${count} unread`}
     >
-      <ThemedText type="small" style={[styles.countLabel, { color: theme.onAccent }]}>
+      <ThemedText type="small" style={[styles.countLabel, { color: '#FFFFFF' }]}>
         {display}
       </ThemedText>
     </View>

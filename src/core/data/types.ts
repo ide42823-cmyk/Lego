@@ -16,7 +16,9 @@ export type RoomRelationshipFilter = 'joined' | 'following' | 'recents';
 export type ConversationFilter = 'all' | 'online' | 'most_chatted' | 'unread';
 export type ContactsFilter = 'following' | 'friends' | 'followers';
 export type MessagesTab = 'messages' | 'contacts';
-export type RoomCategory = 'chat' | 'families' | 'video';
+export type RoomCategory = 'chat' | 'families' | 'friendship' | 'video';
+export type RoomBadge = 'official' | 'featured' | 'trending';
+export type Gender = 'female' | 'male';
 
 export type UserBadge = 'level' | 'vip' | 'svip' | 'aristocracy' | 'verified' | 'new';
 
@@ -34,6 +36,13 @@ export interface UserSummary {
    */
   distanceKm?: number;
   level?: number;
+  /** Age in years, when the member has chosen to display it. */
+  age?: number;
+  gender?: Gender;
+  /** Paid rank number, e.g. 2 renders as "VIP2". Absent for non-members. */
+  vipTier?: number;
+  /** The member advertises video calls straight from the directory row. */
+  videoCall?: boolean;
   badges: UserBadge[];
   isOnline: boolean;
 }
@@ -49,6 +58,8 @@ export interface RoomSummary {
   participantCount: number;
   country?: string;
   language?: string;
+  /** Editorial tags rendered as tinted chips next to the category. */
+  badges?: RoomBadge[];
   tags: string[];
 }
 
@@ -57,6 +68,8 @@ export interface ConversationSummary {
   peerId: string;
   peerName: string;
   avatarUrl?: string;
+  /** Country hint, shown as a flag beside the name in the inbox. */
+  locale?: string;
   snippet: string;
   /** ISO-8601. Formatting happens in the UI layer. */
   lastMessageAt: string;
@@ -74,6 +87,9 @@ export interface MomentPost {
    * than rendered as "Lv 0".
    */
   authorLevel?: number;
+  /** Author's age/gender, shown as the pill under their name. */
+  authorAge?: number;
+  authorGender?: Gender;
   avatarUrl?: string;
   badges: UserBadge[];
   text: string;
@@ -97,6 +113,17 @@ export type DirectoryFeedItem =
   | { kind: 'user'; id: string; user: UserSummary }
   | { kind: 'banner'; id: string; banner: PromoBanner };
 
+/**
+ * A room feed carries the same promotion shape as a people feed.
+ *
+ * The reference puts the promotion *above* a room directory rather than between
+ * rooms, so today it is the first entry — but it stays a feed item so a surface
+ * that wants to interleave one does not need a second type.
+ */
+export type RoomFeedItem =
+  | { kind: 'room'; id: string; room: RoomSummary }
+  | { kind: 'banner'; id: string; banner: PromoBanner };
+
 export interface MembershipSummary {
   id: 'vip' | 'svip' | 'aristocracy';
   label: string;
@@ -111,9 +138,20 @@ export interface MeDashboard {
   handle: string;
   avatarUrl?: string;
   followingCount: number;
-  fansCount: number;
+  friendCount: number;
   followersCount: number;
+  /**
+   * Presentation only. The real balance is server-authoritative and this number
+   * must never be adjusted locally — see the wallet rules in the architecture
+   * notes.
+   */
+  coinBalance: number;
   memberships: MembershipSummary[];
+  /**
+   * Things on this screen that want attention — a pending task, a new visitor.
+   * Drives the dot on the account tab. It is a count, never an entitlement.
+   */
+  notificationCount: number;
 }
 
 export interface Page<T> {

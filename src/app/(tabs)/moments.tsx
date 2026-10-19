@@ -4,7 +4,7 @@ import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { MomentCard } from '@/components/moment-card';
 import { AppScreen } from '@/components/ui/app-screen';
 import { Divider } from '@/components/ui/divider';
-import { ScreenHeader } from '@/components/ui/screen-header';
+import { IconButton } from '@/components/ui/icon-button';
 import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
 import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
@@ -16,9 +16,10 @@ import { usePaginated } from '@/hooks/use-async';
 /**
  * Moments feed (reference screen 085).
  *
- * Likes are applied optimistically and reconciled against the value the data
- * layer returns. A failed request rolls the row back to its last known-good
- * state rather than leaving the UI lying to the user.
+ * The feed is flat posts separated by a rule — not cards — because the content
+ * is text-forward. Likes are applied optimistically and reconciled against the
+ * value the data layer returns; a failed request rolls the post back to its last
+ * known-good state rather than leaving the UI lying to the user.
  */
 interface LikeOverride {
   likedByMe: boolean;
@@ -27,7 +28,7 @@ interface LikeOverride {
 
 const MODES: readonly SegmentedTabItem<MomentsMode>[] = [
   { key: 'recommend', label: 'Recommend' },
-  { key: 'new', label: 'New' },
+  { key: 'new', label: 'New users' },
 ];
 
 export default function MomentsScreen() {
@@ -77,15 +78,18 @@ export default function MomentsScreen() {
   );
 
   return (
-    <AppScreen padded={false}>
+    <AppScreen padded={false} tint="moments">
       <View style={styles.header}>
-        <ScreenHeader
-          title="Moments"
-          subtitle="What your circle is sharing"
-          actions={
-            <SegmentedTabs items={MODES} value={mode} onChange={setMode} label="Moments views" />
-          }
-        />
+        <View style={styles.tabs}>
+          <SegmentedTabs items={MODES} value={mode} onChange={setMode} label="Moments views" />
+        </View>
+        <View style={styles.actions}>
+          <IconButton
+            name="camera"
+            label="Share a moment"
+            onPress={() => notYet('Posting a moment')}
+          />
+        </View>
       </View>
 
       {list.status === 'loading' ? (
@@ -120,6 +124,7 @@ export default function MomentsScreen() {
                 onToggleLike={toggleLike}
                 onOpenAuthor={(userId) => notYet(`The profile for ${userId}`)}
                 onGreet={(userId) => notYet(`Greeting ${userId}`)}
+                onMore={() => notYet('Post options')}
               />
             );
           }}
@@ -137,7 +142,14 @@ export default function MomentsScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: Spacing.three },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.two,
+    paddingBottom: Spacing.two,
+  },
+  tabs: { flex: 1, paddingStart: Spacing.two },
+  actions: { flexDirection: 'row', alignItems: 'center' },
   padded: { paddingHorizontal: Spacing.three },
   listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
   footer: { paddingTop: Spacing.three },

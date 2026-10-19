@@ -68,7 +68,7 @@ export function BottomSheet({
               <ThemedText type="smallBold" numberOfLines={1} style={styles.title}>
                 {title}
               </ThemedText>
-              <IconButton symbol="xmark" glyph="✕" label="Close" tone="muted" onPress={onClose} />
+              <IconButton name="close" label="Close" tone="muted" onPress={onClose} />
             </View>
           ) : null}
           <ScrollView keyboardShouldPersistTaps="handled">{children}</ScrollView>

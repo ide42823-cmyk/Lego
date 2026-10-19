@@ -4,14 +4,21 @@ import { Radius, Spacing } from '@/constants/theme';
 import type { MomentPost } from '@/core/data/types';
 import { formatCompactCount, formatRelativeTime } from '@/core/format';
 import { useTheme } from '@/hooks/use-theme';
+import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from './themed-text';
 import { UserBadges } from './user-badges';
+import { AgePill } from './ui/age-pill';
 import { Avatar } from './ui/avatar';
+import { HiButton } from './ui/hi-button';
+import { Icon } from './ui/icon';
 import { MediaThumb } from './ui/media-thumb';
 
 /**
  * One post in the Moments feed (reference screen 085).
+ *
+ * Flat, separated by a rule rather than a card — the feed is text-forward, so a
+ * card border on every post would compete with the writing.
  *
  * Stateless: the optimistic like state lives in the screen so a failed request
  * can be rolled back centrally.
@@ -21,10 +28,16 @@ export interface MomentCardProps {
   onToggleLike?: (momentId: string, liked: boolean) => void;
   onOpenAuthor?: (userId: string) => void;
   onGreet?: (userId: string) => void;
+  onMore?: (momentId: string) => void;
 }
 
-export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet }: MomentCardProps) {
+const MALE_TINT = '#2B6CE0';
+
+export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet, onMore }: MomentCardProps) {
   const theme = useTheme();
+  const tints = useTints();
+  const genderColor = post.authorGender === 'female' ? theme.accent : MALE_TINT;
+  const likeColor = post.likedByMe ? theme.accent : theme.textSecondary;
 
   return (
     <View style={styles.card}>
@@ -35,29 +48,24 @@ export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet }: Moment
           onPress={() => onOpenAuthor?.(post.authorId)}
           style={styles.author}
         >
-          <Avatar id={post.authorId} name={post.authorName} uri={post.avatarUrl} size={40} />
+          <Avatar id={post.authorId} name={post.authorName} uri={post.avatarUrl} size={48} />
           <View style={styles.authorText}>
-            <ThemedText type="smallBold" numberOfLines={1}>
-              {post.authorName}
-            </ThemedText>
-            <UserBadges badges={post.badges} level={post.authorLevel} />
+            <View style={styles.nameRow}>
+              <ThemedText type="smallBold" numberOfLines={1} style={styles.name}>
+                {post.authorName}
+              </ThemedText>
+              {post.authorGender ? (
+                <Icon name={post.authorGender} size={13} strokeWidth={2.6} color={genderColor} />
+              ) : null}
+              <UserBadges badges={post.badges} level={post.authorLevel} variant="status" />
+            </View>
+            {post.authorAge === undefined ? null : (
+              <AgePill age={post.authorAge} gender={post.authorGender} />
+            )}
           </View>
         </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Say hi to ${post.authorName}`}
-          onPress={() => onGreet?.(post.authorId)}
-          hitSlop={6}
-          style={({ pressed }) => [
-            styles.greet,
-            { backgroundColor: theme.accent, opacity: pressed ? 0.75 : 1 },
-          ]}
-        >
-          <ThemedText type="small" style={[styles.greetLabel, { color: theme.onAccent }]}>
-            HI
-          </ThemedText>
-        </Pressable>
+        <HiButton name={post.authorName} onPress={() => onGreet?.(post.authorId)} />
       </View>
 
       <ThemedText type="default">{post.text}</ThemedText>
@@ -72,10 +80,22 @@ export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet }: Moment
         />
       ) : null}
 
-      <View style={styles.footer}>
-        <ThemedText type="small" themeColor="textSecondary">
-          {formatRelativeTime(post.createdAt)}
-        </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {formatRelativeTime(post.createdAt)}
+      </ThemedText>
+
+      <View style={styles.actions}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="More options"
+          onPress={() => onMore?.(post.id)}
+          hitSlop={8}
+          style={styles.action}
+        >
+          <Icon name="more" size={20} color={theme.textSecondary} />
+        </Pressable>
+
+        <View style={styles.spacer} />
 
         <Pressable
           accessibilityRole="button"
@@ -85,18 +105,21 @@ export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet }: Moment
           hitSlop={8}
           style={styles.action}
         >
-          <ThemedText
-            type="small"
-            themeColor={post.likedByMe ? 'accent' : 'textSecondary'}
-            style={styles.actionLabel}
-          >
-            {`${post.likedByMe ? '♥' : '♡'} ${formatCompactCount(post.likeCount)}`}
+          <Icon
+            name="like"
+            size={20}
+            color={likeColor}
+            fill={post.likedByMe ? tints.hi.icon : 'none'}
+          />
+          <ThemedText type="small" style={[styles.actionLabel, { color: likeColor }]}>
+            {formatCompactCount(post.likeCount)}
           </ThemedText>
         </Pressable>
 
         <View style={styles.action}>
+          <Icon name="comment" size={20} color={theme.textSecondary} />
           <ThemedText type="small" themeColor="textSecondary" style={styles.actionLabel}>
-            {`💬 ${formatCompactCount(post.commentCount)}`}
+            {formatCompactCount(post.commentCount)}
           </ThemedText>
         </View>
       </View>
@@ -108,18 +131,17 @@ const styles = StyleSheet.create({
   card: { gap: Spacing.two, paddingVertical: Spacing.three },
   header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   author: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  authorText: { flex: 1, gap: Spacing.half },
+  authorText: { flex: 1, gap: Spacing.one },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, flexWrap: 'wrap' },
+  name: { flexShrink: 1 },
   media: { width: '100%', aspectRatio: 4 / 3 },
-  footer: { flexDirection: 'row', alignItems: 'center', gap: Spacing.four },
-  action: { minHeight: 32, justifyContent: 'center' },
-  actionLabel: { fontWeight: '600' },
-  greet: {
-    minWidth: 44,
-    minHeight: 32,
-    paddingHorizontal: Spacing.two,
+  actions: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: Radius.pill,
+    gap: Spacing.four,
+    paddingTop: Spacing.one,
   },
-  greetLabel: { fontWeight: '800', fontSize: 12 },
+  action: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, minHeight: 32 },
+  actionLabel: { fontWeight: '700' },
+  spacer: { flex: 1 },
 });

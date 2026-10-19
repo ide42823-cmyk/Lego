@@ -2,6 +2,10 @@ import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type ViewProps } from 'react-native';
 
 import { Radius } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { useTints } from '@/hooks/use-tints';
+
+import { Icon } from './icon';
 
 export interface AvatarProps extends ViewProps {
   /** Stable id used to pick a deterministic placeholder colour. */
@@ -13,6 +17,8 @@ export interface AvatarProps extends ViewProps {
   ringColor?: string;
   /** Show a presence dot. */
   online?: boolean;
+  /** Show a video-call affordance. */
+  videoCall?: boolean;
 }
 
 const PLACEHOLDER_COLORS = ['#7C4DF0', '#DB2777', '#0EA5E9', '#F59E0B', '#10B981', '#6366F1'];
@@ -42,19 +48,27 @@ function initials(name: string): string {
  * Renders a remote image when one exists, otherwise a deterministic monogram.
  * Fixtures ship without image URLs on purpose, so no external image host is
  * needed to review the UI.
+ *
+ * Presence sits at the logical end edge and is ringed in the page colour so it
+ * appears to be cut out of the avatar — the reference's treatment.
  */
 export function Avatar({
   id,
   name,
   uri,
-  size = 48,
+  size = 56,
   ringColor,
   online,
+  videoCall,
   style,
   ...rest
 }: AvatarProps) {
+  const theme = useTheme();
+  const tints = useTints();
+
   const backgroundColor = PLACEHOLDER_COLORS[hash(id) % PLACEHOLDER_COLORS.length];
   const ring = ringColor ? { borderWidth: 2, borderColor: ringColor } : null;
+  const dot = Math.max(10, Math.round(size * 0.24));
 
   return (
     <View
@@ -82,7 +96,38 @@ export function Avatar({
           {initials(name)}
         </Text>
       )}
-      {online ? <View style={[styles.presence, { borderColor: backgroundColor }]} /> : null}
+
+      {videoCall ? (
+        <View
+          style={[
+            styles.video,
+            {
+              width: dot + 4,
+              height: dot + 4,
+              borderRadius: Radius.pill,
+              backgroundColor: theme.brand,
+              borderColor: theme.background,
+            },
+          ]}
+        >
+          <Icon name="video" size={dot - 4} strokeWidth={2.6} color={theme.onBrand} />
+        </View>
+      ) : null}
+
+      {online ? (
+        <View
+          style={[
+            styles.presence,
+            {
+              width: dot,
+              height: dot,
+              borderRadius: Radius.pill,
+              backgroundColor: tints.online,
+              borderColor: theme.background,
+            },
+          ]}
+        />
+      ) : null}
     </View>
   );
 }
@@ -92,12 +137,16 @@ const styles = StyleSheet.create({
   initials: { color: '#FFFFFF', fontWeight: '700' },
   presence: {
     position: 'absolute',
+    top: 0,
     end: 0,
+    borderWidth: 2,
+  },
+  video: {
+    position: 'absolute',
     bottom: 0,
-    width: 12,
-    height: 12,
-    borderRadius: Radius.pill,
-    backgroundColor: '#2E7D32',
+    end: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
   },
 });

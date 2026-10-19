@@ -90,7 +90,21 @@ export function formatDistanceKm(km: number): string {
   return `${Math.round(km)} km`;
 }
 
-/** Numeric label for a membership tier badge. */
-export function formatLevel(level: number): string {
-  return `Lv ${Math.max(0, Math.floor(level))}`;
+/**
+ * Renders an ISO-3166 alpha-2 code as its flag emoji.
+ *
+ * Country hints are deliberately coarse (see `UserSummary.locale`); this never
+ * carries a precise location, and an unknown code degrades to an empty string
+ * rather than a broken glyph.
+ */
+export function countryFlag(code?: string): string {
+  if (!code || code.length !== 2) {
+    return '';
+  }
+  const base = 0x1f1e6;
+  const points = [...code.toUpperCase()].map((character) => base + (character.charCodeAt(0) - 65));
+  if (points.some((point) => point < base || point > base + 25)) {
+    return '';
+  }
+  return String.fromCodePoint(...points);
 }

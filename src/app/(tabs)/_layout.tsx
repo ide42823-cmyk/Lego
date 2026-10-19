@@ -18,11 +18,17 @@ export default function TabsLayout() {
     () => fixtureDataSource.listConversations('all', { limit: 100 }),
     'tab-unread-total',
   );
+  const me = useAsync(() => fixtureDataSource.getMe(), 'tab-account-attention');
 
   const unreadTotal =
     conversations.status === 'ready'
       ? conversations.data.items.reduce((total, item) => total + item.unreadCount, 0)
       : 0;
 
-  return <AppBottomTabs messageBadge={unreadTotal} />;
+  return (
+    <AppBottomTabs
+      messageBadge={unreadTotal}
+      meBadge={me.status === 'ready' ? me.data.notificationCount : 0}
+    />
+  );
 }

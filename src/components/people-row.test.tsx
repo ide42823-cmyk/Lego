@@ -13,6 +13,9 @@ const USER: UserSummary = {
   locale: 'SA',
   distanceKm: 6,
   level: 12,
+  age: 24,
+  gender: 'female',
+  vipTier: 2,
   badges: ['level', 'vip'],
   isOnline: true,
 };
@@ -30,14 +33,35 @@ describe('PeopleRow', () => {
     expect(screen.getByText('ل')).toBeTruthy();
   });
 
-  it('shows the locale and a bucketed distance, never a precise location', async () => {
+  it('shows a bucketed distance, never a precise location', async () => {
     await render(<PeopleRow user={USER} />);
 
-    expect(screen.getByText('SA · 6 km')).toBeTruthy();
+    expect(screen.getByText('6 km · هنا للدردشة والضحك.')).toBeTruthy();
   });
 
-  it('omits the meta line when the directory supplies neither locale nor distance', async () => {
-    await render(<PeopleRow user={{ ...USER, locale: undefined, distanceKm: undefined }} />);
+  it('keeps the distance coarse even when the directory sends a fraction', async () => {
+    await render(<PeopleRow user={{ ...USER, distanceKm: 6.42 }} />);
+
+    expect(screen.queryByText(/6\.42/)).toBeNull();
+    expect(screen.getByText('6 km · هنا للدردشة والضحك.')).toBeTruthy();
+  });
+
+  it('describes the age pill with its gender', async () => {
+    await render(<PeopleRow user={USER} />);
+
+    expect(screen.getByLabelText('female, 24')).toBeTruthy();
+  });
+
+  it('omits the age pill when the member does not publish an age', async () => {
+    await render(<PeopleRow user={{ ...USER, age: undefined }} />);
+
+    expect(screen.queryByLabelText(/^female/)).toBeNull();
+    // The paid rank is independent of age and must survive.
+    expect(screen.getByText('VIP2')).toBeTruthy();
+  });
+
+  it('omits the meta line when the directory supplies no distance', async () => {
+    await render(<PeopleRow user={{ ...USER, distanceKm: undefined }} />);
 
     expect(screen.queryByText(/km/)).toBeNull();
   });

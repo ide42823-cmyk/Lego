@@ -1,4 +1,3 @@
-import type { SFSymbol } from 'expo-symbols';
 import {
   TabList,
   TabSlot,
@@ -12,10 +11,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Radius, Spacing, TouchTarget } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from './themed-text';
 import { CountBadge } from './ui/badge';
-import { Icon } from './ui/icon';
+import { Icon, type IconName } from './ui/icon';
 
 /**
  * The app's bottom navigation.
@@ -31,19 +31,22 @@ import { Icon } from './ui/icon';
 export interface AppBottomTabsProps {
   /** Unread conversation total; renders as a capped counter. */
   messageBadge?: number;
-  /** Actionable notifications for the account tab. */
+  /** Actionable notifications for the account tab; renders as a dot. */
   meBadge?: number;
 }
 
 interface TabItemProps extends TabTriggerSlotProps {
   label: string;
-  symbol: SFSymbol;
-  glyph: string;
+  name: IconName;
+  /** Wash behind the icon while this tab is active. */
+  tint: string;
   badge?: number;
+  dot?: boolean;
 }
 
-function TabBarItem({ label, symbol, glyph, badge, isFocused, ...props }: TabItemProps) {
+function TabBarItem({ label, name, tint, badge, dot, isFocused, ...props }: TabItemProps) {
   const theme = useTheme();
+  const color = isFocused ? theme.text : theme.textSecondary;
 
   return (
     <Pressable
@@ -56,28 +59,18 @@ function TabBarItem({ label, symbol, glyph, badge, isFocused, ...props }: TabIte
       accessibilityState={{ selected: isFocused }}
       style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
     >
-      <View>
-        <Icon
-          symbol={symbol}
-          glyph={glyph}
-          size={22}
-          color={isFocused ? theme.brand : theme.textSecondary}
-        />
+      <View style={[styles.iconSlot, isFocused && { backgroundColor: tint }]}>
+        <Icon name={name} size={22} strokeWidth={isFocused ? 2.5 : 2} color={color} />
         {badge && badge > 0 ? (
           <View style={styles.badgeSlot}>
             <CountBadge count={badge} accessibilityLabel={`${badge} unread`} />
           </View>
         ) : null}
+        {dot ? <View style={[styles.dot, { backgroundColor: theme.danger }]} /> : null}
       </View>
       <ThemedText
         type="small"
-        style={[
-          styles.label,
-          {
-            color: isFocused ? theme.brand : theme.textSecondary,
-            fontWeight: isFocused ? '700' : '500',
-          },
-        ]}
+        style={[styles.label, { color, fontWeight: isFocused ? '800' : '600' }]}
       >
         {label}
       </ThemedText>
@@ -106,30 +99,32 @@ function TabBar(props: TabListProps) {
 }
 
 export default function AppBottomTabs({ messageBadge = 0, meBadge = 0 }: AppBottomTabsProps) {
+  const tints = useTints();
+
   return (
     <Tabs style={styles.root}>
       <TabSlot />
       <TabList asChild>
         <TabBar>
           <TabTrigger name="index" href="/" asChild>
-            <TabBarItem label="Home" symbol="house.fill" glyph="🏠" />
+            <TabBarItem label="Home" name="home" tint={tints.tab.home} />
           </TabTrigger>
           <TabTrigger name="moments" href="/moments" asChild>
-            <TabBarItem label="Moments" symbol="sparkles" glyph="✨" />
+            <TabBarItem label="Moments" name="moments" tint={tints.tab.moments} />
           </TabTrigger>
           <TabTrigger name="rooms" href="/rooms" asChild>
-            <TabBarItem label="Rooms" symbol="mic.fill" glyph="🎙" />
+            <TabBarItem label="Rooms" name="rooms" tint={tints.tab.rooms} />
           </TabTrigger>
           <TabTrigger name="messages" href="/messages" asChild>
             <TabBarItem
               label="Messages"
-              symbol="bubble.left.and.bubble.right.fill"
-              glyph="💬"
+              name="messages"
+              tint={tints.tab.messages}
               badge={messageBadge}
             />
           </TabTrigger>
           <TabTrigger name="me" href="/me" asChild>
-            <TabBarItem label="Me" symbol="person.crop.circle.fill" glyph="👤" badge={meBadge} />
+            <TabBarItem label="Me" name="me" tint={tints.tab.me} dot={meBadge > 0} />
           </TabTrigger>
         </TabBar>
       </TabList>
@@ -153,10 +148,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.half,
-    borderRadius: Radius.medium,
     paddingVertical: Spacing.one,
   },
   itemPressed: { opacity: 0.6 },
+  // The active tab sits in a soft square of its own hue, as in the reference.
+  iconSlot: {
+    width: 46,
+    height: 30,
+    borderRadius: Radius.medium,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   label: { fontSize: 11, lineHeight: 14 },
-  badgeSlot: { position: 'absolute', top: -6, end: -10 },
+  badgeSlot: { position: 'absolute', top: -7, end: -10 },
+  dot: { position: 'absolute', top: -1, end: 4, width: 9, height: 9, borderRadius: Radius.pill },
 });
