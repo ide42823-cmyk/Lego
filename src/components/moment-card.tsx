@@ -40,7 +40,7 @@ export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet }: Moment
             <ThemedText type="smallBold" numberOfLines={1}>
               {post.authorName}
             </ThemedText>
-            <UserBadges badges={post.badges} />
+            <UserBadges badges={post.badges} level={post.authorLevel} />
           </View>
         </Pressable>
 

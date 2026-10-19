@@ -1,7 +1,7 @@
 # 0004 — App shell + design system (P3)
 
 **Date:** 2026-10-18
-**Status:** DONE — implemented and passing all repo checks; **no on-device pass yet** (see below)
+**Status:** DONE — implemented, all repo checks passing, and rendered on a physical device
 **Phase:** P3 — application shell and design system
 
 ## Decisions
@@ -121,22 +121,48 @@ Hooks: `useAsync`, `usePaginated`, `useReducedMotion`, `useTheme`.
 | `npx tsc --noEmit` | PASS — strict, 0 errors |
 | `npx eslint .` | PASS — 0 errors, 0 warnings |
 | `npx prettier --check` | PASS |
-| `npx jest` | PASS — **58/58** across 6 suites |
+| `npx jest` | PASS — **63/63** across 7 suites |
 | Repository seam contract (pagination, cursors, filters, banner interleaving, like reconciliation + idempotency, simulated failures) | PASS — `src/core/data/repository.test.ts` |
 | Hook state machine (append, cursor exhaustion, failed page keeps items, error + retry, refresh in place, **superseded key ignored**) | PASS — `src/hooks/use-async.test.tsx` |
 | Formatting helpers | PASS — `src/core/format/format.test.ts` |
 | RTL detection | PASS — `src/core/i18n/i18n.test.ts` |
 | Component behaviour + accessibility label + monogram fallback | PASS — `src/components/people-row.test.tsx` |
+| Badge cluster omits a level it does not have | PASS — `src/components/user-badges.test.tsx` |
+
+## On-device pass (2026-10-19)
+
+Run on the same Xiaomi/Android 14 device as [0003](0003-android-toolchain-and-local-rtc.md),
+against Metro, by reading the accessibility/UI hierarchy with
+`uiautomator dump`. This matters because the checks above are static or
+unit-level — they say nothing about whether the layout actually renders.
+
+| Screen | What the device actually showed |
+|---|---|
+| Home `/` | "Discover / People near you and beyond", the 4 mode tabs (Recommend, Nearby, New, Featured), people rows carrying name + **real level** + badges (VIP, SVIP, AR, NEW) + status + locale + distance, and **promo banners interleaved** between rows |
+| Rooms `/rooms` | The 5 directories (Recommend, Video, New, Me, Global), room cards with title, description, category chip, country chip, host + level, and participant counts **sorted descending** (478, 453, 424, …) as the data test asserts |
+| Moments `/moments` | Recommend/New, post cards with author, level and badges, body text, relative time, and like/comment counters |
+| Messages `/messages` | Messages/Contacts pill tabs, the filter chips (All, Online, Most Chatted, Unread), the dismissible notification prompt, and conversation rows with unread counters |
+| Me `/me` | Identity, the Following/Fans/Followers metrics, the Recharge card, the three membership tiers with status, and the General tools rows |
+| Tab bar (every screen) | All five destinations with labels, plus a live unread badge **37** on Messages sourced from the repository — not hard-coded |
+| Runtime | `fabric: true` (**New Architecture** active) and **zero JS errors** in `logcat` |
+
+All five routes were reached by deep link (`letgo:///rooms` etc.) rather than by
+tapping, because MIUI still blocks host-side input injection (see 0003).
+
+### Defect found by the device pass, and fixed
+
+Only one, and the unit tests could not have caught it: **every Moments card
+rendered `Lv 0`.** `MomentPost` had no author level, so `UserBadges` fell back to
+`formatLevel(0)`. Fixed by (a) giving a post its author's real level and badges —
+derived from the same user record, so the two can never drift — and (b) making
+`UserBadges` omit a level badge entirely when no level is known, since `Lv 0` is
+worse than no badge. Both are now pinned by tests.
 
 ## NOT verified
 
-- **No device pass for P3 yet.** The shell has never been rendered on the phone:
-  the device was disconnected from USB when this phase finished, and MIUI still
-  blocks host-side input injection (see [0003](0003-android-toolchain-and-local-rtc.md)),
-  so tapping through five tabs must be done by hand. The checks above are static
-  or unit-level; they prove the types, the data contract and the primitives, not
-  the layout. **This is the next action.**
-- **No iOS build** (needs a Mac).
+- **iOS.** Cannot be built on Windows; needs a Mac.
+- **Interactive flows** (tab switching by tap, likes, pull-to-refresh, sheet
+  open/close) — the device pass proves rendering and data wiring, not gestures.
 
 ## Deliberately NOT in P3
 

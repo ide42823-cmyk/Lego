@@ -99,6 +99,29 @@ describe('listConversations', () => {
   });
 });
 
+describe('listMoments', () => {
+  it('carries the author level and name from the directory', async () => {
+    const moments = await fixtureDataSource.listMoments('recommend', { limit: 50 });
+    const people = await fixtureDataSource.listPeople('recommend', { limit: 200 });
+
+    expect(moments.items.length).toBeGreaterThan(0);
+
+    // A feed card must never disagree with the same person's row elsewhere.
+    expect(moments.items.every((post) => (post.authorLevel ?? 0) > 0)).toBe(true);
+
+    const authors = new Map(
+      people.items.filter((item) => item.kind === 'user').map((item) => [item.user.id, item.user]),
+    );
+
+    for (const post of moments.items) {
+      const author = authors.get(post.authorId);
+      expect(author).toBeDefined();
+      expect(post.authorName).toBe(author?.displayName);
+      expect(post.authorLevel).toBe(author?.level);
+    }
+  });
+});
+
 describe('setMomentLiked', () => {
   it('is idempotent and reversible', async () => {
     const feed = await fixtureDataSource.listMoments('recommend', { limit: 1 });

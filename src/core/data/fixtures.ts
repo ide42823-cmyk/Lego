@@ -216,25 +216,35 @@ function buildConversations(count: number): ConversationSummary[] {
   }));
 }
 
-function buildMoments(count: number): MomentPost[] {
+/**
+ * Moments are written by the same people who appear in the discovery
+ * directories, so each post borrows its author's real level and badges instead
+ * of re-deriving them. That is what stops a feed card from contradicting the
+ * same person's row elsewhere in the app.
+ */
+function buildMoments(users: UserSummary[], count: number): MomentPost[] {
   const random = createRandom(99001);
-  return Array.from({ length: count }, (_, index) => ({
-    id: `moment-${index + 1}`,
-    authorId: `user-${((index * 7) % 24) + 1}`,
-    authorName: DISPLAY_NAMES[(index * 7) % DISPLAY_NAMES.length] as string,
-    badges: ['level', ...pickSome(random, BADGE_POOL, 1)] as UserBadge[],
-    text: pick(random, MOMENT_TEXTS),
-    createdAt: new Date(NOW - Math.floor(random() * 3 * DAY)).toISOString(),
-    likeCount: Math.floor(random() * 320),
-    commentCount: Math.floor(random() * 48),
-    likedByMe: false,
-  }));
+  return Array.from({ length: count }, (_, index) => {
+    const author = users[(index * 7) % users.length] as UserSummary;
+    return {
+      id: `moment-${index + 1}`,
+      authorId: author.id,
+      authorName: author.displayName,
+      authorLevel: author.level,
+      badges: author.badges,
+      text: pick(random, MOMENT_TEXTS),
+      createdAt: new Date(NOW - Math.floor(random() * 3 * DAY)).toISOString(),
+      likeCount: Math.floor(random() * 320),
+      commentCount: Math.floor(random() * 48),
+      likedByMe: false,
+    };
+  });
 }
 
 export const FIXTURE_USERS = buildUsers(24);
 export const FIXTURE_ROOMS = buildRooms(18);
 export const FIXTURE_CONVERSATIONS = buildConversations(14);
-export const FIXTURE_MOMENTS = buildMoments(10);
+export const FIXTURE_MOMENTS = buildMoments(FIXTURE_USERS, 10);
 
 export const FIXTURE_BANNERS: PromoBanner[] = BANNERS;
 

@@ -29,7 +29,14 @@ const BADGE_LABELS: Record<UserBadge, string> = {
 const BADGE_ORDER: UserBadge[] = ['level', 'vip', 'svip', 'aristocracy', 'verified', 'new'];
 
 export function UserBadges({ badges, level }: UserBadgesProps) {
-  const ordered = BADGE_ORDER.filter((badge) => badges.includes(badge)).slice(0, 3);
+  const ordered = BADGE_ORDER.filter((badge) => {
+    if (!badges.includes(badge)) {
+      return false;
+    }
+    // A level badge is only meaningful with a real level: rendering "Lv 0" is
+    // worse than omitting it, so absence degrades to no badge.
+    return badge !== 'level' || (typeof level === 'number' && level > 0);
+  }).slice(0, 3);
   if (ordered.length === 0) {
     return null;
   }

@@ -68,6 +68,12 @@ export interface MomentPost {
   id: string;
   authorId: string;
   authorName: string;
+  /**
+   * Mirrors the author's level in the discovery directories. Optional like
+   * `UserSummary.level`: when it is absent the level badge is omitted rather
+   * than rendered as "Lv 0".
+   */
+  authorLevel?: number;
   avatarUrl?: string;
   badges: UserBadge[];
   text: string;
