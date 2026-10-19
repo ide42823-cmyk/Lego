@@ -556,6 +556,10 @@ does the strip balance against a busy background.
   inbox previously paired a peer id with an unrelated name from a flat pool.
 - **`FramedAvatar` is a new primitive**, and `tints.couple` a new token group, so the
   rose card and its ring art vary correctly between schemes rather than being hard-coded.
+- **The couple card's cloud band stays in its upper band.** The art is near-opaque white,
+  so it is placed in the top 72%, stretched to the card's edges and weakened in the dark
+  scheme; a rose floor gradient sits under the names. White labels on white clouds was the
+  first defect the handset showed, in both schemes.
 - **The crest is now the generated medal.** `ProfileEmblem` keeps its structure — a large
   crest beside the name carrying the member's honor glyph — but the medal is art rather
   than concentric tinted rings.
@@ -577,32 +581,48 @@ does the strip balance against a busy background.
 
 ### Verified on device (2026-10-19, light and dark)
 
-**Not run yet: the handset was not attached.** Windows reported no Android USB device
-and neither `adb devices` nor `adb mdns services` found the phone, so `adb reverse` and
-the deep-link harness could not be used. The checks below are what the pass will cover;
-they are listed here so the gap is explicit rather than implied, and will be filled in
-from the handset before this section is treated as evidence.
+Xiaomi 24117RN76G (1080×2400, 393dp, Android 14), Metro over `adb reverse`. This handset
+denies `INJECT_EVENTS`, so every screen was reached by deep link, and the profile's section
+and scroll offset were driven by a temporary `?tab=` / `?scroll=` harness that was removed
+before committing.
 
 | Check | Result |
 |---|---|
-| Relationships for a member with no couple and no friends keeps both cards and both invites | not run |
-| Couple card: rose wash, cloud band, framed owner, winged heart between the members | not run |
-| A member with a couple shows the peer's photo and the level/duration line under the heart | not run |
-| Friend cards show the peer's photo inside the ring, with the level badge intact | not run |
-| Profile cover is real photography with bare white controls and the album strip legible | not run |
-| Moments feed: author photos, portrait media inset | not run |
-| Home and Messages rows show portraits; the inbox name matches the peer's photo | not run |
-| Rooms screen: real covers on the list and grid cards | not run |
-| Me tab shows the member's own photo | not run |
-| Crest medal renders with the member's honor glyph in the enamel | not run |
-| Light scheme end to end | not run |
-| Dark scheme end to end | not run |
+| Relationships for a member with no couple and no friends keeps both cards and both invites | pass — `/person/user-1` |
+| Couple card: rose wash, cloud band, framed owner, winged heart between the members | pass, after the contrast fix below |
+| A member with a couple shows the peer's photo and the level/duration line under the heart | pass — `Lv.15 · 216 days` under the heart |
+| Friend cards show the peer's photo inside the ring, with the level badge intact | pass — `Noah Friend Lv.24 · 126 days`, `Kenji Friend Lv.27 · 132 days` |
+| Profile cover is real photography with bare white controls and the album strip legible | pass |
+| Moments feed: author photos, portrait media inset | pass |
+| Home and Messages rows show portraits; the inbox name matches the peer's photo | pass — `عبدالله` male, `نورة` female, and `Milo` is the same peer the couple card shows |
+| Rooms screen: real covers on the list and grid cards | list pass; the grid toggle was not reached, it needs a tap |
+| Me tab shows the member's own photo | pass |
+| Crest medal renders with the member's honor glyph in the enamel | pass — `ليان` |
+| Light scheme end to end | pass |
+| Dark scheme end to end | pass |
+
+### Defect found and fixed in the pass
+
+- **The couple card's cloud band washed out its own labels.** The cloud art is near-opaque
+  white, so anchored to the card's foot it erased the white names, and in the dark scheme it
+  turned the card white and made `tints.couple.dark` pointless. The band now occupies the
+  upper 72% at 0.6 opacity (0.22 in dark) and stretches, so the art's own fades meet the
+  card's edges, and a rose floor gradient gives the names a surface to sit on in both
+  schemes.
+
+### Platform chrome left alone
+
+- **The system navigation bar stays light in the dark scheme** — a pale strip under the tab
+  bar, with the gesture pill. The app is not edge-to-edge, so on Android 14 that area is
+  system chrome with its own background, and `expo-navigation-bar` is not installed. Fixing
+  it needs a native config change and a rebuild, so it belongs to a platform pass rather than
+  to this one.
 
 ### NOT verified in P4.2
 
-- **The whole on-device pass above** — the phone was not reachable; see that table.
-- **Literal taps** — unchanged: `INJECT_EVENTS` is denied, so controls are verified as
-  rendered, labelled and wired, not as pressed.
+- **Literal taps and swipes** — unchanged: `INJECT_EVENTS` is denied, so controls are
+  verified as rendered, labelled and wired, not as pressed. The Rooms grid toggle and the
+  honor wall are the two screens that this put out of reach.
 - **Every fixture member's photo** — the pass covers the members screens select, not all 24
   portraits.
 - **The `media:fetch` script against a clean checkout** — it was run against the working

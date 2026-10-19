@@ -6,6 +6,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Radius, Spacing } from '@/constants/theme';
 import type { RelationshipRecord } from '@/core/data/types';
 import { artSource } from '@/core/media/images';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
 import { useTints } from '@/hooks/use-tints';
 
@@ -143,6 +144,7 @@ export function CouplePanel({
 function CoupleBackdrop() {
   const tints = useTints();
   const palette = tints.couple;
+  const isDark = useColorScheme() === 'dark';
 
   return (
     <View style={styles.backdrop} pointerEvents="none" accessible={false}>
@@ -155,7 +157,30 @@ function CoupleBackdrop() {
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#couple-wash)" />
       </Svg>
-      <Image source={CLOUDS} style={styles.clouds} contentFit="cover" accessible={false} />
+      {/*
+        The clouds stay in the upper band: the names sit at the card's foot, and a
+        white cloud under white type erases it. They are also weaker in the dark
+        scheme, where a full-strength white band would flatten the deep rose.
+      */}
+      <Image
+        source={CLOUDS}
+        style={[styles.clouds, { opacity: isDark ? 0.22 : 0.6 }]}
+        contentFit="fill"
+        accessible={false}
+      />
+      {/*
+        A floor shade the names can be read against. It is a gradient, not a
+        plate: it deepens the card's foot the way the reference's does.
+      */}
+      <Svg style={StyleSheet.absoluteFill}>
+        <Defs>
+          <LinearGradient id="couple-floor" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0.5" stopColor="#5E0A2C" stopOpacity="0" />
+            <Stop offset="1" stopColor="#5E0A2C" stopOpacity={isDark ? 0.4 : 0.6} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#couple-floor)" />
+      </Svg>
     </View>
   );
 }
@@ -265,8 +290,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     start: 0,
     end: 0,
-    bottom: 0,
-    height: '82%',
+    top: 0,
+    height: '72%',
   },
   pressed: { opacity: 0.85 },
   coupleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
