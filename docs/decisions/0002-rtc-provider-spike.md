@@ -22,7 +22,8 @@ early development), and exposes a plain React Native WebRTC layer that fits our
 - `src/core/rtc/` — vendor-agnostic `VoiceRoomAdapter` contract + LiveKit adapter
   + lazy factory. Feature code depends only on the interface.
 - `src/app/dev/rtc-spike.tsx` — throwaway dev harness (URL + token → connect /
-  mute / leave). Reachable from Home behind `__DEV__`.
+  mute / leave). Reachable from the **Me** tab's developer section behind
+  `__DEV__`, or by deep link (see [0003](0003-android-toolchain-and-local-rtc.md)).
 
 ## Verified (evidence)
 
@@ -30,7 +31,7 @@ early development), and exposes a plain React Native WebRTC layer that fits our
 |---|---|
 | `npm run typecheck` | PASS |
 | `npm run lint` | PASS |
-| `npm test` | 6/6 PASS |
+| `npm test` | 6/6 PASS at spike time (58/58 after P3) |
 | `npx prettier --check .` | PASS |
 | `npx expo export --platform ios` | PASS — Metro bundles the LiveKit graph (5.7 MB Hermes bundle vs 3.7 MB before) |
 | `npx expo config --type introspect` | PASS — resolved native config contains `NSMicrophoneUsageDescription`, `NSCameraUsageDescription`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `CAMERA`, and the `react-native-webrtc` plugin |
@@ -39,6 +40,9 @@ early development), and exposes a plain React Native WebRTC layer that fits our
 | • transport | `ice: connected`, `dtls: connected`, `route: host/udp -> host`, RTT **11 ms** |
 | • microphone published | `codec: audio/opus`, `bytesSent: 271619`, `audioLevel: 0.015` |
 | • remote participant | discovered and rendered (`participants: 2`) |
+| • subscribe / downlink | 20 min receiving a remote H.264 track: `packetsLost: 0`, 218 MB |
+| • reconnect after a server bounce | rejoined automatically into a new room instance in ~35 s |
+| • stability | 9 min idle, zero UI state drift (host-side dump watcher) |
 | • survives backgrounding | yes — still publishing while the app was backgrounded |
 
 The **provisional provider choice is now confirmed for Android**, and the
@@ -46,10 +50,12 @@ vendor-isolation design held up: no feature code had to know that LiveKit exists
 
 ## Still NOT TESTED (and why)
 
-- **Mute/unmute/leave on-device**, **audible two-way audio between two humans**,
-  **reconnect after a real network drop**, and **Bluetooth routing** — publishing
-  is proven, but these need a second person or on-device tapping, and MIUI
-  currently blocks input injection from the host (see 0003).
+- **Mute/unmute/leave on-device** and **audible two-way audio between two humans** —
+  publishing *and* subscribing are proven (see the table), but these need a human
+  tap and a second human respectively, and MIUI currently blocks input injection
+  from the host (see 0003).
+- **Reconnect across a network change** (Wi-Fi → cellular) and **Bluetooth
+  routing**. Reconnect after a transport/server loss is verified.
 - **iOS** — cannot be built on Windows; needs a Mac.
 - **New Architecture support** for `@livekit/react-native-webrtc@150` under RN 0.88
   is confirmed on Android at compile time *and* runtime, but not on iOS.

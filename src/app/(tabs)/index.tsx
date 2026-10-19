@@ -1,110 +1,136 @@
-import * as Device from 'expo-device';
-import { Link } from 'expo-router';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { PeopleRow } from '@/components/people-row';
+import { PromoBanner } from '@/components/promo-banner';
+import { AppScreen } from '@/components/ui/app-screen';
+import { IconButton } from '@/components/ui/icon-button';
+import { ScreenHeader } from '@/components/ui/screen-header';
+import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
+import { Divider } from '@/components/ui/divider';
+import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states';
+import { useToast } from '@/components/ui/toast';
+import { Spacing } from '@/constants/theme';
+import { fixtureDataSource } from '@/core/data/repository';
+import type { DirectoryFeedItem, PeopleMode } from '@/core/data/types';
+import { usePaginated } from '@/hooks/use-async';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+/**
+ * Home — people discovery (reference screens 097–100).
+ *
+ * One screen with four directory modes. The mode is the only state that changes
+ * the query, so switching is instant and each mode keeps nothing stale.
+ */
+const MODES: readonly SegmentedTabItem<PeopleMode>[] = [
+  { key: 'recommend', label: 'Recommend' },
+  { key: 'nearby', label: 'Nearby' },
+  { key: 'new', label: 'New' },
+  { key: 'featured', label: 'Featured' },
+];
 
 export default function HomeScreen() {
+  const [mode, setMode] = useState<PeopleMode>('recommend');
+  const toast = useToast();
+
+  const list = usePaginated<DirectoryFeedItem>(
+    (cursor) => fixtureDataSource.listPeople(mode, { cursor, limit: 12 }),
+    `people:${mode}`,
+  );
+
+  const notYet = useCallback(
+    (what: string) => {
+      toast.show(`${what} arrives with the backend phase.`);
+    },
+    [toast],
+  );
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <AppScreen padded={false}>
+      <View style={styles.header}>
+        <ScreenHeader
+          title="Discover"
+          subtitle="People near you and beyond"
+          actions={
+            <>
+              <IconButton
+                symbol="magnifyingglass"
+                glyph="🔍"
+                label="Search people"
+                onPress={() => notYet('People search')}
+              />
+              <IconButton
+                symbol="globe"
+                glyph="🌐"
+                label="Filter by region"
+                onPress={() => notYet('Region filtering')}
+              />
+              <IconButton
+                symbol="trophy"
+                glyph="🏆"
+                label="Leaderboard"
+                onPress={() => notYet('The leaderboard')}
+              />
+            </>
+          }
+        />
+        <SegmentedTabs
+          items={MODES}
+          value={mode}
+          onChange={setMode}
+          label="People discovery views"
+        />
+      </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {__DEV__ ? (
-          <Link href="/dev/rtc-spike" style={styles.devLink}>
-            Open RTC spike (dev only)
-          </Link>
-        ) : null}
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {list.status === 'loading' ? (
+        <View style={styles.padded}>
+          <LoadingSkeleton rows={6} />
+        </View>
+      ) : list.status === 'error' ? (
+        <ErrorState onRetry={list.reload} />
+      ) : list.items.length === 0 ? (
+        <EmptyState
+          title="No one here yet"
+          message="Nobody matches this view right now. Try another one — the list refreshes as members join."
+        />
+      ) : (
+        <FlatList
+          data={list.items}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          accessibilityLabel="People"
+          ItemSeparatorComponent={Divider}
+          refreshControl={
+            <RefreshControl refreshing={list.isRefreshing} onRefresh={list.refresh} />
+          }
+          onEndReachedThreshold={0.6}
+          onEndReached={list.loadMore}
+          renderItem={({ item }) =>
+            item.kind === 'user' ? (
+              <PeopleRow
+                user={item.user}
+                onOpenProfile={(userId) => notYet(`The profile for ${userId}`)}
+                onGreet={(userId) => notYet(`Greeting ${userId}`)}
+              />
+            ) : (
+              <PromoBanner banner={item.banner} onPress={() => notYet(item.banner.title)} />
+            )
+          }
+          ListFooterComponent={
+            list.isLoadingMore ? (
+              <View style={styles.footer}>
+                <LoadingSkeleton rows={2} />
+              </View>
+            ) : undefined
+          }
+        />
+      )}
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-  devLink: {
-    color: '#8B5CF6',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  header: { paddingHorizontal: Spacing.three, gap: Spacing.one },
+  padded: { paddingHorizontal: Spacing.three },
+  listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
+  footer: { paddingTop: Spacing.three },
 });

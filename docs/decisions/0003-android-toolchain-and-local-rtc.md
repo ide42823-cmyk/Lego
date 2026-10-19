@@ -206,18 +206,28 @@ Note that changing it invalidates Metro's transform cache.
 | **ICE + DTLS** | PASS — `ice: connected`, `dtls: connected`, `network: wifi`, `route: host/udp -> host`, RTT **11 ms** |
 | **Microphone published** | PASS — `codec: audio/opus`, `bytesSent: 271619`, `audioLevel: 0.015` |
 | **Remote participant discovered** | PASS — screen rendered `participants: 2` → `phone-a (you) mic on`, `bot-b` |
-| Room survives backgrounding | PASS — room still showed 1 participant/1 publisher while the app was backgrounded |
-| `npm run typecheck` / `lint` / `test` | PASS — lint 0 problems, tests 6/6 |
+| **Downlink / subscribe path** | PASS — the phone sustained **20 minutes** receiving `bot-b`'s H.264 track: `packetsSeenPrimary: 199776`, **`packetsLost: 0`**, 218 MB, `bitrate: 1446430`, `nacks: 109` |
+| **Reconnect after transport loss** | PASS — the server was bounced; the app rejoined on its own into a **new room instance** (`RM_PVSfLRq5oXxh` → `RM_LEuGo5k8XStu`) in ~35 s, with no user action |
+| Room survives backgrounding | PASS — still publishing while backgrounded (green mic indicator), so the session outlives the foreground UI |
+| Stability / no state drift | PASS — 9 minutes idle with a host-side UI dump watcher running: zero UI state changes |
+| `npm run typecheck` / `lint` | PASS — lint 0 problems |
+| `npm test` | PASS — 58/58 (6/6 at the time of the P2 spike; the suite has since grown with P3) |
 | `npx prettier --check .` | PASS |
 
 ## Still NOT TESTED
 
-- **Mute / unmute / leave** button behaviour on-device (buttons are on screen and
-  wired to the adapter, but tapping was not automated — see the MIUI gate above).
-- **Audible audio in both directions between two humans.** Publishing is proven;
-  hearing a remote peer is not, and the `lk` bot publishes a synthetic track.
-- **Reconnect** after a real network drop, **Bluetooth** routing, and sustained
-  background operation (only a short background interval was observed).
+- **Mute / unmute / leave on-device.** The controls are on screen and wired to the
+  adapter, but this needs a human tap and the MIUI gate above blocks host-side
+  input injection. A 27-minute UI-watcher session on 2026-10-18 recorded the
+  button labels (`Mute`, `Leave`) and never changed state, i.e. **nobody tapped**,
+  so the transitions themselves remain unverified.
+- **Audible audio in both directions between two humans.** Publishing is proven and
+  the downlink path is proven (see the subscribe row), but "a human hears another
+  human" has not been confirmed — the `lk` bot publishes a synthetic track, which
+  is also why it renders as *muted* (its source is not `microphone`).
+- **Reconnect across a network change** (Wi-Fi → cellular handoff). Reconnect after
+  a transport/server loss *is* verified; changing the underlying network is not.
+- **Bluetooth** audio routing.
 - **iOS** — cannot be built on Windows; needs a Mac.
 - **New Architecture** support of `@livekit/react-native-webrtc@150` under RN 0.88
   is confirmed at compile time and at runtime on Android, but not on iOS.

@@ -1,0 +1,23 @@
+# Line endings.
+#
+# Prettier's `endOfLine` default is `lf`, so the working tree must be LF on every
+# platform or `npx prettier --check .` fails on a fresh clone (Windows defaults to
+# `core.autocrlf=true`, which would otherwise check files out as CRLF).
+* text=auto eol=lf
+
+# Binary assets must never be line-ending normalised.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.jar binary
+*.so binary
+*.a binary
+*.apk binary
+*.keystore binary
