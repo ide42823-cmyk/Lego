@@ -778,3 +778,85 @@ them.
 - **RTL.** The screen uses logical properties throughout (`start`/`end`, no `left`/`right`) and
   the app ships Arabic copy, but the Arabic layout of this screen has not been looked at.
 - **iOS.** Cannot be built on Windows.
+
+## P7 - search (2026-10-20)
+
+### What changed
+
+- **One search screen, two directories.** `search` is a pushed route with a field-and-Cancel
+  header, a People/Rooms segmented row and a `mode` route param. Home's magnifier opens it on
+  People, Rooms' opens it on Rooms; switching tabs keeps the query and re-runs it against the
+  other directory. This closes the dead end on the most prominent control of both tabs.
+- **Search lives behind the data seam.** `DataSource` gained `searchPeople(query, request)`,
+  `searchRooms(query, request)` and `getSearchSuggestions()`. Both search methods return
+  `SearchPage<T>` — a `Page<T>` with a `total`, so the screen can print "12 people" while
+  only the first page is loaded — and the fixture implementation ranks in `core/search.ts`.
+- **Matching folds the spellings members actually type.** `normalizeSearchText` lowercases,
+  strips punctuation, Latin accents, Arabic harakat and tatweel, and folds alef forms
+  (alef with hamza/madda to bare alef), ta marbuta (to ha) and alef maqsura (to ya). Every query
+  token must match somewhere, so "maya japan" cannot return Maya in Egypt. Ranking puts the
+  name first, then country/host/tag/category terms, then status/description.
+- **What a term searches is what the card shows.** Room category and badge labels moved to
+  `core/room-labels.ts`, shared by the room card and the search field set, so typing a visible
+  chip ("Families", "Official") finds that room. Country codes resolve through `countryName`,
+  so "Saudi" works without exposing or inventing a location.
+- **The landing state is useful without a query.** Recent searches (session-scoped, capped at
+  six, removable one by one or all at once) plus popular places/topics derived from the fixtures
+  — every suggestion is guaranteed to return results, and a test pins that. Both the recent list
+  and the suggestions are pure props; the store is `core/search-recents.ts` and the hook is
+  `useSyncExternalStore`, so leaving and reopening search keeps the terms.
+- **Search history is honestly temporary.** The real list belongs to the account and must be
+  erasable from settings; until the backend exists it is kept in memory for the session. The
+  screen says "Recent searches", never "synced".
+- **Typing is debounced, clearing is immediate.** `useDebouncedValue` trails the query by
+  250 ms; an empty field leaves results at once rather than waiting for the debounce. Each
+  result page is keyed by mode + query, so a stale response can never replace a newer query.
+- **All four request states are rendered.** Skeleton while the first page loads, `ErrorState`
+  with retry, an empty state that offers the same query in the other directory, and the list
+  itself with pagination on scroll. The count line is a polite live region for screen readers.
+- **The field owns its focus state.** The pill's border turns brand on focus, and a scoped
+  `[role='search'] input:focus` rule removes Chrome's square focus ring inside the rounded
+  field on web. Every control is a 44-point target; the field is labelled "Search people" /
+  "Search rooms", and the clear control says "Clear search".
+- **Entry points.** Home's search icon and Rooms' search icon both navigate now; Rooms' room
+  press toast also names the room instead of printing its id.
+
+### Verified
+
+- `tsc`, `eslint`, `prettier --check` clean; `jest` 14 suites / 148 tests (39 new:
+  17 for matching and ranking, 8 for the recent list, 2 for the debounce, 11 for the search
+  contract, 1 for the paginated total).
+- **Rendered off-device at 320, 360 and 393 pt** (measured in the dark scheme; the palette has
+  no effect on layout): no horizontal overflow, including the six-room Arabic result list.
+  Checked by measuring `#root` scrollWidth against clientWidth and the field/Cancel rects at
+  320 pt (field 16-241, Cancel 245-304). Light and dark renders were reviewed at 500 pt.
+- **Every path was exercised in the browser:** Home → search (People), Cancel → Home,
+  Rooms → search (Rooms), suggestion tap ("Music" → 2 rooms), a room press shows "The room
+  screen for “Late Night Radio” arrives later", an empty query ("zzzz" → "No rooms found")
+  switches to People and re-runs the same query, Arabic "موسيقى" → 6 rooms, "maya" → 1 person,
+  opening the result lands on `/person/user-1`, and the greeting confirmation reads
+  "Greeted Maya K." (the name's own full stop is no longer doubled). Recent searches survived
+  leaving and reopening the screen; clearing the field returned to the landing state.
+- **Zero console errors or warnings** on the route after the focus-ring fix.
+
+### Defects found and fixed in the pass
+
+- **Double full stop in the greeting toast.** Fixture names already end in a full stop
+  ("Maya K."), so `Greeted ${name}.` read "Greeted Maya K.." on every surface. `useGreet`
+  now drops trailing punctuation before appending its own.
+- **Chrome's focus ring inside the rounded field.** The browser draws a square outline around
+  the inner `<input>`, so a focused search field showed two misaligned borders. The pill's
+  brand border is now the focus indicator, and the global rule suppresses only the inner ring.
+
+### NOT verified in P7
+
+- **Nothing on the handset.** The device was not attached during this pass. Layout was checked
+  in RN-web; Android font metrics, keyboard resize behaviour and the IME's Arabic composition
+  are unproven.
+- **Keyboard navigation on web.** The focus border is visible, but a full Tab/Shift-Tab and
+  screen-reader pass has not been done.
+- **RTL.** The screen uses logical properties and an Arabic query renders correctly, but the
+  whole screen has not been reviewed with the app in RTL mode.
+- **iOS.** Cannot be built on Windows.
+- **History persistence and server search.** Recents die with the session; real search history,
+  trending terms, ranking and result totals belong to the backend phase.

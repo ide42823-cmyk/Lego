@@ -53,6 +53,11 @@ export default function HomeScreen() {
     [router],
   );
 
+  const openSearch = useCallback(
+    () => router.push({ pathname: '/search', params: { mode: 'people' } }),
+    [router],
+  );
+
   return (
     <AppScreen padded={false} tint="home">
       <View style={styles.header}>
@@ -65,7 +70,7 @@ export default function HomeScreen() {
           />
         </View>
         <View style={styles.actions}>
-          <IconButton name="search" label="Search people" onPress={() => notYet('People search')} />
+          <IconButton name="search" label="Search people" onPress={openSearch} />
           <IconButton
             name="filter"
             label="Filter people"

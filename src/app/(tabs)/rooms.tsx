@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -53,6 +54,7 @@ export default function RoomsScreen() {
   const [mode, setMode] = useState<RoomMode>('recommend');
   const [relationship, setRelationship] = useState<RoomRelationshipFilter>('joined');
   const toast = useToast();
+  const router = useRouter();
 
   const list = usePaginated<RoomFeedItem>(
     (cursor) => fixtureDataSource.listRooms(mode, { cursor, limit: 10, relationship }),
@@ -60,6 +62,10 @@ export default function RoomsScreen() {
   );
 
   const notYet = useCallback((what: string) => toast.show(`${what} arrives later.`), [toast]);
+  const openSearch = useCallback(
+    () => router.push({ pathname: '/search', params: { mode: 'rooms' } }),
+    [router],
+  );
   const isGrid = mode === 'video';
 
   // The promotion leads the feed, so it renders above the list — and above the
@@ -80,7 +86,7 @@ export default function RoomsScreen() {
           <SegmentedTabs items={MODES} value={mode} onChange={setMode} label="Room directories" />
         </View>
         <View style={styles.actions}>
-          <IconButton name="search" label="Search rooms" onPress={() => notYet('Room search')} />
+          <IconButton name="search" label="Search rooms" onPress={openSearch} />
           <IconButton
             name="create"
             label="Create a room"
@@ -134,7 +140,7 @@ export default function RoomsScreen() {
             <RoomCard
               room={item}
               variant={isGrid ? 'grid' : 'list'}
-              onPress={(roomId) => notYet(`The room for ${roomId}`)}
+              onPress={() => notYet(`The room screen for “${item.name}”`)}
             />
           )}
           ListFooterComponent={

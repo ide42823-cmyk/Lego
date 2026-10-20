@@ -44,6 +44,23 @@ describe('usePaginated', () => {
     expect(result.current.hasMore).toBe(false);
   });
 
+  it('reports the total from the endpoint and keeps it while paging', async () => {
+    const fetchPage = (cursor: string | null): Promise<Page<Row>> =>
+      Promise.resolve(
+        cursor === null
+          ? { items: [{ id: 'a' }], nextCursor: '1', total: 3 }
+          : { items: [{ id: 'b' }], nextCursor: null, total: 3 },
+      );
+
+    const { result } = await renderHook(() => usePaginated(fetchPage, 'search'));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    expect(result.current.total).toBe(3);
+
+    await act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.items).toHaveLength(2));
+    expect(result.current.total).toBe(3);
+  });
+
   it('stops requesting pages once the cursor is exhausted', async () => {
     const { fetchPage, calls } = pagedFetcher([[{ id: 'a' }]]);
     const { result } = await renderHook(() => usePaginated(fetchPage, 'feed'));

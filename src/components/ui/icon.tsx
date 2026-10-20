@@ -12,6 +12,7 @@ import ChevronDown from 'lucide-react-native/icons/chevron-down';
 import ChevronLeft from 'lucide-react-native/icons/chevron-left';
 import ChevronRight from 'lucide-react-native/icons/chevron-right';
 import CircleAlert from 'lucide-react-native/icons/circle-alert';
+import Clock from 'lucide-react-native/icons/clock';
 import Coins from 'lucide-react-native/icons/coins';
 import Copy from 'lucide-react-native/icons/copy';
 import Crown from 'lucide-react-native/icons/crown';
@@ -106,6 +107,7 @@ export type IconName =
   | 'check'
   | 'refresh'
   | 'alert'
+  | 'history'
   // Social and room semantics
   | 'greeting'
   | 'like'
@@ -175,6 +177,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   check: Check,
   refresh: RefreshCw,
   alert: CircleAlert,
+  history: Clock,
 
   greeting: Heart,
   like: ThumbsUp,

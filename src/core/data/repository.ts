@@ -9,6 +9,9 @@
  * build and review the UI.
  */
 
+import { countryName, languageName, rankSearchMatches, type SearchFieldSet } from '@/core/search';
+import { ROOM_CATEGORY_LABELS } from '@/core/room-labels';
+
 import {
   FIXTURE_BANNERS,
   FIXTURE_CONVERSATIONS,
@@ -32,6 +35,8 @@ import type {
   RoomMode,
   RoomRelationshipFilter,
   RoomSummary,
+  SearchPage,
+  SearchSuggestions,
   UserProfile,
   UserSummary,
 } from './types';
@@ -53,6 +58,15 @@ export interface DataSource {
   ): Promise<Page<ConversationSummary>>;
   listContacts(filter: ContactsFilter, request?: PageRequest): Promise<Page<UserSummary>>;
   listMoments(mode: MomentsMode, request?: PageRequest): Promise<Page<MomentPost>>;
+  /**
+   * Text search over the people directory. Matching and ranking live behind
+   * this seam; the screen only renders the page and its total.
+   */
+  searchPeople(query: string, request?: PageRequest): Promise<SearchPage<UserSummary>>;
+  /** Text search over the room directory. */
+  searchRooms(query: string, request?: PageRequest): Promise<SearchPage<RoomSummary>>;
+  /** Terms offered before the member types. Server-owned in the real build. */
+  getSearchSuggestions(): Promise<SearchSuggestions>;
   getMe(): Promise<MeDashboard>;
   /** One member's public profile. Rejects for an unknown id. */
   getProfile(userId: string): Promise<UserProfile>;
@@ -110,6 +124,83 @@ function paginate<T>(items: readonly T[], request: PageRequest = {}): Page<T> {
   const slice = items.slice(start, start + limit);
   const next = start + limit < items.length ? String(start + limit) : null;
   return { items: slice, nextCursor: next };
+}
+
+/** A search page also carries the full match count, not just the slice. */
+function paginateSearch<T>(items: readonly T[], request: PageRequest = {}): SearchPage<T> {
+  return { ...paginate(items, request), total: items.length };
+}
+
+/**
+ * What a people search looks at.
+ *
+ * The display name outranks everything. A country name is a strong term so
+ * "Saudi" is a useful query; the status line is weak, so a member whose bio
+ * mentions "coffee" ranks below one called Coffee.
+ */
+function userSearchFields(user: UserSummary): SearchFieldSet {
+  return {
+    name: user.displayName,
+    strong: [countryName(user.locale)],
+    weak: [user.status],
+  };
+}
+
+/**
+ * What a room search looks at. Category and tag labels are the same strings the
+ * card prints, so searching a visible chip always finds that room.
+ */
+function roomSearchFields(room: RoomSummary): SearchFieldSet {
+  return {
+    name: room.name,
+    strong: [
+      room.hostName,
+      ROOM_CATEGORY_LABELS[room.category],
+      countryName(room.country),
+      languageName(room.language),
+      ...room.tags,
+    ],
+    weak: [room.description],
+  };
+}
+
+/** Countries that actually occur in the people fixtures, in a stable order. */
+function suggestedCountries(): string[] {
+  const seen = new Set<string>();
+  const terms: string[] = [];
+
+  for (const user of FIXTURE_USERS) {
+    const term = countryName(user.locale);
+    if (term && !seen.has(term)) {
+      seen.add(term);
+      terms.push(term);
+    }
+  }
+
+  return terms.slice(0, 8);
+}
+
+/** Visible room chips: topics first, then categories. */
+function suggestedRoomTerms(): string[] {
+  const seen = new Set<string>();
+  const terms: string[] = [];
+
+  for (const room of FIXTURE_ROOMS) {
+    for (const tag of room.tags) {
+      if (!seen.has(tag)) {
+        seen.add(tag);
+        terms.push(tag);
+      }
+    }
+  }
+
+  const tags = terms.slice(0, 6);
+  for (const label of Object.values(ROOM_CATEGORY_LABELS)) {
+    if (!tags.includes(label)) {
+      tags.push(label);
+    }
+  }
+  return tags;
 }
 
 /** Interleaves promotional banners into a people list. */
@@ -230,6 +321,31 @@ export const fixtureDataSource: DataSource = {
   listMoments(mode, request) {
     const items = mode === 'new' ? [...FIXTURE_MOMENTS].reverse() : [...FIXTURE_MOMENTS];
     return simulate(() => paginate(items, request));
+  },
+
+  searchPeople(query, request) {
+    return simulate(() => {
+      const matches = rankSearchMatches(FIXTURE_USERS, query, userSearchFields, (a, b) =>
+        a.displayName.localeCompare(b.displayName),
+      );
+      return paginateSearch(matches, request);
+    });
+  },
+
+  searchRooms(query, request) {
+    return simulate(() => {
+      const matches = rankSearchMatches(FIXTURE_ROOMS, query, roomSearchFields, (a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      return paginateSearch(matches, request);
+    });
+  },
+
+  getSearchSuggestions() {
+    return simulate(() => ({
+      people: suggestedCountries(),
+      rooms: suggestedRoomTerms(),
+    }));
   },
 
   getMe() {

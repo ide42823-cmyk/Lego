@@ -313,6 +313,115 @@ describe('sendGreeting', () => {
   });
 });
 
+describe('searchPeople', () => {
+  it('finds a member by name and reports the full match count', async () => {
+    const page = await fixtureDataSource.searchPeople('maya', { limit: 1 });
+
+    expect(page.items).toHaveLength(1);
+    expect(page.items[0]?.displayName.startsWith('Maya')).toBe(true);
+    expect(page.total).toBeGreaterThanOrEqual(1);
+  });
+
+  it('finds a member by the country name behind their locale hint', async () => {
+    const page = await fixtureDataSource.searchPeople('saudi arabia', { limit: 50 });
+
+    expect(page.items.length).toBeGreaterThan(0);
+    expect(page.items.every((user) => user.locale === 'SA')).toBe(true);
+  });
+
+  it('folds Arabic spelling variants', async () => {
+    // The fixtures name someone نورة and someone لمى; a phone keyboard often
+    // writes those with ه and ي instead.
+    const taMarbuta = await fixtureDataSource.searchPeople('نوره', { limit: 50 });
+    const alefMaqsura = await fixtureDataSource.searchPeople('لمي', { limit: 50 });
+
+    expect(taMarbuta.items.some((user) => user.displayName === 'نورة')).toBe(true);
+    expect(alefMaqsura.items.some((user) => user.displayName === 'لمى')).toBe(true);
+  });
+
+  it('pages through matches without repeating one', async () => {
+    const first = await fixtureDataSource.searchPeople('a', { limit: 5 });
+    const second = await fixtureDataSource.searchPeople('a', {
+      cursor: first.nextCursor,
+      limit: 5,
+    });
+    const ids = [...first.items, ...second.items].map((user) => user.id);
+
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(second.total).toBe(first.total);
+  });
+
+  it('returns an empty page for a query that matches nothing', async () => {
+    const page = await fixtureDataSource.searchPeople('zzzzzz', { limit: 10 });
+
+    expect(page.items).toEqual([]);
+    expect(page.nextCursor).toBeNull();
+    expect(page.total).toBe(0);
+  });
+});
+
+describe('searchRooms', () => {
+  it('finds a room by its own name', async () => {
+    const all = await fixtureDataSource.listRooms('new', { limit: 100 });
+    const entry = all.items.find((item) => item.kind === 'room');
+
+    expect(entry).toBeDefined();
+    if (!entry || entry.kind !== 'room') {
+      return;
+    }
+
+    const page = await fixtureDataSource.searchRooms(entry.room.name, { limit: 50 });
+
+    expect(page.items.some((room) => room.id === entry.room.id)).toBe(true);
+    expect(page.total).toBeGreaterThanOrEqual(page.items.length);
+  });
+
+  it('matches the category label the card prints', async () => {
+    const page = await fixtureDataSource.searchRooms('families', { limit: 50 });
+
+    expect(page.items.length).toBeGreaterThan(0);
+    expect(page.items.every((room) => room.category === 'families')).toBe(true);
+  });
+
+  it('matches Arabic topics', async () => {
+    const page = await fixtureDataSource.searchRooms('موسيقى', { limit: 50 });
+
+    expect(page.items.length).toBeGreaterThan(0);
+  });
+
+  it('returns an empty page for a query that matches nothing', async () => {
+    const page = await fixtureDataSource.searchRooms('zzzzzz', { limit: 10 });
+
+    expect(page.items).toEqual([]);
+    expect(page.total).toBe(0);
+  });
+});
+
+describe('getSearchSuggestions', () => {
+  it('derives unique terms from the fixtures', async () => {
+    const suggestions = await fixtureDataSource.getSearchSuggestions();
+
+    expect(suggestions.people.length).toBeGreaterThan(0);
+    expect(suggestions.rooms.length).toBeGreaterThan(0);
+    expect(new Set(suggestions.people).size).toBe(suggestions.people.length);
+    expect(new Set(suggestions.rooms).size).toBe(suggestions.rooms.length);
+  });
+
+  it('only suggests terms that actually return results', async () => {
+    const { people, rooms } = await fixtureDataSource.getSearchSuggestions();
+
+    for (const term of people) {
+      const page = await fixtureDataSource.searchPeople(term, { limit: 1 });
+      expect(page.total).toBeGreaterThan(0);
+    }
+
+    for (const term of rooms) {
+      const page = await fixtureDataSource.searchRooms(term, { limit: 1 });
+      expect(page.total).toBeGreaterThan(0);
+    }
+  });
+});
+
 describe('failure simulation', () => {
   it('rejects the configured number of reads and then recovers', async () => {
     devControls.failReads = 1;

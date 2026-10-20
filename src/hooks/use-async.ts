@@ -92,6 +92,8 @@ interface PageEntry<T> {
   items: T[];
   error: unknown;
   hasMore: boolean;
+  /** Full match count when the endpoint reports one; kept across pages. */
+  total: number | null;
 }
 
 export interface PaginatedResult<T> {
@@ -103,13 +105,15 @@ export interface PaginatedResult<T> {
   /** A pull-to-refresh is in flight; existing items stay on screen. */
   isRefreshing: boolean;
   hasMore: boolean;
+  /** Full match count, or null when the endpoint does not report one. */
+  total: number | null;
   loadMore: () => void;
   refresh: () => void;
   reload: () => void;
 }
 
 function makeEntry<T>(key: string): PageEntry<T> {
-  return { key, status: 'loading', items: [], error: null, hasMore: false };
+  return { key, status: 'loading', items: [], error: null, hasMore: false, total: null };
 }
 
 /**
@@ -155,6 +159,7 @@ export function usePaginated<T>(
           items: page.items,
           error: null,
           hasMore: page.nextCursor !== null,
+          total: page.total ?? null,
         });
       },
       (error: unknown) => {
@@ -162,7 +167,14 @@ export function usePaginated<T>(
           return;
         }
         inFlightRef.current = false;
-        setEntry({ key: requestKey, status: 'error', items: [], error, hasMore: false });
+        setEntry({
+          key: requestKey,
+          status: 'error',
+          items: [],
+          error,
+          hasMore: false,
+          total: null,
+        });
       },
     );
 
@@ -195,6 +207,7 @@ export function usePaginated<T>(
                 status: 'ready',
                 items: [...previous.items, ...page.items],
                 hasMore: page.nextCursor !== null,
+                total: page.total ?? previous.total,
               },
         );
       },
@@ -226,6 +239,7 @@ export function usePaginated<T>(
           items: page.items,
           error: null,
           hasMore: page.nextCursor !== null,
+          total: page.total ?? null,
         });
       },
       () => {
@@ -246,6 +260,7 @@ export function usePaginated<T>(
     isLoadingMore,
     isRefreshing,
     hasMore: current.hasMore,
+    total: current.total,
     loadMore,
     refresh,
     reload,

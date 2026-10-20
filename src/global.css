@@ -7,3 +7,12 @@
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
   --font-serif: Georgia, 'Times New Roman', serif;
 }
+
+/*
+ * The search field paints a focus ring on its own rounded pill (the brand
+ * border). The browser's default ring is a square outline around the inner
+ * input, which reads as a second, misaligned border inside the pill.
+ */
+[role='search'] input:focus {
+  outline: none;
+}

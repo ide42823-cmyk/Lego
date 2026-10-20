@@ -32,6 +32,8 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               {/* A pushed screen with a custom collapsing header of its own. */}
               <Stack.Screen name="person/[id]" options={{ headerShown: false }} />
+              {/* Search owns its header (field + Cancel), so the stack one is hidden. */}
+              <Stack.Screen name="search" options={{ headerShown: false }} />
               <Stack.Screen name="dev/rtc-spike" options={{ title: 'RTC spike (dev only)' }} />
             </Stack>
           </ToastProvider>

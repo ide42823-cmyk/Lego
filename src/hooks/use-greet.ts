@@ -16,8 +16,11 @@ export function useGreet(): (userId: string, displayName?: string) => void {
 
   return useCallback(
     (userId: string, displayName?: string) => {
+      // Display names may already end in punctuation ("Maya K."), so trailing
+      // full stops are dropped before the confirmation's own period.
+      const name = displayName?.replace(/[.!?]+$/, '');
       fixtureDataSource.sendGreeting(userId).then(
-        () => toast.show(displayName ? `Greeted ${displayName}.` : 'Greeting sent.'),
+        () => toast.show(name ? `Greeted ${name}.` : 'Greeting sent.'),
         () => toast.show('Could not send your greeting. Try again.'),
       );
     },

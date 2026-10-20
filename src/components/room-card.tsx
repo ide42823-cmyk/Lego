@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Radius, Spacing, type ChipTintKey } from '@/constants/theme';
-import type { RoomBadge, RoomCategory, RoomSummary } from '@/core/data/types';
+import type { RoomBadge, RoomSummary } from '@/core/data/types';
 import { formatCompactCount } from '@/core/format';
+import { ROOM_BADGE_LABELS, ROOM_CATEGORY_LABELS } from '@/core/room-labels';
 import { useTheme } from '@/hooks/use-theme';
 
 import { ThemedText } from './themed-text';
@@ -26,19 +27,6 @@ export interface RoomCardProps {
   variant?: RoomCardVariant;
   onPress?: (roomId: string) => void;
 }
-
-const CATEGORY_LABELS: Record<RoomCategory, string> = {
-  chat: 'Chat',
-  families: 'Families',
-  friendship: 'Friendship',
-  video: 'Video',
-};
-
-const BADGE_LABELS: Record<RoomBadge, string> = {
-  official: 'Official',
-  featured: 'Featured',
-  trending: 'Trending',
-};
 
 const BADGE_ICONS: Record<RoomBadge, IconName> = {
   official: 'verified',
@@ -66,11 +54,14 @@ function ParticipantCount({ count }: { count: number }) {
 function RoomMeta({ room }: { room: RoomSummary }) {
   return (
     <View style={styles.chipRow}>
-      <CategoryChip label={CATEGORY_LABELS[room.category]} tone={room.category as ChipTintKey} />
+      <CategoryChip
+        label={ROOM_CATEGORY_LABELS[room.category]}
+        tone={room.category as ChipTintKey}
+      />
       {(room.badges ?? []).map((badge) => (
         <CategoryChip
           key={badge}
-          label={BADGE_LABELS[badge]}
+          label={ROOM_BADGE_LABELS[badge]}
           tone={badge as ChipTintKey}
           icon={BADGE_ICONS[badge]}
         />
@@ -80,7 +71,7 @@ function RoomMeta({ room }: { room: RoomSummary }) {
 }
 
 export function RoomCard({ room, variant = 'list', onPress }: RoomCardProps) {
-  const accessibilityLabel = `${room.name}. ${CATEGORY_LABELS[room.category]} room hosted by ${room.hostName}, ${room.participantCount} people. ${room.description}`;
+  const accessibilityLabel = `${room.name}. ${ROOM_CATEGORY_LABELS[room.category]} room hosted by ${room.hostName}, ${room.participantCount} people. ${room.description}`;
 
   if (variant === 'grid') {
     return (

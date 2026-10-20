@@ -16,6 +16,8 @@ export type RoomRelationshipFilter = 'joined' | 'following' | 'recents';
 export type ConversationFilter = 'all' | 'online' | 'most_chatted' | 'unread';
 export type ContactsFilter = 'following' | 'friends' | 'followers';
 export type MessagesTab = 'messages' | 'contacts';
+/** Search covers the two entity kinds the app has directories for. */
+export type SearchMode = 'people' | 'rooms';
 export type RoomCategory = 'chat' | 'families' | 'friendship' | 'video';
 export type RoomBadge = 'official' | 'featured' | 'trending';
 export type Gender = 'female' | 'male';
@@ -235,6 +237,29 @@ export interface Page<T> {
   items: T[];
   /** Cursor for the next page; null when the list is exhausted. */
   nextCursor: string | null;
+  /**
+   * Total matches across every page, when the endpoint reports one. Directory
+   * feeds omit it; a search endpoint uses it to print "12 people" while only
+   * the first page is loaded.
+   */
+  total?: number;
+}
+
+/** A search page always knows how many matches exist in total. */
+export interface SearchPage<T> extends Page<T> {
+  total: number;
+}
+
+/**
+ * Terms offered before the member has typed anything.
+ *
+ * The real implementation is server-owned (trending searches for the member's
+ * region and language); until then the fixture derives them from the data it
+ * already has, so a suggestion can never point at nothing.
+ */
+export interface SearchSuggestions {
+  people: string[];
+  rooms: string[];
 }
 
 /* -------------------------------------------------------------------------
