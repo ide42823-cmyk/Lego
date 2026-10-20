@@ -18,6 +18,12 @@ export interface SearchLandingProps {
   onClearRecents: () => void;
 }
 
+const HINTS: Record<SearchMode, string> = {
+  people: 'Search by name, country or status line.',
+  rooms: 'Search by room name, host, topic or description.',
+  families: 'Search family rooms by name, host or topic.',
+};
+
 /**
  * What the search screen shows before a query is typed: the session's recent
  * searches and a few terms that are guaranteed to have results.
@@ -35,6 +41,8 @@ export function SearchLanding({
 }: SearchLandingProps) {
   const theme = useTheme();
   const terms = suggestions ? suggestions[mode] : [];
+  const popularLabel =
+    mode === 'people' ? 'Popular places' : mode === 'families' ? 'Family rooms' : 'Popular topics';
 
   return (
     <View style={styles.container}>
@@ -85,7 +93,7 @@ export function SearchLanding({
       {terms.length > 0 ? (
         <View style={styles.section}>
           <ThemedText type="smallBold" accessibilityRole="header">
-            {mode === 'people' ? 'Popular places' : 'Popular topics'}
+            {popularLabel}
           </ThemedText>
           <View style={styles.chips}>
             {terms.map((term) => (
@@ -96,12 +104,12 @@ export function SearchLanding({
                 onPress={() => onPick(term)}
                 style={({ pressed }) => [
                   styles.chip,
-                  { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+                  { backgroundColor: theme.surface, borderColor: theme.border },
                   pressed && { opacity: 0.7 },
                 ]}
               >
                 <Icon
-                  name={mode === 'people' ? 'globe' : 'trending'}
+                  name={mode === 'people' ? 'globe' : mode === 'families' ? 'family' : 'trending'}
                   size={15}
                   strokeWidth={2.2}
                   color={theme.textSecondary}
@@ -114,9 +122,7 @@ export function SearchLanding({
       ) : null}
 
       <ThemedText type="small" themeColor="textSecondary" style={styles.hint}>
-        {mode === 'people'
-          ? 'Search by name, country or status line.'
-          : 'Search by room name, host, topic or description.'}
+        {HINTS[mode]}
       </ThemedText>
     </View>
   );

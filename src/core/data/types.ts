@@ -16,8 +16,12 @@ export type RoomRelationshipFilter = 'joined' | 'following' | 'recents';
 export type ConversationFilter = 'all' | 'online' | 'most_chatted' | 'unread';
 export type ContactsFilter = 'following' | 'friends' | 'followers';
 export type MessagesTab = 'messages' | 'contacts';
-/** Search covers the two entity kinds the app has directories for. */
-export type SearchMode = 'people' | 'rooms';
+/**
+ * Search covers the two entity kinds the app has directories for. "Families"
+ * is a view of the room directory restricted to family rooms, not a separate
+ * family entity (the app has none yet).
+ */
+export type SearchMode = 'people' | 'rooms' | 'families';
 export type RoomCategory = 'chat' | 'families' | 'friendship' | 'video';
 export type RoomBadge = 'official' | 'featured' | 'trending';
 export type Gender = 'female' | 'male';
@@ -260,6 +264,8 @@ export interface SearchPage<T> extends Page<T> {
 export interface SearchSuggestions {
   people: string[];
   rooms: string[];
+  /** Family-room names, for the Families tab. */
+  families: string[];
 }
 
 /* -------------------------------------------------------------------------

@@ -389,6 +389,27 @@ describe('searchRooms', () => {
     expect(page.items.length).toBeGreaterThan(0);
   });
 
+  it('restricts the Families tab to family rooms', async () => {
+    const page = await fixtureDataSource.searchRooms('families', {
+      limit: 50,
+      category: 'families',
+    });
+
+    expect(page.items.length).toBeGreaterThan(0);
+    expect(page.items.every((room) => room.category === 'families')).toBe(true);
+    expect(page.total).toBe(page.items.length);
+  });
+
+  it('accepts the singular "family" as well as the category label', async () => {
+    const page = await fixtureDataSource.searchRooms('family', {
+      limit: 50,
+      category: 'families',
+    });
+
+    expect(page.items.length).toBeGreaterThan(0);
+    expect(page.items.every((room) => room.category === 'families')).toBe(true);
+  });
+
   it('returns an empty page for a query that matches nothing', async () => {
     const page = await fixtureDataSource.searchRooms('zzzzzz', { limit: 10 });
 
@@ -403,12 +424,14 @@ describe('getSearchSuggestions', () => {
 
     expect(suggestions.people.length).toBeGreaterThan(0);
     expect(suggestions.rooms.length).toBeGreaterThan(0);
+    expect(suggestions.families.length).toBeGreaterThan(0);
     expect(new Set(suggestions.people).size).toBe(suggestions.people.length);
     expect(new Set(suggestions.rooms).size).toBe(suggestions.rooms.length);
+    expect(new Set(suggestions.families).size).toBe(suggestions.families.length);
   });
 
   it('only suggests terms that actually return results', async () => {
-    const { people, rooms } = await fixtureDataSource.getSearchSuggestions();
+    const { people, rooms, families } = await fixtureDataSource.getSearchSuggestions();
 
     for (const term of people) {
       const page = await fixtureDataSource.searchPeople(term, { limit: 1 });
@@ -417,6 +440,14 @@ describe('getSearchSuggestions', () => {
 
     for (const term of rooms) {
       const page = await fixtureDataSource.searchRooms(term, { limit: 1 });
+      expect(page.total).toBeGreaterThan(0);
+    }
+
+    for (const term of families) {
+      const page = await fixtureDataSource.searchRooms(term, {
+        limit: 1,
+        category: 'families',
+      });
       expect(page.total).toBeGreaterThan(0);
     }
   });

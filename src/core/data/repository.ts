@@ -31,6 +31,7 @@ import type {
   MomentsMode,
   Page,
   PeopleMode,
+  RoomCategory,
   RoomFeedItem,
   RoomMode,
   RoomRelationshipFilter,
@@ -44,6 +45,14 @@ import type {
 export interface PageRequest {
   cursor?: string | null;
   limit?: number;
+}
+
+export interface SearchRequest extends PageRequest {
+  /**
+   * Restrict a room search to one directory category. The Families tab uses
+   * this to search the family rooms without a second entity type.
+   */
+  category?: RoomCategory;
 }
 
 export interface DataSource {
@@ -64,7 +73,7 @@ export interface DataSource {
    */
   searchPeople(query: string, request?: PageRequest): Promise<SearchPage<UserSummary>>;
   /** Text search over the room directory. */
-  searchRooms(query: string, request?: PageRequest): Promise<SearchPage<RoomSummary>>;
+  searchRooms(query: string, request?: SearchRequest): Promise<SearchPage<RoomSummary>>;
   /** Terms offered before the member types. Server-owned in the real build. */
   getSearchSuggestions(): Promise<SearchSuggestions>;
   getMe(): Promise<MeDashboard>;
@@ -156,6 +165,9 @@ function roomSearchFields(room: RoomSummary): SearchFieldSet {
     strong: [
       room.hostName,
       ROOM_CATEGORY_LABELS[room.category],
+      // The visible label is plural ("Families"), but members also type the
+      // singular. Both are strong terms for family rooms.
+      ...(room.category === 'families' ? ['Family'] : []),
       countryName(room.country),
       languageName(room.language),
       ...room.tags,
@@ -201,6 +213,25 @@ function suggestedRoomTerms(): string[] {
     }
   }
   return tags;
+}
+
+/**
+ * Family-room names. The Families tab is a room directory, so the most useful
+ * chips are the rooms themselves; every chip is guaranteed to have a result.
+ */
+function suggestedFamilyTerms(): string[] {
+  const seen = new Set<string>();
+  const names: string[] = [];
+
+  for (const room of FIXTURE_ROOMS) {
+    if (room.category !== 'families' || seen.has(room.name)) {
+      continue;
+    }
+    seen.add(room.name);
+    names.push(room.name);
+  }
+
+  return names.slice(0, 6);
 }
 
 /** Interleaves promotional banners into a people list. */
@@ -334,7 +365,11 @@ export const fixtureDataSource: DataSource = {
 
   searchRooms(query, request) {
     return simulate(() => {
-      const matches = rankSearchMatches(FIXTURE_ROOMS, query, roomSearchFields, (a, b) =>
+      const category = request?.category;
+      const rooms = category
+        ? FIXTURE_ROOMS.filter((room) => room.category === category)
+        : FIXTURE_ROOMS;
+      const matches = rankSearchMatches(rooms, query, roomSearchFields, (a, b) =>
         a.name.localeCompare(b.name),
       );
       return paginateSearch(matches, request);
@@ -345,6 +380,7 @@ export const fixtureDataSource: DataSource = {
     return simulate(() => ({
       people: suggestedCountries(),
       rooms: suggestedRoomTerms(),
+      families: suggestedFamilyTerms(),
     }));
   },
 

@@ -15,6 +15,31 @@ type SearchResult = { kind: 'person'; user: UserSummary } | { kind: 'room'; room
 
 const PAGE_SIZE = 12;
 
+/** Empty-state wording for each directory, including the other-tab escape hatch. */
+function emptyCopy(mode: SearchMode, query: string) {
+  if (mode === 'people') {
+    return {
+      title: 'No people found',
+      message: `Nothing matches “${query}”. Try a shorter word, or search rooms instead.`,
+      actionLabel: 'Search rooms',
+    };
+  }
+
+  if (mode === 'families') {
+    return {
+      title: 'No family rooms found',
+      message: `Nothing matches “${query}”. Try a shorter word, or search all rooms instead.`,
+      actionLabel: 'Search all rooms',
+    };
+  }
+
+  return {
+    title: 'No rooms found',
+    message: `Nothing matches “${query}”. Try a shorter word, or search people instead.`,
+    actionLabel: 'Search people',
+  };
+}
+
 export interface SearchResultsProps {
   mode: SearchMode;
   /** Already trimmed and debounced; never empty. */
@@ -29,9 +54,9 @@ export interface SearchResultsProps {
 /**
  * Results for one mode and one query.
  *
- * The component is keyed by mode at the call site, so switching People/Rooms
- * starts a fresh list rather than carrying a scroll position across. Every
- * request state is rendered: skeleton, retry, no matches, and the page itself.
+ * The component is keyed by mode at the call site, so switching tabs starts a
+ * fresh list rather than carrying a scroll position across. Every request state
+ * is rendered: skeleton, retry, no matches, and the page itself.
  */
 export function SearchResults({
   mode,
@@ -49,10 +74,16 @@ export function SearchResults({
       }));
     }
 
-    return fixtureDataSource.searchRooms(query, { cursor, limit: PAGE_SIZE }).then((page) => ({
-      ...page,
-      items: page.items.map((room): SearchResult => ({ kind: 'room', room })),
-    }));
+    return fixtureDataSource
+      .searchRooms(query, {
+        cursor,
+        limit: PAGE_SIZE,
+        category: mode === 'families' ? 'families' : undefined,
+      })
+      .then((page) => ({
+        ...page,
+        items: page.items.map((room): SearchResult => ({ kind: 'room', room })),
+      }));
   }, `search:${mode}:${query}`);
 
   if (list.status === 'loading') {
@@ -64,26 +95,30 @@ export function SearchResults({
   }
 
   if (list.status === 'error') {
-    return <ErrorState onRetry={list.reload} />;
+    return (
+      <View style={styles.centered}>
+        <ErrorState onRetry={list.reload} />
+      </View>
+    );
   }
 
   if (list.items.length === 0) {
+    const copy = emptyCopy(mode, query);
+
     return (
-      <EmptyState
-        title={mode === 'people' ? 'No people found' : 'No rooms found'}
-        message={
-          mode === 'people'
-            ? `Nothing matches “${query}”. Try a shorter word, or search rooms instead.`
-            : `Nothing matches “${query}”. Try a shorter word, or search people instead.`
-        }
-        actionLabel={mode === 'people' ? 'Search rooms' : 'Search people'}
-        onAction={onSwitchMode}
-      />
+      <View style={styles.centered}>
+        <EmptyState
+          title={copy.title}
+          message={copy.message}
+          actionLabel={copy.actionLabel}
+          onAction={onSwitchMode}
+        />
+      </View>
     );
   }
 
   const total = list.total ?? list.items.length;
-  const noun = mode === 'people' ? 'person' : 'room';
+  const noun = mode === 'people' ? 'person' : mode === 'families' ? 'family room' : 'room';
   const countLabel = `${total} ${noun}${total === 1 ? '' : 's'}`;
 
   return (
@@ -106,7 +141,13 @@ export function SearchResults({
         contentContainerStyle={styles.listContent}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
-        accessibilityLabel={mode === 'people' ? 'People search results' : 'Room search results'}
+        accessibilityLabel={
+          mode === 'people'
+            ? 'People search results'
+            : mode === 'families'
+              ? 'Family room search results'
+              : 'Room search results'
+        }
         onEndReachedThreshold={0.6}
         onEndReached={list.loadMore}
         renderItem={({ item }) =>
@@ -134,6 +175,7 @@ export function SearchResults({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  centered: { flex: 1, justifyContent: 'center' },
   message: { paddingHorizontal: Spacing.three },
   countRow: {
     flexDirection: 'row',

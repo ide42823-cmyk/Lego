@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { Radius, Spacing, TouchTarget } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 import { ThemedText } from '../themed-text';
 import { Icon } from '../ui/icon';
 import { IconButton } from '../ui/icon-button';
 
-export interface SearchFieldProps {
+export interface SearchBarProps {
   value: string;
   /** Accessible name, e.g. "Search people". */
   label: string;
@@ -16,31 +16,30 @@ export interface SearchFieldProps {
   /** Extra guidance for assistive technology, e.g. what is searchable. */
   hint?: string;
   onChangeText: (value: string) => void;
-  /** Fired by the keyboard's search key; used to remember the term. */
-  onSubmit?: () => void;
-  onCancel: () => void;
+  /** Fired by the Search button and the keyboard's search key. */
+  onSubmit: () => void;
   autoFocus?: boolean;
 }
 
 /**
- * The search header: a pill field, a clear control and Cancel.
+ * The reference's search row: a pill field and a filled Search button.
  *
- * This is a pushed screen, not a tab, so the field *is* the header — there is no
- * title competing with it. Cancel is a 44-point target and the accessible name
- * says what it cancels ("Cancel search") rather than just "Cancel".
+ * Results update as the member types, so the button is not the only way to
+ * search — it commits the term to the session's recent list and dismisses the
+ * keyboard, and it is disabled while the field is empty.
  */
-export function SearchField({
+export function SearchBar({
   value,
   label,
   placeholder,
   hint,
   onChangeText,
   onSubmit,
-  onCancel,
   autoFocus = true,
-}: SearchFieldProps) {
+}: SearchBarProps) {
   const theme = useTheme();
   const [focused, setFocused] = useState(false);
+  const disabled = value.trim().length === 0;
 
   return (
     <View style={styles.row} accessibilityRole="search">
@@ -49,11 +48,11 @@ export function SearchField({
           styles.field,
           {
             backgroundColor: theme.backgroundElement,
-            borderColor: focused ? theme.brand : theme.border,
+            borderColor: focused ? theme.brand : 'transparent',
           },
         ]}
       >
-        <Icon name="search" size={18} strokeWidth={2.4} color={theme.textSecondary} />
+        <Icon name="search" size={20} strokeWidth={2.2} color={theme.text} />
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -86,13 +85,25 @@ export function SearchField({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Cancel search"
-        onPress={onCancel}
-        hitSlop={4}
-        style={({ pressed }) => [styles.cancel, pressed && { opacity: 0.7 }]}
+        accessibilityLabel="Search"
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onSubmit}
+        style={({ pressed }) => [
+          styles.button,
+          {
+            backgroundColor: disabled
+              ? theme.backgroundElement
+              : pressed
+                ? theme.brandPressed
+                : theme.brand,
+          },
+        ]}
       >
-        <ThemedText type="smallBold" style={{ color: theme.brand }}>
-          Cancel
+        <ThemedText
+          style={[styles.buttonLabel, { color: disabled ? theme.textSecondary : theme.onBrand }]}
+        >
+          Search
         </ThemedText>
       </Pressable>
     </View>
@@ -103,19 +114,18 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.one,
+    gap: Spacing.two,
     paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.one,
+    paddingVertical: Spacing.two,
   },
   field: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
-    minHeight: TouchTarget,
+    height: 48,
     paddingStart: Spacing.three,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderRadius: Radius.pill,
   },
   input: {
@@ -123,14 +133,16 @@ const styles = StyleSheet.create({
     minWidth: 0,
     fontSize: 16,
     lineHeight: 20,
-    paddingVertical: Spacing.two,
+    paddingVertical: 0,
     // The pill draws the focus state (brand border). Leaving the browser's own
     // outline on would paint a second, square ring inside the rounded field.
     outlineWidth: 0,
   },
-  cancel: {
-    minHeight: TouchTarget,
+  button: {
+    height: 48,
     justifyContent: 'center',
-    paddingHorizontal: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    borderRadius: Radius.pill,
   },
+  buttonLabel: { fontSize: 15, lineHeight: 20, fontWeight: 700 },
 });

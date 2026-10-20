@@ -30,7 +30,7 @@ layout/flow inspiration.
 > the reference’s card rhythm — wallet and membership tiles, tools, games and the
 > account menu, all fed from the dashboard fixture with our own art in place of
 > the reference’s third-party game covers. Search is now a real screen as
-> well: one field with People and Rooms modes, ranked matching over the fixture
+> well: one field with People, Rooms and Families tabs, ranked matching over the fixture
 > directories (Arabic spelling variants included), session-scoped recent searches,
 > popular terms derived from the data, and loading, error, empty and no-result
 > states — see

@@ -783,10 +783,13 @@ them.
 
 ### What changed
 
-- **One search screen, two directories.** `search` is a pushed route with a field-and-Cancel
-  header, a People/Rooms segmented row and a `mode` route param. Home's magnifier opens it on
-  People, Rooms' opens it on Rooms; switching tabs keeps the query and re-runs it against the
-  other directory. This closes the dead end on the most prominent control of both tabs.
+- **One search screen, three directories.** `search` is a pushed route with a centred title,
+  a back control, a full-width People/Rooms/Families tab row and a `mode` route param. Home's
+  magnifier opens it on People, Rooms' opens it on Rooms; switching tabs keeps the query and
+  re-runs it against that directory. Families is a view of the room directory restricted to the
+  family category — the app has no separate family entity yet — and the singular "family" is a
+  strong search term for those rooms. This closes the dead end on the most prominent control of
+  both tabs.
 - **Search lives behind the data seam.** `DataSource` gained `searchPeople(query, request)`,
   `searchRooms(query, request)` and `getSearchSuggestions()`. Both search methods return
   `SearchPage<T>` — a `Page<T>` with a `total`, so the screen can print "12 people" while
@@ -812,31 +815,41 @@ them.
   250 ms; an empty field leaves results at once rather than waiting for the debounce. Each
   result page is keyed by mode + query, so a stale response can never replace a newer query.
 - **All four request states are rendered.** Skeleton while the first page loads, `ErrorState`
-  with retry, an empty state that offers the same query in the other directory, and the list
-  itself with pagination on scroll. The count line is a polite live region for screen readers.
+  with retry, an empty state that offers the same query in another tab (People → Rooms,
+  Rooms → People, Families → all rooms), and the list itself with pagination on scroll. The
+  count line is a polite live region for screen readers.
 - **The field owns its focus state.** The pill's border turns brand on focus, and a scoped
   `[role='search'] input:focus` rule removes Chrome's square focus ring inside the rounded
-  field on web. Every control is a 44-point target; the field is labelled "Search people" /
-  "Search rooms", and the clear control says "Clear search".
+  field on web. The filled Search button submits the term (records it in the session's recent
+  list) and is disabled, with a secondary-grey treatment, while the field is empty. Every
+  control is a 44-point target; the field is labelled "Search people" / "Search rooms" /
+  "Search family rooms", and the clear control says "Clear search".
 - **Entry points.** Home's search icon and Rooms' search icon both navigate now; Rooms' room
   press toast also names the room instead of printing its id.
 
 ### Verified
 
-- `tsc`, `eslint`, `prettier --check` clean; `jest` 14 suites / 148 tests (39 new:
-  17 for matching and ranking, 8 for the recent list, 2 for the debounce, 11 for the search
-  contract, 1 for the paginated total).
-- **Rendered off-device at 320, 360 and 393 pt** (measured in the dark scheme; the palette has
-  no effect on layout): no horizontal overflow, including the six-room Arabic result list.
-  Checked by measuring `#root` scrollWidth against clientWidth and the field/Cancel rects at
-  320 pt (field 16-241, Cancel 245-304). Light and dark renders were reviewed at 500 pt.
-- **Every path was exercised in the browser:** Home → search (People), Cancel → Home,
-  Rooms → search (Rooms), suggestion tap ("Music" → 2 rooms), a room press shows "The room
-  screen for “Late Night Radio” arrives later", an empty query ("zzzz" → "No rooms found")
-  switches to People and re-runs the same query, Arabic "موسيقى" → 6 rooms, "maya" → 1 person,
-  opening the result lands on `/person/user-1`, and the greeting confirmation reads
-  "Greeted Maya K." (the name's own full stop is no longer doubled). Recent searches survived
-  leaving and reopening the screen; clearing the field returned to the landing state.
+- `tsc`, `eslint`, `prettier --check` clean; `jest` 14 suites / 150 tests (two more than the
+  original P7 count: the Families-category contract and the singular "family" alias).
+- **Rendered off-device at 320, 360 and 393 pt** with headless Chrome device metrics (DPR 2;
+  light and dark): no horizontal overflow at any width, including the Arabic family-room
+  results. Measured in the reference-aligned layout: at 320 pt the field is 185.3 pt wide at
+  x=16 and the Search button 94.8 pt at x=209.3 (ends 304.1); at 393 pt the field is 258.3 pt
+  and the button 94.8 pt (ends 377.1). Light and dark renders were reviewed at 393 pt.
+- **P7's paths were exercised in the browser before this shell change:** Home → search
+  (People), Cancel → Home, Rooms → search (Rooms), suggestion tap ("Music" → 2 rooms), a room
+  press shows "The room screen for “Late Night Radio” arrives later", an empty query
+  ("zzzz" → "No rooms found") switches to People and re-runs the same query, Arabic "موسيقى"
+  → 6 rooms, "maya" → 1 person, opening the result lands on `/person/user-1`, and the greeting
+  confirmation reads "Greeted Maya K." (the name's own full stop is no longer doubled). Recent
+  searches survived leaving and reopening the screen; clearing the field returned to the
+  landing state. **The reference-aligned shell was then exercised for** People/Rooms/Families,
+  live typing, the disabled and enabled Search button, the empty state, both schemes and the
+  sizes above. The back control calls the same handler the removed Cancel button used.
+- **RTL.** With `dir="rtl"` on the document, the back control moves to the right, the tab order
+  reverses, and the field and Search button swap sides (button 16–110.8, field 118.8–377.1 at
+  393 pt) with no overflow. The copy in that check is still English, so the full Arabic layout
+  remains unverified.
 - **Zero console errors or warnings** on the route after the focus-ring fix.
 
 ### Defects found and fixed in the pass
@@ -848,6 +861,34 @@ them.
   the inner `<input>`, so a focused search field showed two misaligned borders. The pill's
   brand border is now the focus indicator, and the global rule suppresses only the inner ring.
 
+### P7.1 — reference alignment (2026-10-20)
+
+The project owner supplied the reference's search, filter and ranking screens after P7. This
+pass brings Search to that structure; Filter and Ranking are separate passes.
+
+- **Header and tabs.** The pushed screen now has a back chevron, a centred "Search" title, and
+  three equal-width tabs (People / Rooms / Families) whose selected state is a full-width black
+  bar sitting on a hairline — the reference's shape. The tabs are a local `SearchTabs`
+  component rather than a new `SegmentedTabs` variant, so the directory tabs on Home and Rooms
+  are unchanged.
+- **Search row.** The pill is flat grey with a magnifier and clear control; a filled brand
+  "Search" button sits to its right, as in the reference. Results still update live (250 ms
+  debounce); the button commits the term to the session's recent list. While the field is
+  empty the button is disabled and uses the secondary surface rather than a washed-out purple,
+  which keeps it legible in both schemes.
+- **Content surface.** The area under the row uses `surfaceMuted`, so result cards and chips
+  read as raised white cards on the reference's light grey (the dark scheme uses its existing
+  elevated-surface relationship). Empty and error states are vertically centred in that area.
+- **Families.** The third tab is the room directory filtered to the `families` category, not an
+  invented family entity. The landing shows family-room names (the most useful chips for a room
+  directory), and the singular "family" is a strong term alongside the plural category label.
+  The empty state offers "Search all rooms".
+- **Deliberate deviations.** The reference's content area is a location-permission gate
+  ("Turn on location…"). The app has no location feature yet, so reproducing an "Enable Now"
+  button would be a dead control; the landing keeps the real recents/suggestions instead. Copy
+  and labels use the app's vocabulary (People/Rooms/Families, not the reference's
+  Users/Chat room/Family), and the reference's original-app name does not appear anywhere.
+
 ### NOT verified in P7
 
 - **Nothing on the handset.** The device was not attached during this pass. Layout was checked
@@ -855,8 +896,12 @@ them.
   are unproven.
 - **Keyboard navigation on web.** The focus border is visible, but a full Tab/Shift-Tab and
   screen-reader pass has not been done.
-- **RTL.** The screen uses logical properties and an Arabic query renders correctly, but the
-  whole screen has not been reviewed with the app in RTL mode.
+- **RTL.** The English screen was mirrored with `dir="rtl"` and the field/button/back/tab
+  geometry checked; the app's Arabic copy and native `I18nManager` layout have not been.
+- **The reference's location gate and family entity.** The app has no location permission
+  flow, so the reference's "Turn on location" empty state is deliberately not reproduced; the
+  landing shows real recents and suggestions instead. Families is a filtered room directory,
+  not a separate family object or family leaderboard.
 - **iOS.** Cannot be built on Windows.
 - **History persistence and server search.** Recents die with the session; real search history,
   trending terms, ranking and result totals belong to the backend phase.

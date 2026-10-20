@@ -2,11 +2,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { SearchField } from '@/components/search/search-field';
+import { SearchBar } from '@/components/search/search-bar';
+import { SearchHeader } from '@/components/search/search-header';
 import { SearchLanding } from '@/components/search/search-landing';
 import { SearchResults } from '@/components/search/search-results';
+import { SearchTabs, type SearchTabItem } from '@/components/search/search-tabs';
 import { AppScreen } from '@/components/ui/app-screen';
-import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
 import { LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
 import { Spacing } from '@/constants/theme';
@@ -17,31 +18,49 @@ import { useAsync } from '@/hooks/use-async';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useGreet } from '@/hooks/use-greet';
 import { useRecentSearches } from '@/hooks/use-recent-searches';
+import { useTheme } from '@/hooks/use-theme';
 
 /**
- * Search — people and rooms (the utility behind both directory headers).
+ * Search — people, rooms and family rooms (the utility behind both directory
+ * headers).
  *
- * One screen serves both directories: the `mode` route param decides which tab
- * opens first, and switching tabs keeps the typed query. Matching and ranking
- * live behind the data seam, so this screen never looks at fixtures.
+ * One screen serves all three directories: the `mode` route param decides which
+ * tab opens first, and switching tabs keeps the typed query. Matching and
+ * ranking live behind the data seam, so this screen never looks at fixtures.
+ * The Families tab is a view of the room directory restricted to the family
+ * category; there is no separate family entity yet.
  *
  * Search history is genuinely account state. Until there is a backend it is
  * kept for the session only (see `core/search-recents`); the screen says
  * "recent searches" and never implies the list is synced.
  */
-const MODES: readonly SegmentedTabItem<SearchMode>[] = [
+const MODES: readonly SearchTabItem<SearchMode>[] = [
   { key: 'people', label: 'People' },
   { key: 'rooms', label: 'Rooms' },
+  { key: 'families', label: 'Families' },
 ];
 
 const SEARCH_HINTS: Record<SearchMode, string> = {
   people: 'Names, countries and status lines are searchable.',
   rooms: 'Room names, hosts, topics and descriptions are searchable.',
+  families: 'Family room names, hosts and topics are searchable.',
+};
+
+const FIELD_LABELS: Record<SearchMode, string> = {
+  people: 'Search people',
+  rooms: 'Search rooms',
+  families: 'Search family rooms',
 };
 
 function readMode(value: string | string[] | undefined): SearchMode {
   const first = Array.isArray(value) ? value[0] : value;
-  return first === 'rooms' ? 'rooms' : 'people';
+  if (first === 'rooms') {
+    return 'rooms';
+  }
+  if (first === 'families') {
+    return 'families';
+  }
+  return 'people';
 }
 
 export default function SearchScreen() {
@@ -50,6 +69,7 @@ export default function SearchScreen() {
   const toast = useToast();
   const greet = useGreet();
   const recents = useRecentSearches();
+  const theme = useTheme();
 
   const [mode, setMode] = useState<SearchMode>(() => readMode(params.mode));
   const [query, setQuery] = useState('');
@@ -103,58 +123,59 @@ export default function SearchScreen() {
 
   return (
     <AppScreen padded={false}>
-      <SearchField
+      <SearchHeader onBack={cancel} />
+      <SearchTabs items={MODES} value={mode} onChange={setMode} label="Search within" />
+      <SearchBar
         value={query}
         onChangeText={setQuery}
         onSubmit={() => record(query)}
-        onCancel={cancel}
-        label={mode === 'people' ? 'Search people' : 'Search rooms'}
-        placeholder={mode === 'people' ? 'Search people' : 'Search rooms'}
+        label={FIELD_LABELS[mode]}
+        placeholder="Search"
         hint={SEARCH_HINTS[mode]}
       />
 
-      <View style={styles.modes}>
-        <SegmentedTabs items={MODES} value={mode} onChange={setMode} label="Search within" />
-      </View>
-
-      {!hasQuery ? (
-        <ScrollView
-          style={styles.flex}
-          contentContainerStyle={styles.landing}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-        >
-          <SearchLanding
+      <View style={[styles.content, { backgroundColor: theme.surfaceMuted }]}>
+        {!hasQuery ? (
+          <ScrollView
+            style={styles.flex}
+            contentContainerStyle={styles.landing}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
+            <SearchLanding
+              mode={mode}
+              recents={recents}
+              suggestions={suggestions.status === 'ready' ? suggestions.data : null}
+              onPick={pick}
+              onRemoveRecent={(term) => recentSearches.remove(term)}
+              onClearRecents={() => recentSearches.clear()}
+            />
+          </ScrollView>
+        ) : shownQuery.length === 0 ? (
+          <View style={styles.pending}>
+            <LoadingSkeleton rows={6} />
+          </View>
+        ) : (
+          <SearchResults
+            key={mode}
             mode={mode}
-            recents={recents}
-            suggestions={suggestions.status === 'ready' ? suggestions.data : null}
-            onPick={pick}
-            onRemoveRecent={(term) => recentSearches.remove(term)}
-            onClearRecents={() => recentSearches.clear()}
+            query={shownQuery}
+            onOpenProfile={openProfile}
+            onOpenRoom={openRoom}
+            onGreet={greet}
+            onSwitchMode={() =>
+              setMode(mode === 'people' ? 'rooms' : mode === 'rooms' ? 'people' : 'rooms')
+            }
           />
-        </ScrollView>
-      ) : shownQuery.length === 0 ? (
-        <View style={styles.pending}>
-          <LoadingSkeleton rows={6} />
-        </View>
-      ) : (
-        <SearchResults
-          key={mode}
-          mode={mode}
-          query={shownQuery}
-          onOpenProfile={openProfile}
-          onOpenRoom={openRoom}
-          onGreet={greet}
-          onSwitchMode={() => setMode(mode === 'people' ? 'rooms' : 'people')}
-        />
-      )}
+        )}
+      </View>
     </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  modes: { paddingHorizontal: Spacing.three },
+  content: { flex: 1 },
   landing: { flexGrow: 1, paddingHorizontal: Spacing.three },
   pending: { paddingHorizontal: Spacing.three, paddingTop: Spacing.two },
 });
