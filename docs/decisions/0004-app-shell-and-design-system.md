@@ -666,12 +666,17 @@ them.
   meanings and is carried by `UserSummary`, `ConversationSummary`, `MomentPost`,
   `UserProfile`, `MeDashboard` and — as `peerFrame` — `RelationshipRecord`, so a member's frame
   can no more differ between two screens than their photo can. `core/media/images.ts` maps the
-  keys to art and holds `AVATAR_FRAME_SCALE`, the measured canvas ÷ hole ratio per frame.
+  keys to art and holds `AVATAR_FRAME_FIT`: the measured canvas ÷ hole ratio **and the offset
+  of the hole's centre from the canvas centre** (the heart and the blossoms hang below the
+  ring, so their opening is not centred). `Avatar` applies both, which is what puts the photo
+  exactly inside the opening — centre to centre, edge to edge — at any size. The numbers come
+  from a flood fill of each PNG's alpha channel: the hole's horizontal extremes give its centre
+  and diameter, its first transparent row gives its top.
 - **`Avatar` grew a `frame` prop** that bleeds the art *outside* the avatar's layout box, so a
   row's geometry never depends on whether its member owns a frame. `FramedAvatar` sizes its
-  outer box by the frame's own ratio and falls back to the app's ring when the member has
-  none; the Me tab uses it, so the animated halo's 1.73× box is laid out rather than
-  overflowing the identity row.
+  outer box by the frame's ratio plus that offset so nothing clips, and falls back to the
+  app's ring when the member has none; the Me tab uses it, so the animated halo's 1.9× box is
+  laid out rather than overflowing the identity row.
 - **One animated frame, and only on the account's own avatar.** `halo` is animated WebP
   (61 frames, 60 ms, 320², 1.4 MB, alpha intact). The fixtures give it to `FIXTURE_ME` and
   never to a directory row, a post or a conversation — sixty frames of alpha in a scrolling
@@ -712,3 +717,64 @@ them.
   count chip and each trophy are verified as rendered, labelled and wired, not as pressed.
 - **iOS.** Cannot be built on Windows.
 
+## P6 - the Me dashboard (2026-10-20)
+
+### What changed
+
+- **The account screen is now the reference's card rhythm.** Identity strip, then the
+  following/friends/followers row on the page, then four cards: Recharge (wallet + the two join
+  tiles), General Tools (four shortcuts), Games (three covers) and the account menu (seven
+  actions). The old screen had the same information in a different shape — a flat tools
+  section, four games in a wrapping grid, and a "More" list.
+- **The dashboard's content is data, not screen literals.** `MeDashboard` gained `tools`,
+  `games` and `menu`, typed as `MeTool`, `MeGame` and `MeMenuEntry`. `MeGame.kind` and
+  `MeMenuEntry.key` are meanings; the screen owns the glyph and tint mapping, so swapping the
+  icon set never touches fixtures and a future server payload fills the same fields.
+- **VIP and SVIP share one tile.** `core/memberships.ts` groups the dashboard's memberships
+  into the reference's two tiles and derives the second line (`Join` / `Renew` / `Active`) from
+  the statuses it was told — it never decides an entitlement. Five unit tests pin the grouping
+  and the copy.
+- **Games use our own covers.** The reference's tiles are third-party game art (a licensed
+  strategy game, a car game, Ludo). Those are not ours to ship, so each cover is a gradient
+  from `tints.me.game` with a Lucide glyph (sparkles, checklist, dice) — modern, original, and
+  consistent with the icon language used everywhere else.
+- **The interface kit grew.** `GradientFill` is the tile-sized sibling of `ScreenGradient`;
+  `MenuRow` gained `chevron`, `iconColor` and `valueAttention`; `Icon` gained `family`,
+  `headset` and `warning` (UsersRound, Headset, TriangleAlert); and `tints.me` carries the
+  membership tile and the three game gradients for both schemes.
+- **The wallet is still display-only.** Recharge, both join tiles, the tools, the games and the
+  menu actions that need a server hand off with an "arrives with the backend phase" toast. Only
+  Share Letgo performs a real action (the platform share sheet) and reports a clear message
+  when the platform has none. Nothing on this screen changes a balance.
+
+### Verified
+
+- `tsc`, `eslint`, `prettier --check` clean; `jest` 11 suites / 109 tests (five new for
+  `membershipTiles`).
+- **Rendered off-device at 320, 360 and 393 pt**, light and dark: no element crosses the
+  viewport edge and no label clips. The tier tiles wrap to full-width rows at 320 pt, which
+  is why the labels survive that screen; at 360 and 393 they stay side by side.
+- **Every control was pressed in the browser** and produced its expected outcome: Recharge,
+  VIP/SVIP, Aristocracy, each tool, each game, each menu row, and Share Letgo (falls back to
+  "Sharing is not available on this device" where the platform has no share sheet). Accessible
+  names read as "Recharge. Balance 260 coins", "VIP/SVIP. Join", "Visitors, 15 new", "My Level.
+  0" — values are part of the label, not separate announcements.
+- **Zero console errors** on the route.
+
+### Defect found and fixed in the pass
+
+- **The tile glyphs were invisible.** `GradientFill` is absolutely positioned; in CSS an
+  absolutely positioned sibling paints *above* in-flow content whatever the document order, so
+  the crown, the shield and the three game glyphs sat under their own gradient. Each tile now
+  wraps its contents in a positioned layer (`position: relative` on the row, an absolutely
+  positioned centred layer for the cover), which is the same class of fix as P5's `zIndex: 2`
+  trophy layer.
+
+### NOT verified in P6
+
+- **Nothing on the handset.** The device was not attached during this pass. The layout was
+  checked in RN-web, which shares the React Native layout model but not Android's font
+  metrics, its elevation shadows or the system navigation bar.
+- **RTL.** The screen uses logical properties throughout (`start`/`end`, no `left`/`right`) and
+  the app ships Arabic copy, but the Arabic layout of this screen has not been looked at.
+- **iOS.** Cannot be built on Windows.

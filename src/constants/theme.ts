@@ -181,6 +181,13 @@ export interface AppTints {
   couple: { from: string; to: string; text: string; muted: string };
   /** The three honour walls on the profile's Honour tab. */
   honor: Record<HonorToneKey, HonorTone>;
+  /** The Me dashboard's own surfaces: membership tiles and game covers. */
+  me: {
+    /** The two cream-gold join tiles under the wallet row. */
+    tierTile: { from: string; to: string; border: string; ink: string; accent: string };
+    /** One gradient per mini-game; `ink` is the glyph colour on top. */
+    game: Record<'spin' | 'quiz' | 'board', { from: string; to: string; ink: string }>;
+  };
   /** Presence dot. */
   online: string;
   /** The greeting control. */
@@ -251,6 +258,20 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     },
     online: '#22C55E',
     hi: { background: '#FFDCEA', text: '#E5307A', icon: '#F04088' },
+    me: {
+      tierTile: {
+        from: '#FFF7DE',
+        to: '#FFE7B0',
+        border: '#F4CE79',
+        ink: '#6B4A00',
+        accent: '#DE9A16',
+      },
+      game: {
+        spin: { from: '#8B5CF6', to: '#EC4899', ink: '#FFFFFF' },
+        quiz: { from: '#3B82F6', to: '#06B6D4', ink: '#FFFFFF' },
+        board: { from: '#F59E0B', to: '#EF4444', ink: '#FFFFFF' },
+      },
+    },
     cardShadow: 'rgba(46, 32, 84, 0.10)',
   },
   dark: {
@@ -314,6 +335,20 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     },
     online: '#4ADE80',
     hi: { background: '#3A1D2B', text: '#FF9EC4', icon: '#FF9EC4' },
+    me: {
+      tierTile: {
+        from: '#332A14',
+        to: '#463414',
+        border: '#5E4820',
+        ink: '#FFE3A6',
+        accent: '#F0B84A',
+      },
+      game: {
+        spin: { from: '#6D28D9', to: '#BE185D', ink: '#FFFFFF' },
+        quiz: { from: '#1D4ED8', to: '#0E7490', ink: '#FFFFFF' },
+        board: { from: '#B45309', to: '#B91C1C', ink: '#FFFFFF' },
+      },
+    },
     cardShadow: 'rgba(0, 0, 0, 0.5)',
   },
 };

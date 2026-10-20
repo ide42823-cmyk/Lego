@@ -376,6 +376,31 @@ export const FIXTURE_ME: MeDashboard = {
       detail: 'Advanced entertainment',
     },
   ],
+  tools: [
+    { key: 'diamonds', label: 'Diamonds' },
+    {
+      key: 'visitors',
+      label: 'Visitors',
+      avatarUrl: mediaRef('portraits', 'f04'),
+      badgeCount: 15,
+    },
+    { key: 'tasks', label: 'Tasks' },
+    { key: 'family', label: 'Family' },
+  ],
+  games: [
+    { id: 'lucky-spin', title: 'Lucky Spin', kind: 'spin', badgeCount: 1, tag: '37' },
+    { id: 'quiz-night', title: 'Quiz Night', kind: 'quiz' },
+    { id: 'board-night', title: 'Board Night', kind: 'board' },
+  ],
+  menu: [
+    { key: 'events', label: 'Event Center' },
+    { key: 'store', label: 'Store' },
+    { key: 'backpack', label: 'Backpack' },
+    { key: 'level', label: 'My Level', value: '0', attention: true },
+    { key: 'share', label: 'Share Letgo' },
+    { key: 'support', label: 'Help & support' },
+    { key: 'settings', label: 'Settings' },
+  ],
 };
 
 /* -------------------------------------------------------------------------

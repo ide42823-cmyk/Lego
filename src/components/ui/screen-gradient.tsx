@@ -27,13 +27,7 @@ export function ScreenGradient({ color, height = 240, opacity = 1 }: ScreenGradi
   const id = `tint-${color.replace('#', '')}-${Math.round(opacity * 100)}`;
 
   return (
-    <Svg
-      width="100%"
-      height={height}
-      style={styles.backdrop}
-      pointerEvents="none"
-      accessible={false}
-    >
+    <Svg width="100%" height={height} style={styles.backdrop} pointerEvents="none" aria-hidden>
       <Defs>
         <LinearGradient id={id} x1="0" y1="0" x2="0" y2="1">
           <Stop offset="0" stopColor={color} stopOpacity={opacity} />

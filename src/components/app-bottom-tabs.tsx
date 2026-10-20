@@ -103,7 +103,13 @@ export default function AppBottomTabs({ messageBadge = 0, meBadge = 0 }: AppBott
 
   return (
     <Tabs style={styles.root}>
-      <TabSlot />
+      {/*
+        `flex: 1` here (not just on `Tabs`) is what keeps the slot inside the
+        window: expo-router's slot container ships with `flexShrink: 0`, so on
+        web the screen would grow to its content's height and push the bar below
+        the fold instead of scrolling inside it.
+      */}
+      <TabSlot style={styles.slot} />
       <TabList asChild>
         <TabBar>
           <TabTrigger name="index" href="/" asChild>
@@ -134,6 +140,7 @@ export default function AppBottomTabs({ messageBadge = 0, meBadge = 0 }: AppBott
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  slot: { flex: 1 },
   bar: {
     flexDirection: 'row',
     alignItems: 'flex-start',

@@ -27,7 +27,14 @@ export function AppCard({ children, padded = true, style, ...rest }: AppCardProp
     <View
       style={[
         styles.card,
-        { backgroundColor: theme.surface, shadowColor: tints.cardShadow },
+        {
+          backgroundColor: theme.surface,
+          shadowColor: tints.cardShadow,
+          // A hairline as well as the shadow: on web the shadow is faint, and in
+          // the light scheme a white card on a white page would otherwise have
+          // no edge at all.
+          borderColor: theme.border,
+        },
         padded && styles.padded,
         style,
       ]}
@@ -41,6 +48,7 @@ export function AppCard({ children, padded = true, style, ...rest }: AppCardProp
 const styles = StyleSheet.create({
   card: {
     borderRadius: Radius.large,
+    borderWidth: StyleSheet.hairlineWidth,
     ...CardShadow,
   },
   padded: { padding: Spacing.three },

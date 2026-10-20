@@ -10,6 +10,7 @@ import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from '../themed-text';
 import { Icon, type IconName } from '../ui/icon';
+import { DECORATIVE_IMAGE } from '@/components/ui/decorative-image';
 
 const ART: Record<HonorArt, IconName> = {
   crown: 'crown',
@@ -100,7 +101,7 @@ export function HonorWallCard({ wall, onOpenCollection, onOpenEntry }: HonorWall
         style={StyleSheet.absoluteFill}
         contentFit="fill"
         // The plate is decoration; the plaque below carries the wall's name.
-        accessible={false}
+        {...DECORATIVE_IMAGE}
       />
 
       <View style={[styles.content, ROW_FOOT[wall.key]]}>
@@ -197,7 +198,7 @@ function BadgeRow({ wall, palette, dark, onOpenEntry }: RowProps & { dark: boole
               source={medal}
               style={StyleSheet.absoluteFill}
               contentFit="contain"
-              accessible={false}
+              {...DECORATIVE_IMAGE}
             />
             <View style={styles.glyph}>
               <Icon name={ART[entry.art]} size={26} strokeWidth={2.1} color={GLYPH[entry.art]} />
@@ -226,7 +227,7 @@ function BadgeRow({ wall, palette, dark, onOpenEntry }: RowProps & { dark: boole
               source={medal}
               style={[StyleSheet.absoluteFill, styles.faded]}
               contentFit="contain"
-              accessible={false}
+              {...DECORATIVE_IMAGE}
             />
             <View style={styles.glyph}>
               <Icon name="diamonds" size={24} strokeWidth={1.8} color={palette.slot.text} />
@@ -316,7 +317,7 @@ function GiftRow({ wall, palette, dark, onOpenEntry }: RowProps & { dark: boolea
               source={frame}
               style={StyleSheet.absoluteFill}
               contentFit="fill"
-              accessible={false}
+              {...DECORATIVE_IMAGE}
             />
             <View style={styles.glyph}>
               <Icon name={ART[entry.art]} size={25} strokeWidth={2.1} color={GLYPH[entry.art]} />
@@ -359,7 +360,7 @@ function GiftRow({ wall, palette, dark, onOpenEntry }: RowProps & { dark: boolea
               source={frame}
               style={[StyleSheet.absoluteFill, styles.faded]}
               contentFit="fill"
-              accessible={false}
+              {...DECORATIVE_IMAGE}
             />
             <View style={styles.glyph}>
               <Icon name="gift" size={24} strokeWidth={1.8} color={palette.slot.text} />

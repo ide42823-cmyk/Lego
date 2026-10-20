@@ -159,8 +159,46 @@ export interface MembershipSummary {
   id: 'vip' | 'svip' | 'aristocracy';
   label: string;
   status: 'active' | 'available' | 'expiring';
-  /** Presentation copy only — never an entitlement decision. */
+  /** Presentation copy only - never an entitlement decision. */
   detail: string;
+}
+
+/** The four shortcuts in the Me screen's General Tools card. */
+export type MeToolKey = 'diamonds' | 'visitors' | 'tasks' | 'family';
+
+export interface MeTool {
+  key: MeToolKey;
+  label: string;
+  /**
+   * Visitors shows the newest visitor's photo instead of a glyph, as in the
+   * reference. The photo is display-only; who may see it is a server decision.
+   */
+  avatarUrl?: string;
+  /** Unactioned count drawn on the tile's corner. */
+  badgeCount?: number;
+}
+
+/** A mini-game tile. `kind` is a meaning; the screen owns the glyph. */
+export interface MeGame {
+  id: string;
+  title: string;
+  kind: 'spin' | 'quiz' | 'board';
+  /** Red dot: something new inside. */
+  badgeCount?: number;
+  /** Small ribbon in the cover's corner, e.g. the player's best level. */
+  tag?: string;
+}
+
+export type MeMenuKey =
+  'events' | 'store' | 'backpack' | 'level' | 'share' | 'support' | 'settings';
+
+export interface MeMenuEntry {
+  key: MeMenuKey;
+  label: string;
+  /** Trailing value, e.g. unclaimed level points. */
+  value?: string;
+  /** Draws the value as an attention chip rather than plain text. */
+  attention?: boolean;
 }
 
 export interface MeDashboard {
@@ -180,6 +218,12 @@ export interface MeDashboard {
    */
   coinBalance: number;
   memberships: MembershipSummary[];
+  /** General Tools shortcuts, in display order. */
+  tools: MeTool[];
+  /** Games row. Three tiles fit the reference's row. */
+  games: MeGame[];
+  /** The account menu, in display order. */
+  menu: MeMenuEntry[];
   /**
    * Things on this screen that want attention — a pending task, a new visitor.
    * Drives the dot on the account tab. It is a count, never an entitlement.

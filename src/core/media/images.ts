@@ -96,18 +96,31 @@ const FRAMES: Record<AvatarFrameKey, number> = {
 };
 
 /**
- * How much larger than the photo each frame has to be drawn.
+ * How each frame sits around the photo.
  *
- * The frames are square canvases with a transparent hole, so the ratio is
- * (canvas side ÷ hole diameter) — measured once when the art was prepared. A
- * frame therefore never covers the face, whatever size the avatar is.
+ * Every frame is a square canvas with a transparent hole, but the hole is not
+ * always centred: the heart and the blossoms hang off the bottom of the ring, so
+ * the opening sits above the canvas centre. Drawing the art centred on the photo
+ * would leave a gap under the chin and clip the hair, so each frame carries the
+ * offset of its hole as well as its size.
+ *
+ * `scale` is (canvas side ÷ hole diameter) and both offsets are fractions of the
+ * canvas side. They are measured once from the art's alpha channel — the hole's
+ * horizontal extremes give its centre and diameter, the first transparent row
+ * gives its top.
  */
-export const AVATAR_FRAME_SCALE: Record<AvatarFrameKey, number> = {
-  blossom: 1.333,
-  wings: 1.45,
-  heart: 1.336,
-  rope: 1.225,
-  halo: 1.734,
+export interface AvatarFrameFit {
+  scale: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+export const AVATAR_FRAME_FIT: Record<AvatarFrameKey, AvatarFrameFit> = {
+  blossom: { scale: 1.323, offsetX: 0.0098, offsetY: -0.0303 },
+  wings: { scale: 1.463, offsetX: 0, offsetY: -0.0312 },
+  heart: { scale: 1.34, offsetX: 0, offsetY: -0.0469 },
+  rope: { scale: 1.219, offsetX: 0, offsetY: 0 },
+  halo: { scale: 1.905, offsetX: 0, offsetY: 0 },
 };
 
 export const AVATAR_FRAME_KEYS = Object.keys(FRAMES) as AvatarFrameKey[];

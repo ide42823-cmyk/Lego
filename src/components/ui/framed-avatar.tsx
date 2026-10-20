@@ -2,9 +2,10 @@ import { Image } from 'expo-image';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import type { AvatarFrameKey } from '@/core/data/types';
-import { AVATAR_FRAME_SCALE, artSource } from '@/core/media/images';
+import { AVATAR_FRAME_FIT, artSource } from '@/core/media/images';
 
 import { Avatar } from './avatar';
+import { DECORATIVE_IMAGE } from '@/components/ui/decorative-image';
 
 /** Generated once by `tools/build-art.mjs`. */
 const FRAME = artSource('avatarFrame');
@@ -43,8 +44,12 @@ export function FramedAvatar({
   style,
   ...rest
 }: FramedAvatarProps) {
-  const scale = frame ? AVATAR_FRAME_SCALE[frame] : RING_SCALE;
-  const outer = Math.round(size * scale);
+  const fit = frame ? AVATAR_FRAME_FIT[frame] : null;
+  const scale = fit ? fit.scale : RING_SCALE;
+  // The art is not always centred on the photo, so the box has to grow by the
+  // largest nudge — otherwise the frame would be clipped on one side.
+  const nudge = fit ? Math.max(Math.abs(fit.offsetX), Math.abs(fit.offsetY)) : 0;
+  const outer = Math.round(size * scale * (1 + 2 * nudge));
 
   return (
     <View
@@ -59,7 +64,7 @@ export function FramedAvatar({
           source={FRAME}
           style={StyleSheet.absoluteFill}
           contentFit="contain"
-          accessible={false}
+          {...DECORATIVE_IMAGE}
         />
       )}
     </View>

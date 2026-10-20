@@ -48,10 +48,24 @@ production versions:
   bundled as WebP rather than GIF because the GIF encode either lost the
   transparency or ballooned past 3 MB; the WebP is 1.4 MB with clean edges.
 
-`src/core/media/images.ts` stores one number per frame: **canvas side ÷ hole
-diameter**, measured when the art was prepared (`blossom` 1.333, `wings` 1.450,
-`heart` 1.336, `rope` 1.225, `halo` 1.734). `Avatar` divides that ratio out when
-it bleeds the art outside the photo, so a frame never covers a face at any size.
+`src/core/media/images.ts` stores the fit of each frame to the photo it wraps —
+**canvas side ÷ hole diameter** plus the **offset of the hole's centre from the
+canvas centre**, both measured from the art's alpha channel:
+
+| frame | scale | offset (x, y) |
+|---|---|---|
+| `blossom` | 1.323 | +0.0098, −0.0303 |
+| `wings` | 1.463 | 0, −0.0312 |
+| `heart` | 1.340 | 0, −0.0469 |
+| `rope` | 1.219 | 0, 0 |
+| `halo` | 1.905 | 0, 0 |
+
+The offsets matter: the heart and the blossoms hang off the bottom of the ring,
+so their hole sits *above* the canvas centre. Drawing the art centred on the
+photo would leave a gap under the chin and clip the hair. `Avatar` scales the art
+and nudges it by the offset so the hole lands exactly on the photo at any size.
+Re-measure with the alpha-channel scan described in ADR 0004 (P5) if the art is
+ever redrawn.
 
 **Only `halo` animates, so only one avatar may wear it at a time.** The fixtures
 give it to the account's own avatar on the Me tab and never to a directory row,

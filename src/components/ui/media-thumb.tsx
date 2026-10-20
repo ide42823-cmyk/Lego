@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, type ViewProps } from 'react-native';
 
 import { Radius } from '@/constants/theme';
 import { imageSource } from '@/core/media/images';
+import { DECORATIVE_IMAGE } from '@/components/ui/decorative-image';
 
 export interface MediaThumbProps extends ViewProps {
   /** Stable id used to pick a deterministic placeholder colour. */
@@ -56,7 +57,7 @@ export function MediaThumb({
           source={source}
           style={[styles.image, { borderRadius }]}
           contentFit="cover"
-          accessible={false}
+          {...DECORATIVE_IMAGE}
         />
       ) : (
         <Text style={styles.placeholder} accessible={false}>

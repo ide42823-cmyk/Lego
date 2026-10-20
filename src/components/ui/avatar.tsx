@@ -3,11 +3,12 @@ import { StyleSheet, Text, View, type ViewProps } from 'react-native';
 
 import { Radius } from '@/constants/theme';
 import type { AvatarFrameKey } from '@/core/data/types';
-import { AVATAR_FRAME_SCALE, frameSource, imageSource } from '@/core/media/images';
+import { AVATAR_FRAME_FIT, frameSource, imageSource } from '@/core/media/images';
 import { useTheme } from '@/hooks/use-theme';
 import { useTints } from '@/hooks/use-tints';
 
 import { Icon } from './icon';
+import { DECORATIVE_IMAGE } from '@/components/ui/decorative-image';
 
 export interface AvatarProps extends ViewProps {
   /** Stable id used to pick a deterministic placeholder colour. */
@@ -85,8 +86,22 @@ export function Avatar({
   const corner = radius ?? size / 2;
   const ring = ringColor ? { borderWidth: 2, borderColor: ringColor } : null;
   const dot = Math.max(10, Math.round(size * 0.24));
-  /** How far the frame art bleeds past each edge of the photo. */
-  const bleed = frame ? Math.round((size * (AVATAR_FRAME_SCALE[frame] - 1)) / 2) : 0;
+  /**
+   * The frame is drawn larger than the photo and nudged so that its transparent
+   * hole lands exactly on the avatar — the art's hole is not centred in its
+   * canvas (see `AVATAR_FRAME_FIT`).
+   */
+  const fit = frame ? AVATAR_FRAME_FIT[frame] : null;
+  const art = fit ? size * fit.scale : 0;
+  const artStyle = fit
+    ? {
+        position: 'absolute' as const,
+        width: art,
+        height: art,
+        left: (size - art) / 2 - fit.offsetX * art,
+        top: (size - art) / 2 - fit.offsetY * art,
+      }
+    : null;
 
   return (
     <View
@@ -104,7 +119,7 @@ export function Avatar({
           style={{ width: size, height: size, borderRadius: corner }}
           contentFit="cover"
           // Purely decorative; the row supplies the accessible name.
-          accessible={false}
+          {...DECORATIVE_IMAGE}
         />
       ) : (
         <Text
@@ -115,20 +130,14 @@ export function Avatar({
         </Text>
       )}
 
-      {frame ? (
+      {frame && artStyle ? (
         <Image
           // Decoration, and the one place the animated frame may appear: on a
           // single avatar. Lists never get the animated key.
           source={frameSource(frame)}
-          style={{
-            position: 'absolute',
-            top: -bleed,
-            start: -bleed,
-            end: -bleed,
-            bottom: -bleed,
-          }}
+          style={artStyle}
           contentFit="contain"
-          accessible={false}
+          {...DECORATIVE_IMAGE}
         />
       ) : null}
 

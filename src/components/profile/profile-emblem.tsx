@@ -5,6 +5,7 @@ import type { HonorArt, ProfileEmblem as ProfileEmblemData } from '@/core/data/t
 import { artSource } from '@/core/media/images';
 
 import { Icon, type IconName } from '../ui/icon';
+import { DECORATIVE_IMAGE } from '@/components/ui/decorative-image';
 
 /** The reference floats a crest of roughly this size beside the display name. */
 export const EMBLEM_SIZE = 84;
@@ -51,7 +52,7 @@ export function ProfileEmblem({ emblem, style }: ProfileEmblemProps) {
       accessibilityLabel={emblem.label}
       style={[styles.root, style]}
     >
-      <Image source={CREST} style={styles.art} contentFit="contain" accessible={false} />
+      <Image source={CREST} style={styles.art} contentFit="contain" {...DECORATIVE_IMAGE} />
       <View style={styles.glyph} accessible={false}>
         <Icon name={ART[emblem.art]} size={30} strokeWidth={2.2} color="#FFFFFF" />
       </View>

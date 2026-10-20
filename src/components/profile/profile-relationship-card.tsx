@@ -14,6 +14,7 @@ import { ThemedText } from '../themed-text';
 import { Divider } from '../ui/divider';
 import { FramedAvatar } from '../ui/framed-avatar';
 import { Icon } from '../ui/icon';
+import { DECORATIVE_IMAGE } from '@/components/ui/decorative-image';
 
 /** Cards are a fixed width so a row of them lines up with the reference's grid. */
 const CARD_WIDTH = 104;
@@ -92,7 +93,7 @@ export function CouplePanel({
             source={WING_HEART}
             style={styles.wingHeart}
             contentFit="contain"
-            accessible={false}
+            {...DECORATIVE_IMAGE}
           />
           {record ? (
             <View style={styles.daysPill}>
@@ -170,7 +171,7 @@ function CoupleBackdrop() {
         source={CLOUDS}
         style={[styles.clouds, { opacity: isDark ? 0.22 : 0.6 }]}
         contentFit="fill"
-        accessible={false}
+        {...DECORATIVE_IMAGE}
       />
       {/*
         A floor shade the names can be read against. It is a gradient, not a

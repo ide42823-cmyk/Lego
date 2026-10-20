@@ -22,6 +22,7 @@ import Flame from 'lucide-react-native/icons/flame';
 import Gem from 'lucide-react-native/icons/gem';
 import Gift from 'lucide-react-native/icons/gift';
 import Globe from 'lucide-react-native/icons/globe';
+import Headset from 'lucide-react-native/icons/headset';
 import Heart from 'lucide-react-native/icons/heart';
 import HeartHandshake from 'lucide-react-native/icons/heart-handshake';
 import House from 'lucide-react-native/icons/house';
@@ -50,16 +51,19 @@ import Star from 'lucide-react-native/icons/star';
 import Store from 'lucide-react-native/icons/store';
 import ThumbsUp from 'lucide-react-native/icons/thumbs-up';
 import Ticket from 'lucide-react-native/icons/ticket';
+import TriangleAlert from 'lucide-react-native/icons/triangle-alert';
 import Trophy from 'lucide-react-native/icons/trophy';
 import UserPlus from 'lucide-react-native/icons/user-plus';
 import UserRound from 'lucide-react-native/icons/user-round';
 import Users from 'lucide-react-native/icons/users';
+import UsersRound from 'lucide-react-native/icons/users-round';
 import Venus from 'lucide-react-native/icons/venus';
 import Video from 'lucide-react-native/icons/video';
 import WavesHorizontal from 'lucide-react-native/icons/waves-horizontal';
 import Weight from 'lucide-react-native/icons/weight';
 import X from 'lucide-react-native/icons/x';
 import type { LucideIcon } from 'lucide-react-native';
+import { View } from 'react-native';
 
 /**
  * The app's icon vocabulary.
@@ -123,6 +127,7 @@ export type IconName =
   | 'backpack'
   | 'tasks'
   | 'friends'
+  | 'family'
   | 'games'
   | 'party'
   | 'diamonds'
@@ -138,6 +143,8 @@ export type IconName =
   | 'rank'
   | 'settings'
   | 'share'
+  | 'headset'
+  | 'warning'
   // Profile contact and attribute rows
   | 'phone'
   | 'copy'
@@ -189,6 +196,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   backpack: Backpack,
   tasks: ListChecks,
   friends: Users,
+  family: UsersRound,
   games: Dices,
   party: PartyPopper,
   diamonds: Gem,
@@ -204,6 +212,8 @@ const ICONS: Record<IconName, LucideIcon> = {
   rank: HeartHandshake,
   settings: Settings,
   share: Share2,
+  headset: Headset,
+  warning: TriangleAlert,
 
   phone: Phone,
   copy: Copy,
@@ -240,15 +250,28 @@ export function Icon({
 }: IconProps) {
   const Glyph = ICONS[name];
 
-  return (
+  // Lucide draws with `react-native-svg`, which forwards props straight to the
+  // DOM node on web, where `accessible` is not a valid HTML attribute. So the
+  // glyph itself is always hidden, and a labelled icon is wrapped in a view that
+  // carries the accessible name.
+  const glyph = (
     <Glyph
       size={size}
       color={color}
       strokeWidth={strokeWidth}
       fill={fill}
-      accessible={Boolean(label)}
-      accessibilityLabel={label}
       focusable={false}
+      aria-hidden
     />
+  );
+
+  if (!label) {
+    return glyph;
+  }
+
+  return (
+    <View accessible accessibilityRole="image" accessibilityLabel={label}>
+      {glyph}
+    </View>
   );
 }
