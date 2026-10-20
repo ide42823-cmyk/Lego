@@ -20,6 +20,18 @@ export type RoomCategory = 'chat' | 'families' | 'friendship' | 'video';
 export type RoomBadge = 'official' | 'featured' | 'trending';
 export type Gender = 'female' | 'male';
 
+/**
+ * A decorative avatar frame a member owns.
+ *
+ * The keys are meanings, not file names: the view resolves them against its own
+ * art set (`core/media/images`), so the art can be replaced without touching the
+ * data layer. Ownership is a server fact; nothing here grants it.
+ *
+ * `halo` is the one animated frame, so it is only ever drawn on a single avatar
+ * at a time — never inside a list.
+ */
+export type AvatarFrameKey = 'blossom' | 'wings' | 'heart' | 'rope' | 'halo';
+
 export type UserBadge = 'level' | 'vip' | 'svip' | 'aristocracy' | 'verified' | 'new';
 
 export interface UserSummary {
@@ -43,6 +55,8 @@ export interface UserSummary {
   vipTier?: number;
   /** The member advertises video calls straight from the directory row. */
   videoCall?: boolean;
+  /** The avatar frame this member owns, when they have one. */
+  avatarFrame?: AvatarFrameKey;
   badges: UserBadge[];
   isOnline: boolean;
 }
@@ -68,6 +82,8 @@ export interface ConversationSummary {
   peerId: string;
   peerName: string;
   avatarUrl?: string;
+  /** The peer's avatar frame, mirroring their directory entry. */
+  avatarFrame?: AvatarFrameKey;
   /** Country hint, shown as a flag beside the name in the inbox. */
   locale?: string;
   snippet: string;
@@ -98,6 +114,8 @@ export interface MomentPost {
   authorAge?: number;
   authorGender?: Gender;
   avatarUrl?: string;
+  /** The author's avatar frame, mirroring their directory entry. */
+  avatarFrame?: AvatarFrameKey;
   badges: UserBadge[];
   text: string;
   mediaUrl?: string;
@@ -150,6 +168,8 @@ export interface MeDashboard {
   displayName: string;
   handle: string;
   avatarUrl?: string;
+  /** This account's own frame. The only place the animated one is drawn. */
+  avatarFrame?: AvatarFrameKey;
   followingCount: number;
   friendCount: number;
   followersCount: number;
@@ -290,6 +310,8 @@ export interface RelationshipRecord {
   peerName: string;
   /** The peer's photo; the card shows the same face the directories show. */
   peerAvatarUrl?: string;
+  /** The peer's frame, so a friend card matches the same member elsewhere. */
+  peerFrame?: AvatarFrameKey;
   /** Relationship level, e.g. 34 renders as "Couple Lv.34". */
   level: number;
   /** Days the relationship has lasted. */
@@ -307,6 +329,8 @@ export interface UserProfile {
   id: string;
   displayName: string;
   avatarUrl?: string;
+  /** The frame this member displays; the profile hero and compact bar share it. */
+  avatarFrame?: AvatarFrameKey;
   coverUrl?: string;
   /** Short status/bio line, also used for the accessible name. */
   status: string;

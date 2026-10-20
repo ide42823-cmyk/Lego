@@ -15,6 +15,7 @@ Replace them with the real assets when they exist.
 | `covers/`     | `f01..f03`, `m01..m04` | Profile hero covers                          |
 | `posts/`      | `f01..f06`, `m01..m02` | Moment media                                 |
 | `rooms/`      | `r01..r08`       | Room card artwork                                   |
+| `frames/`     | 5 files          | Avatar frames the project owner drew; see below     |
 | `art/`        | see below        | Generated decoration; not photography               |
 
 Portraits are 256×256, covers 720×1280, posts 600×800 and room covers 720×480.
@@ -34,6 +35,28 @@ Every fixture member is invented; the name, gender, level and status are
 generated (see `src/core/data/fixtures.ts`). Names, covers and portraits are
 grouped by the gender the photo presents only so a row cannot read as an obvious
 mismatch while reviewing the layout.
+
+## The avatar frames
+
+`frames/` holds five frames drawn by the project owner specifically for this app:
+`blossom`, `wings`, `heart`, `rope` (still) and `halo` (animated). The originals
+live outside the repo in the owner's `Sprites/` folder; the copies here are the
+production versions:
+
+- every still is a **512×512 PNG** with a fully transparent centre hole;
+- `halo.webp` is animated — 61 frames at 60 ms, 320×320, alpha preserved. It is
+  bundled as WebP rather than GIF because the GIF encode either lost the
+  transparency or ballooned past 3 MB; the WebP is 1.4 MB with clean edges.
+
+`src/core/media/images.ts` stores one number per frame: **canvas side ÷ hole
+diameter**, measured when the art was prepared (`blossom` 1.333, `wings` 1.450,
+`heart` 1.336, `rope` 1.225, `halo` 1.734). `Avatar` divides that ratio out when
+it bleeds the art outside the photo, so a frame never covers a face at any size.
+
+**Only `halo` animates, so only one avatar may wear it at a time.** The fixtures
+give it to the account's own avatar on the Me tab and never to a directory row,
+a post or a conversation: sixty frames of alpha in a scrolling list is work the
+device should not do for decoration.
 
 ## Regenerating
 
@@ -56,6 +79,15 @@ by `tools/build-art.mjs` with `@resvg/resvg-js`:
 | `avatar-frame.png` | The gold avatar ring with four rose gems                           |
 | `wing-heart.png`   | The winged heart on the couple card                                |
 | `clouds.png`       | The cloud band behind the couple card                              |
+| `honor-panel-*.png`| The three honour walls' plates, gold/violet/ice, light + `-dark`   |
+| `honor-medal*.png` | The medallion a badge glyph sits in (light + `-dark`)              |
+| `honor-gift-frame*.png` | The plaque a gift glyph is framed by (light + `-dark`)        |
+
+The honour plates share one shape in three tones: a metal double border, filigree
+sprigs in the corners and a glass shelf near the foot that the trophies stand on.
+The wall's *title plaque* and *count chip* are deliberately not baked into the
+art — they carry text, so the screen draws them and they stay translatable and
+mirrored in RTL.
 
 These are original shapes drawn from our own palette — no reference-app art is
 copied or cropped. The enamel in the crest is deliberately empty: `ProfileEmblem`

@@ -4,10 +4,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { AppCard } from '@/components/ui/app-card';
 import { AppScreen } from '@/components/ui/app-screen';
-import { Avatar } from '@/components/ui/avatar';
 import { CategoryChip } from '@/components/ui/category-chip';
 import { CountBadge } from '@/components/ui/badge';
 import { Divider } from '@/components/ui/divider';
+import { FramedAvatar } from '@/components/ui/framed-avatar';
 import { Icon, type IconName } from '@/components/ui/icon';
 import { MenuRow } from '@/components/ui/menu-row';
 import { ErrorState, LoadingSkeleton } from '@/components/ui/states';
@@ -79,11 +79,12 @@ export default function MeScreen() {
             onPress={() => notYet('Editing your profile')}
             style={({ pressed }) => [styles.identity, pressed && { opacity: 0.7 }]}
           >
-            <Avatar
+            <FramedAvatar
               id={state.data.userId}
               name={state.data.displayName}
               size={92}
               uri={state.data.avatarUrl}
+              frame={state.data.avatarFrame}
             />
             <View style={styles.identityCopy}>
               <View style={styles.identityName}>

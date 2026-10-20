@@ -1,5 +1,7 @@
 import type { ImageSource } from 'expo-image';
 
+import type { AvatarFrameKey, HonorWall } from '@/core/data/types';
+
 /**
  * The one place fixture image references meet the bundler.
  *
@@ -67,9 +69,73 @@ const ART = {
   avatarFrame: require('../../../assets/media/art/avatar-frame.png'),
   wingHeart: require('../../../assets/media/art/wing-heart.png'),
   clouds: require('../../../assets/media/art/clouds.png'),
+  honorPanelBadges: require('../../../assets/media/art/honor-panel-badges.png'),
+  honorPanelBadgesDark: require('../../../assets/media/art/honor-panel-badges-dark.png'),
+  honorPanelTitles: require('../../../assets/media/art/honor-panel-titles.png'),
+  honorPanelTitlesDark: require('../../../assets/media/art/honor-panel-titles-dark.png'),
+  honorPanelGifts: require('../../../assets/media/art/honor-panel-gifts.png'),
+  honorPanelGiftsDark: require('../../../assets/media/art/honor-panel-gifts-dark.png'),
+  honorMedal: require('../../../assets/media/art/honor-medal.png'),
+  honorMedalDark: require('../../../assets/media/art/honor-medal-dark.png'),
+  honorGiftFrame: require('../../../assets/media/art/honor-gift-frame.png'),
+  honorGiftFrameDark: require('../../../assets/media/art/honor-gift-frame-dark.png'),
 } as const;
 
 export type ArtName = keyof typeof ART;
+
+/**
+ * Avatar frames. The art is the project owner's own work (see
+ * `assets/media/README.md`); `halo` is the animated one.
+ */
+const FRAMES: Record<AvatarFrameKey, number> = {
+  blossom: require('../../../assets/media/frames/blossom.png'),
+  wings: require('../../../assets/media/frames/wings.png'),
+  heart: require('../../../assets/media/frames/heart.png'),
+  rope: require('../../../assets/media/frames/rope.png'),
+  halo: require('../../../assets/media/frames/halo.webp'),
+};
+
+/**
+ * How much larger than the photo each frame has to be drawn.
+ *
+ * The frames are square canvases with a transparent hole, so the ratio is
+ * (canvas side ÷ hole diameter) — measured once when the art was prepared. A
+ * frame therefore never covers the face, whatever size the avatar is.
+ */
+export const AVATAR_FRAME_SCALE: Record<AvatarFrameKey, number> = {
+  blossom: 1.333,
+  wings: 1.45,
+  heart: 1.336,
+  rope: 1.225,
+  halo: 1.734,
+};
+
+export const AVATAR_FRAME_KEYS = Object.keys(FRAMES) as AvatarFrameKey[];
+
+export function frameSource(key: AvatarFrameKey): number {
+  return FRAMES[key];
+}
+
+const HONOR_PANEL: Record<HonorWall['key'], { light: number; dark: number }> = {
+  badges: { light: ART.honorPanelBadges, dark: ART.honorPanelBadgesDark },
+  titles: { light: ART.honorPanelTitles, dark: ART.honorPanelTitlesDark },
+  gifts: { light: ART.honorPanelGifts, dark: ART.honorPanelGiftsDark },
+};
+
+/** The plate behind one honour wall, in the active scheme. */
+export function honorPanelSource(tone: HonorWall['key'], dark: boolean): number {
+  return HONOR_PANEL[tone][dark ? 'dark' : 'light'];
+}
+
+/** The ring a badge medallion sits in. */
+export function honorMedalSource(dark: boolean): number {
+  return dark ? ART.honorMedalDark : ART.honorMedal;
+}
+
+/** The plaque a gift's glyph is framed by. */
+export function honorGiftFrameSource(dark: boolean): number {
+  return dark ? ART.honorGiftFrameDark : ART.honorGiftFrame;
+}
 
 export type MediaFolder = 'portraits' | 'covers' | 'posts' | 'rooms';
 

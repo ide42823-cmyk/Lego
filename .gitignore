@@ -47,3 +47,6 @@ example
 
 expo-env.d.ts
 # @end expo-cli
+
+# the project owner's working art; the production copies live in assets/media
+/Sprites

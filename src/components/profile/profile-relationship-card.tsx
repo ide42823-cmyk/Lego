@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { Radius, Spacing } from '@/constants/theme';
-import type { RelationshipRecord } from '@/core/data/types';
+import type { AvatarFrameKey, RelationshipRecord } from '@/core/data/types';
 import { artSource } from '@/core/media/images';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
@@ -32,6 +32,8 @@ export interface CouplePanelProps {
   ownerId: string;
   ownerName: string;
   ownerAvatarUrl?: string;
+  /** The owner's own frame, so both sides of the pair are dressed alike. */
+  ownerFrame?: AvatarFrameKey;
   /** Opens the relationship's detail; only reachable when there is a record. */
   onPress: (record: RelationshipRecord) => void;
   onInvite: () => void;
@@ -48,6 +50,7 @@ export function CouplePanel({
   ownerId,
   ownerName,
   ownerAvatarUrl,
+  ownerFrame,
   onPress,
   onInvite,
 }: CouplePanelProps) {
@@ -58,10 +61,11 @@ export function CouplePanel({
     id: string,
     name: string,
     uri: string | undefined,
+    frame: AvatarFrameKey | undefined,
     withHeart: boolean,
   ): ReactElement => (
     <View style={styles.coupleSide}>
-      <FramedAvatar id={id} name={name} uri={uri} size={58} />
+      <FramedAvatar id={id} name={name} uri={uri} frame={frame} size={58} />
       <View style={styles.coupleNameRow}>
         {withHeart ? (
           <Icon name="greeting" size={11} color={palette.text} fill={palette.text} />
@@ -81,7 +85,7 @@ export function CouplePanel({
     <View style={styles.coupleCard}>
       <CoupleBackdrop />
       <View style={styles.coupleRow}>
-        {side(ownerId, ownerName, ownerAvatarUrl, true)}
+        {side(ownerId, ownerName, ownerAvatarUrl, ownerFrame, true)}
 
         <View style={styles.emblem}>
           <Image
@@ -100,7 +104,7 @@ export function CouplePanel({
         </View>
 
         {record ? (
-          side(record.peerId, record.peerName, record.peerAvatarUrl, false)
+          side(record.peerId, record.peerName, record.peerAvatarUrl, record.peerFrame, false)
         ) : (
           <View style={styles.coupleSide}>
             <Pressable
@@ -212,6 +216,7 @@ export function FriendCard({ record, onPress }: FriendCardProps) {
           id={record.peerId}
           name={record.peerName}
           uri={record.peerAvatarUrl}
+          frame={record.peerFrame}
           size={48}
         />
         <View

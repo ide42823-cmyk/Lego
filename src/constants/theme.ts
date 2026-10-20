@@ -135,6 +135,28 @@ export type ChipTintKey =
 
 export type TierTintKey = 'vip' | 'svip' | 'aristocracy';
 
+export type HonorToneKey = 'badges' | 'titles' | 'gifts';
+
+/**
+ * The chrome of one honour wall (reference screen 025).
+ *
+ * The wall's plate, medal and gift frame are generated art (one file per scheme),
+ * so they are not tokens. What lives here is what the *screen* draws on top: the
+ * title plaque, the filled title ribbon, the empty slot and the count chip. Those
+ * carry text, so they have to be real views — a baked-in label could neither
+ * translate nor mirror in RTL.
+ */
+export interface HonorTone {
+  plaque: { from: string; to: string; border: string; text: string };
+  ribbon: { from: string; to: string; border: string; text: string };
+  slot: { border: string; text: string };
+  chip: { background: string; text: string };
+  /** The line under a badge medallion. */
+  caption: string;
+  grade: { background: string; text: string };
+  rarity: { background: string; text: string };
+}
+
 /**
  * The tints that give each tab and each chip its identity.
  *
@@ -157,6 +179,8 @@ export interface AppTints {
   level: { from: string; to: string; text: string };
   /** The couple card on the relationships tab. */
   couple: { from: string; to: string; text: string; muted: string };
+  /** The three honour walls on the profile's Honour tab. */
+  honor: Record<HonorToneKey, HonorTone>;
   /** Presence dot. */
   online: string;
   /** The greeting control. */
@@ -196,6 +220,35 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     gender: { female: '#D6336C', male: '#2B6CE0' },
     level: { from: '#FFE9A8', to: '#F0A500', text: '#5A3B00' },
     couple: { from: '#FF9EC6', to: '#F76BA8', text: '#FFFFFF', muted: 'rgba(255, 255, 255, 0.86)' },
+    honor: {
+      badges: {
+        plaque: { from: '#FFBB61', to: '#EE7C1B', border: '#FFE7B8', text: '#FFFFFF' },
+        ribbon: { from: '#FFD884', to: '#E8A11F', border: '#FFF2CE', text: '#5A3400' },
+        slot: { border: 'rgba(255, 255, 255, 0.92)', text: '#B97A1E' },
+        chip: { background: '#FFFFFF', text: '#C05E10' },
+        caption: '#8A5A12',
+        grade: { background: '#7B4DE0', text: '#FFFFFF' },
+        rarity: { background: 'rgba(255, 255, 255, 0.94)', text: '#3F5FBF' },
+      },
+      titles: {
+        plaque: { from: '#B37BF5', to: '#8A45E0', border: '#F0E2FF', text: '#FFFFFF' },
+        ribbon: { from: '#FFD884', to: '#E8A11F', border: '#FFF2CE', text: '#5A3400' },
+        slot: { border: 'rgba(255, 255, 255, 0.92)', text: '#6B3BC0' },
+        chip: { background: '#FFFFFF', text: '#6B3BC0' },
+        caption: '#5B3597',
+        grade: { background: '#7B4DE0', text: '#FFFFFF' },
+        rarity: { background: 'rgba(255, 255, 255, 0.94)', text: '#5B3597' },
+      },
+      gifts: {
+        plaque: { from: '#8FB3F2', to: '#5E7EE0', border: '#E2ECFF', text: '#FFFFFF' },
+        ribbon: { from: '#FFD884', to: '#E8A11F', border: '#FFF2CE', text: '#5A3400' },
+        slot: { border: 'rgba(255, 255, 255, 0.92)', text: '#3F5FBF' },
+        chip: { background: '#FFFFFF', text: '#3F5FBF' },
+        caption: '#3F5FBF',
+        grade: { background: '#7B4DE0', text: '#FFFFFF' },
+        rarity: { background: 'rgba(255, 255, 255, 0.94)', text: '#3F5FBF' },
+      },
+    },
     online: '#22C55E',
     hi: { background: '#FFDCEA', text: '#E5307A', icon: '#F04088' },
     cardShadow: 'rgba(46, 32, 84, 0.10)',
@@ -230,6 +283,35 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     gender: { female: '#FF9EC4', male: '#8FBCFF' },
     level: { from: '#4A3A0E', to: '#C98A00', text: '#FFE9A8' },
     couple: { from: '#8C2A50', to: '#5C1B36', text: '#FFE3EF', muted: 'rgba(255, 227, 239, 0.8)' },
+    honor: {
+      badges: {
+        plaque: { from: '#C9871F', to: '#8A5A10', border: '#F3D391', text: '#FFF7E6' },
+        ribbon: { from: '#B9841E', to: '#7A5310', border: '#E8C778', text: '#FFF3D2' },
+        slot: { border: 'rgba(255, 255, 255, 0.42)', text: '#E8C275' },
+        chip: { background: '#2A1C08', text: '#F5D89A' },
+        caption: '#E8C275',
+        grade: { background: '#6B41C8', text: '#FFFFFF' },
+        rarity: { background: 'rgba(20, 26, 44, 0.86)', text: '#DCE8FF' },
+      },
+      titles: {
+        plaque: { from: '#7A4FD0', to: '#4A2A8A', border: '#CDB2F7', text: '#F7F1FF' },
+        ribbon: { from: '#B9841E', to: '#7A5310', border: '#E8C778', text: '#FFF3D2' },
+        slot: { border: 'rgba(255, 255, 255, 0.38)', text: '#C9AEF0' },
+        chip: { background: '#221538', text: '#CDB2F7' },
+        caption: '#C9AEF0',
+        grade: { background: '#6B41C8', text: '#FFFFFF' },
+        rarity: { background: 'rgba(28, 20, 48, 0.86)', text: '#DDCBFF' },
+      },
+      gifts: {
+        plaque: { from: '#4A63C0', to: '#2C3E86', border: '#B7C9F7', text: '#EEF4FF' },
+        ribbon: { from: '#B9841E', to: '#7A5310', border: '#E8C778', text: '#FFF3D2' },
+        slot: { border: 'rgba(255, 255, 255, 0.38)', text: '#A9C2F2' },
+        chip: { background: '#141F3C', text: '#B7C9F7' },
+        caption: '#A9C2F2',
+        grade: { background: '#6B41C8', text: '#FFFFFF' },
+        rarity: { background: 'rgba(14, 22, 44, 0.86)', text: '#C6D8FF' },
+      },
+    },
     online: '#4ADE80',
     hi: { background: '#3A1D2B', text: '#FF9EC4', icon: '#FF9EC4' },
     cardShadow: 'rgba(0, 0, 0, 0.5)',

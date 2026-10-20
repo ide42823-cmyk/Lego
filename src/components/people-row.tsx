@@ -49,6 +49,7 @@ export function PeopleRow({ user, onOpenProfile, onGreet }: PeopleRowProps) {
           name={user.displayName}
           uri={user.avatarUrl}
           size={60}
+          frame={user.avatarFrame}
           online={user.isOnline}
           videoCall={user.videoCall}
         />

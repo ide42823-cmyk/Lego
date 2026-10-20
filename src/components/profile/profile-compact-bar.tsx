@@ -72,6 +72,7 @@ export function ProfileCompactBar({
             uri={profile.avatarUrl}
             size={28}
             radius={14}
+            frame={profile.avatarFrame}
             style={{ borderColor: theme.border, borderWidth: StyleSheet.hairlineWidth }}
           />
         )}

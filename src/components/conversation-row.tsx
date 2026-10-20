@@ -48,6 +48,7 @@ export function ConversationRow({ conversation, onPress }: ConversationRowProps)
         name={conversation.peerName}
         uri={conversation.avatarUrl}
         size={56}
+        frame={conversation.avatarFrame}
         online={conversation.isOnline}
       />
       <View style={styles.body}>

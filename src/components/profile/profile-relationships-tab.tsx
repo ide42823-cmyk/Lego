@@ -33,6 +33,7 @@ export function ProfileRelationshipsTab({
           ownerId={profile.id}
           ownerName={profile.displayName}
           ownerAvatarUrl={profile.avatarUrl}
+          ownerFrame={profile.avatarFrame}
           onPress={onOpenRecord}
           onInvite={onInvite}
         />

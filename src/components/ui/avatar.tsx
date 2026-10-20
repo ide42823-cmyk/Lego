@@ -2,7 +2,8 @@ import { Image } from 'expo-image';
 import { StyleSheet, Text, View, type ViewProps } from 'react-native';
 
 import { Radius } from '@/constants/theme';
-import { imageSource } from '@/core/media/images';
+import type { AvatarFrameKey } from '@/core/data/types';
+import { AVATAR_FRAME_SCALE, frameSource, imageSource } from '@/core/media/images';
 import { useTheme } from '@/hooks/use-theme';
 import { useTints } from '@/hooks/use-tints';
 
@@ -22,6 +23,14 @@ export interface AvatarProps extends ViewProps {
   online?: boolean;
   /** Show a video-call affordance. */
   videoCall?: boolean;
+  /**
+   * A decorative frame the member owns.
+   *
+   * Frames are square canvases with a transparent hole, so each one carries its
+   * own ratio. The art is drawn *outside* the avatar's box (the box itself never
+   * changes), which is why the wrapper must not clip.
+   */
+  frame?: AvatarFrameKey;
 }
 
 const PLACEHOLDER_COLORS = ['#7C4DF0', '#DB2777', '#0EA5E9', '#F59E0B', '#10B981', '#6366F1'];
@@ -64,6 +73,7 @@ export function Avatar({
   ringColor,
   online,
   videoCall,
+  frame,
   style,
   ...rest
 }: AvatarProps) {
@@ -75,6 +85,8 @@ export function Avatar({
   const corner = radius ?? size / 2;
   const ring = ringColor ? { borderWidth: 2, borderColor: ringColor } : null;
   const dot = Math.max(10, Math.round(size * 0.24));
+  /** How far the frame art bleeds past each edge of the photo. */
+  const bleed = frame ? Math.round((size * (AVATAR_FRAME_SCALE[frame] - 1)) / 2) : 0;
 
   return (
     <View
@@ -102,6 +114,23 @@ export function Avatar({
           {initials(name)}
         </Text>
       )}
+
+      {frame ? (
+        <Image
+          // Decoration, and the one place the animated frame may appear: on a
+          // single avatar. Lists never get the animated key.
+          source={frameSource(frame)}
+          style={{
+            position: 'absolute',
+            top: -bleed,
+            start: -bleed,
+            end: -bleed,
+            bottom: -bleed,
+          }}
+          contentFit="contain"
+          accessible={false}
+        />
+      ) : null}
 
       {videoCall ? (
         <View

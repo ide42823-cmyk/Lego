@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <defs>
+    <linearGradient id="face" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#F1F6FF" />
+      <stop offset="100%" stop-color="#D6E4FB" />
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#F4F9FF" />
+      <stop offset="48%" stop-color="#82A6EE" />
+      <stop offset="100%" stop-color="#3F5FBF" />
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0" />
+      <stop offset="100%" stop-color="#3F5FBF" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="110" cy="118" rx="98" ry="94" fill="#1A0E2A" opacity="0.10" />
+  <rect x="8" y="8" width="204" height="204" rx="44" fill="url(#face)" stroke="url(#metal)" stroke-width="8" />
+  <rect x="21" y="21" width="178" height="178" rx="34" fill="none" stroke="#F4F9FF" stroke-opacity="0.6" stroke-width="2" />
+  <path d="M124 9 H164 A44 44 0 0 1 208 53 V93 Z" fill="#FFFFFF" opacity="0.16" />
+  <rect x="21" y="110" width="178" height="89" rx="30" fill="url(#floor)" />
+</svg>

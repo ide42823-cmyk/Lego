@@ -241,12 +241,243 @@ function clouds() {
 </svg>`;
 }
 
+/**
+ * The three honour walls (reference screen 025). One shape, three tones: a plate
+ * with a metal double border, filigree sprigs in the corners and a glass shelf
+ * near the foot that the collectibles stand on. The title plaque and the count
+ * chip are deliberately *not* baked in — they carry text, so the screen draws
+ * them and they stay translatable and mirrored in RTL.
+ */
+const HONOR_TONES = {
+  badges: {
+    light: {
+      top: '#FFF6E4',
+      bottom: '#F8D9A8',
+      metalA: '#FFEFC6',
+      metalB: '#F2B850',
+      metalC: '#B97A1E',
+      shelf: '#F7CE86',
+      shelfTop: '#FFF6E0',
+    },
+    dark: {
+      top: '#3B2A14',
+      bottom: '#221706',
+      metalA: '#FFE3AE',
+      metalB: '#D69A2E',
+      metalC: '#8A5E14',
+      shelf: '#7A5316',
+      shelfTop: '#E8C275',
+    },
+  },
+  titles: {
+    light: {
+      top: '#F9F2FF',
+      bottom: '#E4D2FB',
+      metalA: '#F5EAFF',
+      metalB: '#AB6FF0',
+      metalC: '#6B3BC0',
+      shelf: '#E3CDFB',
+      shelfTop: '#F8F0FF',
+    },
+    dark: {
+      top: '#2E2142',
+      bottom: '#1A1230',
+      metalA: '#E7D6FF',
+      metalB: '#9B6BE0',
+      metalC: '#5B3597',
+      shelf: '#40295F',
+      shelfTop: '#C9AEF0',
+    },
+  },
+  gifts: {
+    light: {
+      top: '#F1F6FF',
+      bottom: '#D6E4FB',
+      metalA: '#F4F9FF',
+      metalB: '#82A6EE',
+      metalC: '#3F5FBF',
+      shelf: '#D6E5FC',
+      shelfTop: '#F3F8FF',
+    },
+    dark: {
+      top: '#1F2B46',
+      bottom: '#111A2E',
+      metalA: '#DCE9FF',
+      metalB: '#6C8DE2',
+      metalC: '#31488F',
+      shelf: '#22335A',
+      shelfTop: '#A9C2F2',
+    },
+  },
+};
+
+function honorPanelGradients(tone) {
+  return `<defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${tone.top}" />
+      <stop offset="100%" stop-color="${tone.bottom}" />
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="${tone.metalA}" />
+      <stop offset="45%" stop-color="${tone.metalB}" />
+      <stop offset="100%" stop-color="${tone.metalC}" />
+    </linearGradient>
+    <linearGradient id="metalLight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${tone.metalA}" />
+      <stop offset="100%" stop-color="${tone.metalB}" />
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="shelf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${tone.shelf}" />
+      <stop offset="100%" stop-color="${tone.metalC}" stop-opacity="0.5" />
+    </linearGradient>
+    <linearGradient id="shelfTop" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${tone.shelfTop}" stop-opacity="0.15" />
+      <stop offset="50%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="${tone.shelfTop}" stop-opacity="0.15" />
+    </linearGradient>
+    <radialGradient id="pearl" cx="34%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#FFFDF4" />
+      <stop offset="100%" stop-color="${tone.metalB}" />
+    </radialGradient>
+  </defs>`;
+}
+
+function honorPanel(tone) {
+  const sprig = `
+    <path d="M6 66 C6 33 33 6 66 6" fill="none" stroke="url(#metal)" stroke-width="7" stroke-linecap="round" />
+    <path d="M20 48 C38 48 48 38 48 20 C30 20 20 30 20 48 Z" fill="url(#metalLight)" opacity="0.95" />
+    <path d="M28 40 C34 40 40 34 40 28 C34 28 28 34 28 40 Z" fill="${tone.top}" opacity="0.75" />
+    <path d="M9 36 C20 34 28 26 30 13" fill="none" stroke="url(#metalLight)" stroke-width="3.5" stroke-linecap="round" opacity="0.85" />
+    <circle cx="66" cy="6" r="5.5" fill="url(#pearl)" />
+    <circle cx="9" cy="36" r="3.2" fill="url(#pearl)" />`;
+
+  const corners = [
+    [42, 34, 1, 1],
+    [618, 34, -1, 1],
+    [42, 186, 1, -1],
+    [618, 186, -1, -1],
+  ]
+    .map(([x, y, sx, sy]) => `<g transform="translate(${x} ${y}) scale(${sx} ${sy})">${sprig}</g>`)
+    .join('\n  ');
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="660" height="220" viewBox="0 0 660 220">
+  ${honorPanelGradients(tone)}
+
+  <rect x="16" y="16" width="628" height="196" rx="36" fill="#1A0E2A" opacity="0.10" />
+  <rect x="10" y="10" width="640" height="196" rx="34" fill="url(#plate)" />
+  <rect x="24" y="22" width="612" height="52" rx="24" fill="url(#sheen)" opacity="0.32" />
+
+  <rect x="56" y="168" width="548" height="16" rx="8" fill="url(#shelf)" />
+  <rect x="56" y="168" width="548" height="3" rx="1.5" fill="url(#shelfTop)" opacity="0.95" />
+  <rect x="56" y="180" width="548" height="2.5" rx="1.25" fill="#1A0E2A" opacity="0.18" />
+  <rect x="60" y="186" width="540" height="7" rx="3.5" fill="#1A0E2A" opacity="0.10" />
+
+  <rect x="10" y="10" width="640" height="196" rx="34" fill="none" stroke="url(#metal)" stroke-width="7" />
+  <rect x="23" y="23" width="614" height="170" rx="26" fill="none" stroke="url(#metalLight)" stroke-width="2" opacity="0.7" />
+
+  ${corners}
+</svg>`;
+}
+
+/** A medal for the Badges Wall: a gem-set ring around an empty enamel disc. */
+function honorMedal(tone) {
+  const gems = radial(4, 110, 110, (angle) => {
+    const radians = (angle * Math.PI) / 180;
+    const x = round(110 + Math.sin(radians) * 92);
+    const y = round(110 - Math.cos(radians) * 92);
+    return `<g transform="translate(${x} ${y}) rotate(${angle + 45})">
+      <path d="M0 -14 L10 0 L0 14 L-10 0 Z" fill="url(#gem)" stroke="url(#metal)" stroke-width="2.5" />
+      <path d="M0 -7 L4 0 L0 7 L-4 0 Z" fill="#FFFFFF" fill-opacity="0.55" />
+    </g>`;
+  });
+
+  const ticks = radial(28, 110, 110, (angle) => {
+    const radians = (angle * Math.PI) / 180;
+    const inner = 78;
+    const outer = 86;
+    return `<line x1="${round(110 + Math.sin(radians) * inner)}" y1="${round(
+      110 - Math.cos(radians) * inner,
+    )}" x2="${round(110 + Math.sin(radians) * outer)}" y2="${round(
+      110 - Math.cos(radians) * outer,
+    )}" stroke="${tone.metalC}" stroke-opacity="0.35" stroke-width="2" />`;
+  });
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <defs>
+    <linearGradient id="metal" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="${tone.metalA}" />
+      <stop offset="48%" stop-color="${tone.metalB}" />
+      <stop offset="100%" stop-color="${tone.metalC}" />
+    </linearGradient>
+    <linearGradient id="gem" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFD6E6" />
+      <stop offset="55%" stop-color="#F2689C" />
+      <stop offset="100%" stop-color="#B92D63" />
+    </linearGradient>
+    <radialGradient id="enamel" cx="38%" cy="28%" r="80%">
+      <stop offset="0%" stop-color="${tone.top}" />
+      <stop offset="60%" stop-color="${tone.bottom}" />
+      <stop offset="100%" stop-color="${tone.metalC}" stop-opacity="0.55" />
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="110" cy="124" rx="96" ry="88" fill="#1A0E2A" opacity="0.10" />
+  <circle cx="110" cy="110" r="92" fill="none" stroke="url(#metal)" stroke-width="16" />
+  ${ticks}
+  <circle cx="110" cy="110" r="74" fill="url(#enamel)" />
+  <circle cx="110" cy="110" r="74" fill="none" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="2.5" />
+  <ellipse cx="86" cy="72" rx="38" ry="21" fill="#FFFFFF" fill-opacity="0.3" transform="rotate(-28 86 72)" />
+  ${gems}
+</svg>`;
+}
+
+/** A framed plaque for a gift: the screen draws the gift's own glyph inside. */
+function honorGiftFrame(tone) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <defs>
+    <linearGradient id="face" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="${tone.top}" />
+      <stop offset="100%" stop-color="${tone.bottom}" />
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="${tone.metalA}" />
+      <stop offset="48%" stop-color="${tone.metalB}" />
+      <stop offset="100%" stop-color="${tone.metalC}" />
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0" />
+      <stop offset="100%" stop-color="${tone.metalC}" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="110" cy="118" rx="98" ry="94" fill="#1A0E2A" opacity="0.10" />
+  <rect x="8" y="8" width="204" height="204" rx="44" fill="url(#face)" stroke="url(#metal)" stroke-width="8" />
+  <rect x="21" y="21" width="178" height="178" rx="34" fill="none" stroke="${tone.metalA}" stroke-opacity="0.6" stroke-width="2" />
+  <path d="M124 9 H164 A44 44 0 0 1 208 53 V93 Z" fill="#FFFFFF" opacity="0.16" />
+  <rect x="21" y="110" width="178" height="89" rx="30" fill="url(#floor)" />
+</svg>`;
+}
+
 const ART = [
   { name: 'crest', svg: crest() },
   { name: 'avatar-frame', svg: avatarFrame() },
   { name: 'wing-heart', svg: wingHeart() },
   { name: 'clouds', svg: clouds() },
 ];
+
+for (const [key, tones] of Object.entries(HONOR_TONES)) {
+  ART.push({ name: `honor-panel-${key}`, svg: honorPanel(tones.light) });
+  ART.push({ name: `honor-panel-${key}-dark`, svg: honorPanel(tones.dark) });
+}
+
+ART.push({ name: 'honor-medal', svg: honorMedal(HONOR_TONES.badges.light) });
+ART.push({ name: 'honor-medal-dark', svg: honorMedal(HONOR_TONES.badges.dark) });
+ART.push({ name: 'honor-gift-frame', svg: honorGiftFrame(HONOR_TONES.gifts.light) });
+ART.push({ name: 'honor-gift-frame-dark', svg: honorGiftFrame(HONOR_TONES.gifts.dark) });
 
 await mkdir(SVG_DIR, { recursive: true });
 await mkdir(PNG_DIR, { recursive: true });

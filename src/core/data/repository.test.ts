@@ -242,6 +242,66 @@ describe('getProfile', () => {
   });
 });
 
+describe('avatar frames', () => {
+  it('dresses a member the same way in every surface', async () => {
+    const people = await fixtureDataSource.listPeople('recommend', { limit: 200 });
+    const rows = people.items.flatMap((item) => (item.kind === 'user' ? [item.user] : []));
+    const framed = rows.filter((user) => user.avatarFrame);
+
+    // The fixtures must exercise frames, or nothing renders one.
+    expect(framed.length).toBeGreaterThan(0);
+
+    for (const row of framed) {
+      const profile = await fixtureDataSource.getProfile(row.id);
+      expect(profile.avatarFrame).toBe(row.avatarFrame);
+
+      const feed = await fixtureDataSource.listMoments('recommend', { limit: 100 });
+      const post = feed.items.find((item) => item.authorId === row.id);
+      if (post) {
+        expect(post.avatarFrame).toBe(row.avatarFrame);
+      }
+    }
+  });
+
+  it('carries the peer frame onto relationship cards', async () => {
+    const people = await fixtureDataSource.listPeople('recommend', { limit: 200 });
+    const frames = new Map(
+      people.items.flatMap((item) =>
+        item.kind === 'user' ? [[item.user.id, item.user] as const] : [],
+      ),
+    );
+
+    // A member with a couple and friends, so both card kinds are covered.
+    const profile = await fixtureDataSource.getProfile('user-3');
+    const records = [...(profile.couple ? [profile.couple] : []), ...profile.friends];
+
+    expect(records.length).toBeGreaterThan(0);
+
+    for (const record of records) {
+      expect(record.peerFrame).toBe(frames.get(record.peerId)?.avatarFrame);
+    }
+  });
+
+  it('reserves the animated frame for the account itself', async () => {
+    // `halo` is the one animated frame. Sixty frames of alpha in a scrolling
+    // list is work the device should not do for decoration, so the fixtures
+    // never hand it to a directory row, a post or a conversation.
+    const me = await fixtureDataSource.getMe();
+    expect(me.avatarFrame).toBe('halo');
+
+    const people = await fixtureDataSource.listPeople('recommend', { limit: 200 });
+    expect(
+      people.items.every((item) => item.kind !== 'user' || item.user.avatarFrame !== 'halo'),
+    ).toBe(true);
+
+    const feed = await fixtureDataSource.listMoments('recommend', { limit: 100 });
+    expect(feed.items.every((post) => post.avatarFrame !== 'halo')).toBe(true);
+
+    const inbox = await fixtureDataSource.listConversations('all', { limit: 100 });
+    expect(inbox.items.every((conversation) => conversation.avatarFrame !== 'halo')).toBe(true);
+  });
+});
+
 describe('sendGreeting', () => {
   it('is idempotent and reports the confirmed state', async () => {
     await expect(fixtureDataSource.sendGreeting('user-1')).resolves.toEqual({ greeted: true });

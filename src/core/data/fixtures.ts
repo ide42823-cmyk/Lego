@@ -16,6 +16,7 @@
 import { mediaRef, type MediaFolder } from '@/core/media/images';
 
 import type {
+  AvatarFrameKey,
   ConversationSummary,
   Gender,
   HonorArt,
@@ -219,6 +220,13 @@ const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
+/**
+ * The frames members can wear, in a fixed order. `halo` is deliberately absent:
+ * it is the animated one and is reserved for the account's own avatar, so the
+ * decoration never animates inside a list.
+ */
+const MEMBER_FRAMES: readonly AvatarFrameKey[] = ['blossom', 'wings', 'heart', 'rope'];
+
 function buildUsers(count: number): UserSummary[] {
   const random = createRandom(20261018);
   // Distances come from a separate stream so adding them cannot shift the value
@@ -245,6 +253,9 @@ function buildUsers(count: number): UserSummary[] {
       // Only a member who holds a paid rank gets a number to display.
       vipTier: badges.includes('vip') ? 1 + Math.floor(random() * 5) : undefined,
       videoCall: random() > 0.7,
+      // Every third member wears a frame, cycling through the set. The member at
+      // index 2 (user-3) does, which is the profile the device pass screenshots.
+      avatarFrame: (index + 1) % 3 === 0 ? MEMBER_FRAMES[index % MEMBER_FRAMES.length] : undefined,
       badges,
       isOnline: random() > 0.45,
       // Coarse buckets only. The reference prints a rough distance on every
@@ -288,6 +299,7 @@ function buildConversations(users: UserSummary[], count: number): ConversationSu
       peerId: peer.id,
       peerName: peer.displayName,
       avatarUrl: peer.avatarUrl,
+      avatarFrame: peer.avatarFrame,
       locale: peer.locale,
       snippet: pick(random, CONVERSATION_SNIPPETS),
       lastMessageAt: new Date(NOW - Math.floor(random() * 5 * DAY)).toISOString(),
@@ -319,6 +331,7 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
       authorAge: author.age,
       authorGender: author.gender,
       avatarUrl: author.avatarUrl,
+      avatarFrame: author.avatarFrame,
       badges: author.badges,
       hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
       hasMedia,
@@ -346,6 +359,8 @@ export const FIXTURE_ME: MeDashboard = {
   displayName: 'My Account',
   handle: '@myaccount',
   avatarUrl: mediaRef('portraits', 'self'),
+  // The only avatar in the app wearing the animated frame.
+  avatarFrame: 'halo',
   followingCount: 128,
   friendCount: 42,
   followersCount: 311,
@@ -633,6 +648,7 @@ function buildRelationship(
     // The card shows the peer's face, so it must be the same photo the rest of
     // the app shows for that member.
     peerAvatarUrl: peer.avatarUrl,
+    peerFrame: peer.avatarFrame,
     level,
     days,
   };
@@ -696,6 +712,7 @@ function buildProfile(user: UserSummary, index: number, users: UserSummary[]): U
     id: user.id,
     displayName: user.displayName,
     avatarUrl: user.avatarUrl,
+    avatarFrame: user.avatarFrame,
     // A member's cover is a portrait crop of the same person, the way the
     // reference's hero is.
     coverUrl: covers[index % covers.length],
@@ -798,6 +815,7 @@ function buildProfileMoments(user: UserSummary, random: () => number): MomentPos
       authorAge: user.age,
       authorGender: user.gender,
       avatarUrl: user.avatarUrl,
+      avatarFrame: user.avatarFrame,
       badges: user.badges,
       hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
       hasMedia,

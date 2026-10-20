@@ -52,7 +52,13 @@ export function MomentCard({ post, onToggleLike, onOpenAuthor, onGreet, onMore }
           onPress={() => onOpenAuthor?.(post.authorId)}
           style={styles.author}
         >
-          <Avatar id={post.authorId} name={post.authorName} uri={post.avatarUrl} size={48} />
+          <Avatar
+            id={post.authorId}
+            name={post.authorName}
+            uri={post.avatarUrl}
+            size={48}
+            frame={post.avatarFrame}
+          />
           <View style={styles.authorText}>
             <View style={styles.nameRow}>
               <ThemedText type="smallBold" numberOfLines={1} style={styles.name}>

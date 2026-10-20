@@ -630,3 +630,85 @@ before committing.
   fetch is not.
 - **iOS.** Cannot be built on Windows.
 
+## P5 — Honour tab and avatar frames (2026-10-20)
+
+**Scope:** the profile's Honour tab (`ProfileHonorTab` / `HonorWallCard`) and every avatar in
+the app. No route, no data-method signature and no other screen's layout changed.
+
+Two things drove this pass. The Honour tab is the one profile section that is *entirely*
+decoration in the reference — three ornate metal walls with the trophies standing on a shelf —
+and a flat panel of square tiles could not answer the layout questions it raises: does a row
+of trophies balance, do three tones read as one set, does the plate survive the dark scheme.
+The second is that the project owner drew avatar frames for this app, so avatars should wear
+them.
+
+### What changed
+
+- **The honour plates are generated art, in three tones and two schemes.**
+  `tools/build-art.mjs` gained `honorPanel()` (660×220: plate gradient, sheen, metal double
+  border, four mirrored corner sprigs with pearls, and a glass shelf at 168/220 with a
+  highlight and a shadow), `honorMedal()` (ring, ticks, enamel disc, gloss, four gems) and
+  `honorGiftFrame()` (rounded plaque, hairline, bevel, floor vignette) in the gold / violet /
+  ice tones of the reference's badges / titles / gifts walls, light and dark.
+  `npm run art:build` emits both `assets/art/*.svg` and `assets/media/art/*.png`.
+- **What carries text is drawn by the screen, never baked into the art.** The title plaque
+  (with its pointed tail), the filled title ribbon, the empty crown slot and the count chip
+  are views, driven by a new scheme-keyed `tints.honor` group. A baked-in label could neither
+  translate nor mirror in RTL, and the count has to be a live number. The gradient pills are
+  one `Svg` `Rect` in a `viewBox="0 0 1 1"` stretched under a real border, so the pill stays
+  crisp at any label width.
+- **The walls reproduce the structure, not the art.** A titled plate, one row of previews
+  standing on a shelf, and a count that opens the collection. Badges are our glyphs inside our
+  medallion with a caption printed under the shelf (our glyphs carry no text the way the
+  reference's art does), titles are text ribbons beside empty crown slots, and gifts are framed
+  glyph plaques with a grade chip and a rarity chip that overhangs the plaque's foot.
+- **A frame is data.** `AvatarFrameKey` lives in `core/data/types.ts` beside the other
+  meanings and is carried by `UserSummary`, `ConversationSummary`, `MomentPost`,
+  `UserProfile`, `MeDashboard` and — as `peerFrame` — `RelationshipRecord`, so a member's frame
+  can no more differ between two screens than their photo can. `core/media/images.ts` maps the
+  keys to art and holds `AVATAR_FRAME_SCALE`, the measured canvas ÷ hole ratio per frame.
+- **`Avatar` grew a `frame` prop** that bleeds the art *outside* the avatar's layout box, so a
+  row's geometry never depends on whether its member owns a frame. `FramedAvatar` sizes its
+  outer box by the frame's own ratio and falls back to the app's ring when the member has
+  none; the Me tab uses it, so the animated halo's 1.73× box is laid out rather than
+  overflowing the identity row.
+- **One animated frame, and only on the account's own avatar.** `halo` is animated WebP
+  (61 frames, 60 ms, 320², 1.4 MB, alpha intact). The fixtures give it to `FIXTURE_ME` and
+  never to a directory row, a post or a conversation — sixty frames of alpha in a scrolling
+  list is work the device should not do for decoration. `repository.test.ts` pins that.
+
+### Verified
+
+- `tsc`, `eslint`, `prettier --check` clean; `jest` 10 suites / 104 tests, four of them new:
+  a member's frame is the same in every surface, the peer frame reaches the relationship
+  cards, and the animated frame is reserved for the account.
+- **Rendered at phone width off-device.** RN-web through the running dev server, captured
+  headless inside a fixed 393 pt column, in light and dark: the three walls fit the screen,
+  the shelf carries the rows, the count chips sit inside the plate, the plaques straddle the
+  top edge, and all five frames centre their holes on the photo at 56 pt and 92 pt.
+
+### Defects found and fixed in the pass
+
+- **The badge caption sat on the shelf.** The plate's shelf moved from 158 to 168 (of 220) so
+  that a medallion and its caption both clear the metal, and a row's foot is now derived from
+  the art's own ratio rather than a hand-tuned offset.
+- **The crown slots' `maxWidth` stretched every wall past the screen.** A capped flex child
+  still contributes that cap to its row's intrinsic width, and because the honour column's
+  width is resolved from its content, the cap made all three plates wider than the viewport
+  and pushed the count chips off-screen. The cap is gone; the crowns share what is left.
+- **Glyphs disappeared under the art on web.** An absolutely positioned image paints above
+  in-flow siblings in CSS regardless of document order, so a trophy's glyph is now wrapped in
+  a `zIndex: 2` layer instead of relying on paint order.
+- **The count chip clipped the plate's border** — it moved inside the metal, and the plate's
+  top sheen weakened from 0.5 to 0.32 so the pale band no longer washes the plate out.
+
+### NOT verified in P5
+
+- **Nothing on the handset.** The device was not attached during this pass, so the on-device
+  table above still ends at P4.2: the Honour tab, the avatar frames and the animated WebP have
+  not been seen on Android. RN-web is not Android — the WebP animation through `expo-image` in
+  particular is unproven, as are the frame bleed over a card edge and the light navigation bar.
+- **Taps and swipes** — unchanged: `INJECT_EVENTS` is denied on the handset, so the wall's
+  count chip and each trophy are verified as rendered, labelled and wired, not as pressed.
+- **iOS.** Cannot be built on Windows.
+
