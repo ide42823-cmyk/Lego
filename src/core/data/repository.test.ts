@@ -1,5 +1,6 @@
 import { devControls, fixtureDataSource } from './repository';
-import type { RoomFeedItem, RoomSummary } from './types';
+import type { DirectoryFeedItem, RoomFeedItem, RoomSummary } from './types';
+import { defaultPeopleFilters } from '../people-filters';
 
 /**
  * The fixtures are a development seam, but the *contract* they implement is the
@@ -18,6 +19,11 @@ afterEach(() => {
 /** Room entries of a feed, ignoring promoted content. */
 function roomsOf(items: readonly RoomFeedItem[]): RoomSummary[] {
   return items.flatMap((item) => (item.kind === 'room' ? [item.room] : []));
+}
+
+/** Member entries of a feed, ignoring promoted content. */
+function usersOf(items: readonly DirectoryFeedItem[]) {
+  return items.flatMap((item) => (item.kind === 'user' ? [item.user] : []));
 }
 
 describe('listPeople', () => {
@@ -72,6 +78,129 @@ describe('listPeople', () => {
       .map((item) => item.user.distanceKm ?? 0);
 
     expect(distances).toEqual([...distances].sort((a, b) => a - b));
+  });
+});
+
+describe('people filter options and listPeople filters', () => {
+  it('offers unique, data-derived facets with on-grid bounds', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+
+    expect(options.age.min).toBeGreaterThanOrEqual(18);
+    expect(options.age.max).toBeGreaterThan(options.age.min);
+    expect(options.distanceKm.max).toBeGreaterThanOrEqual(50);
+    expect(options.distanceKm.max % options.distanceKm.step).toBe(0);
+    expect(options.countries.length).toBeGreaterThan(0);
+    expect(options.languages.length).toBeGreaterThan(0);
+    expect(new Set(options.countries.map((option) => option.value)).size).toBe(
+      options.countries.length,
+    );
+    expect(new Set(options.languages.map((option) => option.value)).size).toBe(
+      options.languages.length,
+    );
+  });
+
+  it('leaves the feed unchanged at the defaults', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+    const plain = await fixtureDataSource.listPeople('recommend', { limit: 100 });
+    const filtered = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 100 },
+      defaultPeopleFilters(options),
+    );
+
+    expect(filtered.items.map((item) => item.id)).toEqual(plain.items.map((item) => item.id));
+  });
+
+  it('filters by gender and online state', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+    const page = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 100 },
+      { ...defaultPeopleFilters(options), gender: 'female', onlineOnly: true },
+    );
+    const users = usersOf(page.items);
+
+    expect(users.length).toBeGreaterThan(0);
+    expect(users.every((user) => user.gender === 'female' && user.isOnline)).toBe(true);
+  });
+
+  it('filters by country and by language', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+    const country = options.countries[0]!;
+    const language = options.languages[0]!;
+
+    const byCountry = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 100 },
+      { ...defaultPeopleFilters(options), country: country.value },
+    );
+    const byLanguage = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 100 },
+      { ...defaultPeopleFilters(options), language: language.value },
+    );
+
+    expect(usersOf(byCountry.items).length).toBeGreaterThan(0);
+    expect(usersOf(byCountry.items).every((user) => user.locale === country.value)).toBe(true);
+    expect(usersOf(byLanguage.items).length).toBeGreaterThan(0);
+    expect(usersOf(byLanguage.items).every((user) => user.language === language.value)).toBe(true);
+  });
+
+  it('enforces a narrowed age range', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+    const page = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 100 },
+      {
+        ...defaultPeopleFilters(options),
+        ageMin: options.age.min,
+        ageMax: options.age.min,
+      },
+    );
+    const users = usersOf(page.items);
+
+    expect(users.length).toBeGreaterThan(0);
+    expect(users.every((user) => user.age === options.age.min)).toBe(true);
+  });
+
+  it('enforces a narrowed distance range', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+    const page = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 100 },
+      { ...defaultPeopleFilters(options), distanceMaxKm: 100 },
+    );
+    const users = usersOf(page.items);
+
+    expect(users.every((user) => (user.distanceKm ?? 0) <= 100)).toBe(true);
+  });
+
+  it('returns no entries, and no promotion, when nothing matches', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+    const page = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 100 },
+      { ...defaultPeopleFilters(options), distanceMaxKm: 0 },
+    );
+
+    expect(page.items).toEqual([]);
+    expect(page.nextCursor).toBeNull();
+  });
+
+  it('paginates the filtered feed without duplicates', async () => {
+    const options = await fixtureDataSource.getPeopleFilterOptions();
+    const filters = { ...defaultPeopleFilters(options), gender: 'female' as const };
+    const first = await fixtureDataSource.listPeople('recommend', { limit: 3 }, filters);
+    const second = await fixtureDataSource.listPeople(
+      'recommend',
+      { limit: 3, cursor: first.nextCursor },
+      filters,
+    );
+    const users = usersOf([...first.items, ...second.items]);
+    const ids = [...first.items, ...second.items].map((item) => item.id);
+
+    expect(users.every((user) => user.gender === 'female')).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 

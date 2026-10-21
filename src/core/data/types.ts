@@ -48,6 +48,8 @@ export interface UserSummary {
   status: string;
   /** Country/locale hint. Never a precise location. */
   locale?: string;
+  /** App/interface language code, e.g. "ar" or "en". */
+  language?: string;
   /**
    * Bucketed distance in km, only on the Nearby directory. Deliberately coarse:
    * the product must not leak precise location.
@@ -65,6 +67,41 @@ export interface UserSummary {
   avatarFrame?: AvatarFrameKey;
   badges: UserBadge[];
   isOnline: boolean;
+}
+
+/** One choice in a filter picker. `value` is the stored code, `label` is shown. */
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * The facets a people filter can offer, derived from the directory behind the
+ * data seam. Bounds are the current data's bounds, so a full-range slider is
+ * genuinely "everyone" rather than an invented 18-80 scale.
+ */
+export interface PeopleFilterOptions {
+  age: { min: number; max: number; step: number };
+  distanceKm: { min: number; max: number; step: number };
+  countries: FilterOption[];
+  languages: FilterOption[];
+}
+
+/**
+ * A people filter draft/committed value. `null` in a nullable field means "any";
+ * the full age/distance bounds also mean "any".
+ */
+export interface PeopleFilters {
+  gender: Gender | null;
+  ageMin: number;
+  ageMax: number;
+  distanceMinKm: number;
+  distanceMaxKm: number;
+  onlineOnly: boolean;
+  /** Locale code, e.g. "SA". */
+  country: string | null;
+  /** Language code, e.g. "ar". */
+  language: string | null;
 }
 
 export interface RoomSummary {

@@ -232,6 +232,9 @@ function buildUsers(count: number): UserSummary[] {
   // Distances come from a separate stream so adding them cannot shift the value
   // of every other generated field.
   const distance = createRandom(20261019);
+  // Language has its own stream for the same reason: adding the field must not
+  // renumber every existing fixture (screenshots and tests pin those values).
+  const language = createRandom(20261020);
   return Array.from({ length: count }, (_, index): UserSummary => {
     const level = 1 + Math.floor(random() * 60);
     const badges = ['level', ...pickSome(random, BADGE_POOL, 2)].slice(0, 3) as UserBadge[];
@@ -261,6 +264,7 @@ function buildUsers(count: number): UserSummary[] {
       // Coarse buckets only. The reference prints a rough distance on every
       // directory row, and a bucket is never a position.
       distanceKm: 2 + Math.floor(distance() * 90) * 11,
+      language: language() > 0.5 ? 'ar' : 'en',
     };
   });
 }

@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
+import { FilterSheet } from '@/components/filter-sheet';
 import { PeopleRow } from '@/components/people-row';
 import { PromoBanner } from '@/components/promo-banner';
 import { AppScreen } from '@/components/ui/app-screen';
@@ -9,11 +10,18 @@ import { IconButton } from '@/components/ui/icon-button';
 import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
 import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { fixtureDataSource } from '@/core/data/repository';
-import type { DirectoryFeedItem, PeopleMode } from '@/core/data/types';
-import { usePaginated } from '@/hooks/use-async';
+import type {
+  DirectoryFeedItem,
+  PeopleFilterOptions,
+  PeopleFilters,
+  PeopleMode,
+} from '@/core/data/types';
+import { countActivePeopleFilters } from '@/core/people-filters';
+import { useAsync, usePaginated } from '@/hooks/use-async';
 import { useGreet } from '@/hooks/use-greet';
+import { useTheme } from '@/hooks/use-theme';
 
 /**
  * Home — people discovery (reference screens 097–100).
@@ -32,13 +40,27 @@ const MODES: readonly SegmentedTabItem<PeopleMode>[] = [
 
 export default function HomeScreen() {
   const [mode, setMode] = useState<PeopleMode>('recommend');
+  const [filters, setFilters] = useState<PeopleFilters | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
   const toast = useToast();
   const router = useRouter();
   const greet = useGreet();
+  const theme = useTheme();
+
+  const filterOptions = useAsync<PeopleFilterOptions>(
+    () => fixtureDataSource.getPeopleFilterOptions(),
+    'people-filter-options',
+  );
+
+  const activeFilterCount =
+    filters && filterOptions.status === 'ready'
+      ? countActivePeopleFilters(filters, filterOptions.data)
+      : 0;
+  const filterKey = filters ? JSON.stringify(filters) : 'all';
 
   const list = usePaginated<DirectoryFeedItem>(
-    (cursor) => fixtureDataSource.listPeople(mode, { cursor, limit: 12 }),
-    `people:${mode}`,
+    (cursor) => fixtureDataSource.listPeople(mode, { cursor, limit: 12 }, filters ?? undefined),
+    `people:${mode}:${filterKey}`,
   );
 
   const notYet = useCallback(
@@ -71,11 +93,24 @@ export default function HomeScreen() {
         </View>
         <View style={styles.actions}>
           <IconButton name="search" label="Search people" onPress={openSearch} />
-          <IconButton
-            name="filter"
-            label="Filter people"
-            onPress={() => notYet('People filters')}
-          />
+          <View style={styles.filterWrap}>
+            <IconButton
+              name="filter"
+              label={
+                activeFilterCount > 0
+                  ? `Filter people, ${activeFilterCount} active`
+                  : 'Filter people'
+              }
+              tone={activeFilterCount > 0 ? 'brand' : 'default'}
+              onPress={() => setFilterOpen(true)}
+            />
+            {activeFilterCount > 0 ? (
+              <View
+                pointerEvents="none"
+                style={[styles.filterDot, { backgroundColor: theme.brand }]}
+              />
+            ) : null}
+          </View>
           <IconButton name="trophy" label="Leaderboard" onPress={() => notYet('The leaderboard')} />
         </View>
       </View>
@@ -88,8 +123,14 @@ export default function HomeScreen() {
         <ErrorState onRetry={list.reload} />
       ) : list.items.length === 0 ? (
         <EmptyState
-          title="No one here yet"
-          message="Nobody matches this view right now. Try another one — the list refreshes as members join."
+          title={filters ? 'No one matches' : 'No one here yet'}
+          message={
+            filters
+              ? 'No one matches these filters. Widen the age or distance range, or clear them.'
+              : 'Nobody matches this view right now. Try another one — the list refreshes as members join.'
+          }
+          actionLabel={filters ? 'Clear filters' : undefined}
+          onAction={filters ? () => setFilters(null) : undefined}
         />
       ) : (
         <FlatList
@@ -122,6 +163,19 @@ export default function HomeScreen() {
           }
         />
       )}
+
+      <FilterSheet
+        visible={filterOpen}
+        options={filterOptions.status === 'ready' ? filterOptions.data : null}
+        optionsLoading={filterOptions.status === 'loading'}
+        value={filters}
+        onClose={() => setFilterOpen(false)}
+        onApply={(next) => {
+          setFilters(next);
+          setFilterOpen(false);
+        }}
+        onRetryOptions={filterOptions.reload}
+      />
     </AppScreen>
   );
 }
@@ -135,6 +189,15 @@ const styles = StyleSheet.create({
   },
   tabs: { flex: 1, paddingStart: Spacing.two },
   actions: { flexDirection: 'row', alignItems: 'center' },
+  filterWrap: { position: 'relative' },
+  filterDot: {
+    position: 'absolute',
+    top: 8,
+    end: 8,
+    width: 8,
+    height: 8,
+    borderRadius: Radius.pill,
+  },
   padded: { paddingHorizontal: Spacing.three },
   listContent: {
     paddingHorizontal: Spacing.three,

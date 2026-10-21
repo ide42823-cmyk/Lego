@@ -905,3 +905,81 @@ pass brings Search to that structure; Filter and Ranking are separate passes.
 - **iOS.** Cannot be built on Windows.
 - **History persistence and server search.** Recents die with the session; real search history,
   trending terms, ranking and result totals belong to the backend phase.
+
+## P8 - people filter sheet (2026-10-21)
+
+### What changed
+
+- **The Home filter button is real.** It opens a bottom sheet modelled on the reference: a
+  centred "Filter" title, a close control, gender pills, dual-handle Age and Distance sliders,
+  an Online-users-only switch, the gold VIP Privileges (Language) and Aristocracy Privileges
+  (Country) sections, and a fixed Reset/Confirm footer. The scrim dims the Home directory
+  behind it. Closing the sheet or the scrim discards the draft; Reset returns the draft to
+  neutral; only Confirm commits.
+- **Filters live behind the data seam.** `PeopleFilterOptions` (real age bounds, a distance
+  bound that covers every bucket, unique sorted countries and languages) and `PeopleFilters`
+  are types in `core/data/types`; `DataSource.getPeopleFilterOptions()` supplies the facets and
+  `listPeople(mode, request, filters?)` applies them before promotion banners and pagination.
+  `core/people-filters.ts` owns the meaning of "everyone": a full-range slider is neutral, and
+  a narrowed range excludes members who have not shared that field rather than treating
+  unknown as a match. `countActivePeopleFilters` drives the brand dot and the accessible
+  "Filter people, 4 active" label.
+- **Language became a real directory field.** `UserSummary.language` is generated on its own
+  RNG stream, so no existing fixture value, screenshot or test moved. Country uses the existing
+  coarse locale, distance the existing buckets, and age the fixture ages (18-39); the distance
+  bound rounds up to 1000 km. Languages and countries are derived from the fixtures and sorted
+  by their visible labels.
+- **The sheet edits a draft.** It is seeded from the committed filter each time it opens and
+  never touches the list while a handle is dragged. Confirm commits a stable filter object,
+  which becomes part of the list request key and resets the list; the Home empty state now says
+  "No one matches" and offers "Clear filters". The filter icon gains a brand dot and an
+  accessible active count when anything is narrowed.
+- **A local dual-handle slider avoids a native dependency.** `components/ui/range-slider.tsx`
+  draws the track and two 22 pt thumbs inside 44 pt targets, uses the responder system to pick
+  and move the nearer handle, and `core/range.ts` to round to steps and prevent the handles
+  from crossing. Each handle is `adjustable`, has increment/decrement actions for native screen
+  readers, and sets `aria-valuemin`/`max`/`now`/`text` for the web. The numeric axis stays
+  left-to-right in RTL; only the labels and surrounding layout mirror.
+- **BottomSheet gained a fixed footer and a centred-title option.** `titleAlign` adds a
+  symmetric 44 pt spacer, `footer` sits below the scrolling body above the safe-area inset, and
+  the scroll body can shrink. The sheet title is now 17 pt bold for every sheet.
+- **VIP/Aristocracy headings are presentation, not entitlement.** The gold headings match the
+  reference. Language and Country are ordinary fixture facets in this front-end pass; the sheet
+  does not read memberships, grant a privilege, or claim a successful purchase. Entitlement and
+  filter enforcement remain server work, and the ADR will gain that section when memberships
+  are wired.
+
+### Verified
+
+- `tsc`, `eslint`, `prettier --check` clean; `jest` 16 suites / 178 tests (28 new: 11 filter
+  helpers, 9 range helpers, 8 repository contract cases).
+- **Rendered off-device at 393 (light and dark) and 320 pt** with headless Chrome device
+  metrics (DPR 2): no horizontal overflow; both slider thumbs sit fully inside the track; at
+  320 the sheet body scrolls (scrollHeight 548, clientHeight 475) while the footer stays fixed,
+  and the Country row is reachable. Zero console errors or warnings.
+- **Interactions:** dragging the Age minimum to 25 produced "25-39"; Female + online + Age
+  25-39 + Arabic produced 3 members, all female, online, Arabic and within the range; the
+  filter button then read "Filter people, 4 active"; dragging Distance to 0 produced
+  "0-0 km" and Confirm produced "No one matches" with a Clear filters action.
+- **ARIA values on the web handles** are now non-null `aria-valuemin`, `aria-valuemax`,
+  `aria-valuenow` and `aria-valuetext`; Reset returns the draft to default and Confirm commits
+  it.
+- **RTL.** With `dir="rtl"`, the close control moves left, the section headers right-align, the
+  footer order reverses and the picker chevrons move to the leading edge, with no overflow.
+  The slider's numeric axis intentionally stays LTR.
+- **Keyboard:** the filter sheet's controls are reachable by the web tab order through their
+  button/radio/switch roles; the custom slider's arrow-key handling is not implemented (see
+  below).
+
+### NOT verified in P8
+
+- **Nothing on the handset.** The device was not attached; native slider gestures, Android
+  switch rendering and the modal's keyboard resize are unproven.
+- **Slider keyboard and screen-reader pass.** The handles expose values and native actions, but
+  a full TalkBack/VoiceOver and arrow-key pass has not been done.
+- **Full Arabic copy and native RTL.** The English sheet was mirrored with `dir="rtl"`; the
+  app's Arabic copy and `I18nManager` layout have not been reviewed.
+- **Entitlement enforcement.** No membership gate is applied to Language or Country; that
+  belongs to the server phase and is deliberately not simulated.
+- **Rooms filtering.** This pass filters the people directory only, which is the directory the
+  reference's filter belongs to. Rooms' filter control remains a later pass.

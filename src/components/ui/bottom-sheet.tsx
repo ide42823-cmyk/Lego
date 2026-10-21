@@ -17,7 +17,11 @@ export interface BottomSheetProps {
   visible: boolean;
   onClose: () => void;
   title?: string;
+  /** Centre the title between symmetric 44-point edges (the filter sheet does). */
+  titleAlign?: 'start' | 'center';
   children: ReactNode;
+  /** Stick an action row below the scrolling body. */
+  footer?: ReactNode;
   /** Fraction of the screen height the sheet may occupy. */
   maxHeightRatio?: number;
 }
@@ -26,7 +30,9 @@ export function BottomSheet({
   visible,
   onClose,
   title,
+  titleAlign = 'start',
   children,
+  footer,
   maxHeightRatio = 0.75,
 }: BottomSheetProps) {
   const theme = useTheme();
@@ -65,13 +71,22 @@ export function BottomSheet({
           <View style={[styles.grabber, { backgroundColor: theme.borderStrong }]} />
           {title ? (
             <View style={styles.header}>
-              <ThemedText type="smallBold" numberOfLines={1} style={styles.title}>
+              {titleAlign === 'center' ? <View style={styles.spacer} /> : null}
+              <ThemedText
+                numberOfLines={1}
+                style={[styles.title, titleAlign === 'center' && styles.titleCentered]}
+              >
                 {title}
               </ThemedText>
               <IconButton name="close" label="Close" tone="muted" onPress={onClose} />
             </View>
           ) : null}
-          <ScrollView keyboardShouldPersistTaps="handled">{children}</ScrollView>
+          <ScrollView keyboardShouldPersistTaps="handled" style={styles.scroll}>
+            {children}
+          </ScrollView>
+          {footer ? (
+            <View style={[styles.footer, { borderTopColor: theme.border }]}>{footer}</View>
+          ) : null}
         </View>
       </View>
     </Modal>
@@ -91,5 +106,9 @@ const styles = StyleSheet.create({
   },
   grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: Radius.pill },
   header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  title: { flex: 1 },
+  title: { flex: 1, fontSize: 17, lineHeight: 24, fontWeight: 700 },
+  titleCentered: { textAlign: 'center' },
+  spacer: { width: 44 },
+  scroll: { flexGrow: 0, flexShrink: 1 },
+  footer: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: Spacing.two },
 });

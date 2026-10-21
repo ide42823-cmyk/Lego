@@ -10,6 +10,7 @@
  */
 
 import { countryName, languageName, rankSearchMatches, type SearchFieldSet } from '@/core/search';
+import { applyPeopleFilters } from '@/core/people-filters';
 import { ROOM_CATEGORY_LABELS } from '@/core/room-labels';
 
 import {
@@ -30,6 +31,8 @@ import type {
   MomentPost,
   MomentsMode,
   Page,
+  PeopleFilterOptions,
+  PeopleFilters,
   PeopleMode,
   RoomCategory,
   RoomFeedItem,
@@ -56,7 +59,13 @@ export interface SearchRequest extends PageRequest {
 }
 
 export interface DataSource {
-  listPeople(mode: PeopleMode, request?: PageRequest): Promise<Page<DirectoryFeedItem>>;
+  listPeople(
+    mode: PeopleMode,
+    request?: PageRequest,
+    filters?: PeopleFilters,
+  ): Promise<Page<DirectoryFeedItem>>;
+  /** Facets and bounds for the people filter sheet, derived from the directory. */
+  getPeopleFilterOptions(): Promise<PeopleFilterOptions>;
   listRooms(
     mode: RoomMode,
     options?: PageRequest & { relationship?: RoomRelationshipFilter },
@@ -327,9 +336,73 @@ function selectConversations(filter: ConversationFilter): ConversationSummary[] 
   }
 }
 
+/**
+ * The filter facets the people directory can honestly offer: real ages,
+ * a distance bound that covers every coarse bucket, and the countries and
+ * languages that occur in the fixtures. Sorted by visible label.
+ */
+function buildPeopleFilterOptions(): PeopleFilterOptions {
+  const ages = FIXTURE_USERS.flatMap((user) => (user.age === undefined ? [] : [user.age]));
+  const distances = FIXTURE_USERS.flatMap((user) =>
+    user.distanceKm === undefined ? [] : [user.distanceKm],
+  );
+
+  const countries = new Map<string, string>();
+  const languages = new Map<string, string>();
+
+  for (const user of FIXTURE_USERS) {
+    if (user.locale) {
+      const label = countryName(user.locale);
+      if (label) {
+        countries.set(user.locale.toUpperCase(), label);
+      }
+    }
+    if (user.language) {
+      const label = languageName(user.language);
+      if (label) {
+        languages.set(user.language.toLowerCase(), label);
+      }
+    }
+  }
+
+  const toOptions = (values: Map<string, string>) =>
+    [...values.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+  const maxDistance = distances.length ? Math.max(...distances) : 50;
+
+  return {
+    age: {
+      min: ages.length ? Math.min(...ages) : 18,
+      max: ages.length ? Math.max(...ages) : 60,
+      step: 1,
+    },
+    distanceKm: {
+      min: 0,
+      // Round the bound up to a readable number while still covering every
+      // fixture bucket; the step keeps the thumbs on whole kilometres.
+      max: Math.max(50, Math.ceil(maxDistance / 50) * 50),
+      step: 10,
+    },
+    countries: toOptions(countries),
+    languages: toOptions(languages),
+  };
+}
+
 export const fixtureDataSource: DataSource = {
-  listPeople(mode, request) {
-    return simulate(() => paginate(withBanners(selectPeople(mode)), request));
+  listPeople(mode, request, filters) {
+    return simulate(() => {
+      const people = selectPeople(mode);
+      const filtered = filters
+        ? applyPeopleFilters(people, filters, buildPeopleFilterOptions())
+        : people;
+      return paginate(withBanners(filtered), request);
+    });
+  },
+
+  getPeopleFilterOptions() {
+    return simulate(buildPeopleFilterOptions);
   },
 
   listRooms(mode, options) {
