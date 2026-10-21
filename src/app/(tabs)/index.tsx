@@ -113,6 +113,8 @@ export default function HomeScreen() {
                 name="filter"
                 size={26}
                 compact={compactHeader}
+                // The reference's funnel is a solid black shape, not an outline.
+                fill={theme.text}
                 label={
                   activeFilterCount > 0
                     ? `Filter people, ${activeFilterCount} active`

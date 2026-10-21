@@ -33,6 +33,35 @@ export interface UserBadgeItemProps {
   vipTier?: number;
   /** Discovery rows draw the level as the reference's charm flower. */
   levelStyle?: LevelBadgeStyle;
+  /**
+   * The reference gives the flower two colours: the warm coral sits beside the
+   * verified seal, the violet one stands alone. Defaults to the warm coral.
+   */
+  flowerTone?: 'pair' | 'alone';
+}
+
+/**
+ * The verified seal, in the reference's treatment: a solid scalloped badge with
+ * a white check. Lucide's seal draws its own check with the same stroke colour,
+ * which disappears on the fill, so the check is overlaid in white.
+ */
+function VerifiedSeal() {
+  const tints = useTints();
+
+  return (
+    <View style={styles.seal}>
+      <Icon
+        name="verified"
+        size={17}
+        color={tints.verified}
+        fill={tints.verified}
+        strokeWidth={1.4}
+      />
+      <View pointerEvents="none" style={styles.sealCheck}>
+        <Icon name="check" size={8} strokeWidth={3.4} color="#FFFFFF" />
+      </View>
+    </View>
+  );
 }
 
 /** Renders one badge. A missing level renders nothing rather than a crest "0". */
@@ -41,6 +70,7 @@ export function UserBadgeItem({
   level,
   vipTier,
   levelStyle = 'emblem',
+  flowerTone = 'pair',
 }: UserBadgeItemProps) {
   const tints = useTints();
 
@@ -55,8 +85,8 @@ export function UserBadgeItem({
             name="flower"
             size={17}
             strokeWidth={2.1}
-            color={tints.flower}
-            fill={tints.flower}
+            color={flowerTone === 'alone' ? tints.flowerAlone : tints.flower}
+            fill={flowerTone === 'alone' ? tints.flowerAlone : tints.flower}
             label={`Level ${level}`}
           />
         );
@@ -69,7 +99,7 @@ export function UserBadgeItem({
     case 'aristocracy':
       return <TierBadge tier="aristocracy" label="AR" crowned />;
     case 'verified':
-      return <Icon name="verified" size={17} color={tints.verified} label="Verified" />;
+      return <VerifiedSeal />;
     case 'new':
       return <CategoryChip tone="trending" label="NEW" />;
     default:
@@ -108,6 +138,9 @@ export function UserBadges({
   presentation = 'default',
 }: UserBadgesProps) {
   const directory = presentation === 'directory';
+  // Directory rule from the reference: a member with the verified seal wears
+  // the warm coral flower; the seal-less charm is violet.
+  const flowerTone: 'pair' | 'alone' = badges.includes('verified') ? 'pair' : 'alone';
   const ordered = (directory ? DIRECTORY_ORDER : BADGE_ORDER)
     .filter((badge) => {
       if (!badges.includes(badge)) {
@@ -134,6 +167,7 @@ export function UserBadges({
           level={level}
           vipTier={vipTier}
           levelStyle={directory ? 'flower' : 'emblem'}
+          flowerTone={flowerTone}
         />
       ))}
     </View>
@@ -142,4 +176,14 @@ export function UserBadges({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, flexWrap: 'wrap' },
+  seal: { width: 17, height: 17, alignItems: 'center', justifyContent: 'center' },
+  sealCheck: {
+    position: 'absolute',
+    start: 0,
+    end: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

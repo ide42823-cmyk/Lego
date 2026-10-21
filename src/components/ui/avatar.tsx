@@ -85,7 +85,11 @@ export function Avatar({
   const backgroundColor = PLACEHOLDER_COLORS[hash(id) % PLACEHOLDER_COLORS.length];
   const corner = radius ?? size / 2;
   const ring = ringColor ? { borderWidth: 2, borderColor: ringColor } : null;
-  const dot = Math.max(10, Math.round(size * 0.24));
+  // The reference's presence mark is a neat dot ringed in the page colour —
+  // roughly a sixth of the portrait, not the quarter-sized beacons an earlier
+  // pass drew. The video affordance keeps its own, slightly larger badge.
+  const dot = Math.max(9, Math.round(size * 0.16));
+  const mediaDot = Math.max(14, Math.round(size * 0.26));
   /**
    * The frame is drawn larger than the photo and nudged so that its transparent
    * hole lands exactly on the avatar — the art's hole is not centred in its
@@ -146,15 +150,15 @@ export function Avatar({
           style={[
             styles.video,
             {
-              width: dot + 4,
-              height: dot + 4,
+              width: mediaDot + 4,
+              height: mediaDot + 4,
               borderRadius: Radius.pill,
               backgroundColor: theme.brand,
               borderColor: theme.background,
             },
           ]}
         >
-          <Icon name="video" size={dot - 4} strokeWidth={2.6} color={theme.onBrand} />
+          <Icon name="video" size={mediaDot - 6} strokeWidth={2.6} color={theme.onBrand} />
         </View>
       ) : null}
 

@@ -1136,6 +1136,17 @@ are unchanged.
 Side-by-side comparison against the references showed the card was still visibly denser than
 the original. Corrected:
 
+- **Icons and marks first.** The Me tab is now a plain circle (the reference carries no face on
+  it; the notification dot floats on its rim) instead of a smiley. The header filter funnel is a
+  solid fill, as in the reference, not an outline. The verified seal is Lucide's scalloped badge
+  **filled** in teal with an overlaid white check — Lucide strokes its own check in the same
+  colour, which is invisible on the fill. The charm flower is two-toned like the reference: warm
+  coral (`#FB5A6E` / dark `#FF8B96`) when it sits beside the verified seal, violet
+  (`#A87DF2` / dark `#BF93FA`) when it stands alone, decided from whether the member holds the
+  seal. The avatar presence dot shrank from a quarter of the portrait to about a sixth
+  (`max(9, 0.16 · size)`), matching the reference's neat dot; the video-call badge keeps its
+  own larger scale. All glyphs remain Lucide or generic composed drawings — nothing from the
+  reference app is copied.
 - **Row anatomy** — avatar 60 → 64 pt, name 17 → 18 pt / 23 pt leading, Hi pill 76 × 36 → 92 × 38
   pt with a 20 pt heart, marks 16 → 17 pt, pills grown to 13 pt labels (age) / 12.5 pt (tier),
   text gaps 5 → 6 pt, card gap 14 → 16 pt so ~4 cards fill the viewport like the reference.
@@ -1160,7 +1171,11 @@ the original. Corrected:
 - Verified again: `tsc`, `expo lint` clean; `jest` 17 suites / 196 tests (distance and row
   assertions updated for the new `6.0km` copy); web captures at 384 light/dark and 320 show
   the taller Hi pill, 2.0 km-style copy, plain New users, no horizontal overflow and zero
-  console errors.
+  console errors; and the rendered SVGs were read back over CDP in both schemes to prove the
+  seal fills teal with a white 8 pt check overlay, the seal-paired flower is coral
+  (`#1FC7A6` + `#FB5A6E` light / `#3EE0BC` + `#FF8B96` dark), the solo flower is violet
+  (`#A87DF2` light / `#BF93FA` dark), the header funnel fills in text ink and the Ranking cup
+  fills gold.
 
 ### What changed
 

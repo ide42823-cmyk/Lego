@@ -9,6 +9,7 @@ import CalendarDays from 'lucide-react-native/icons/calendar-days';
 import Camera from 'lucide-react-native/icons/camera';
 import Check from 'lucide-react-native/icons/check';
 import ChevronDown from 'lucide-react-native/icons/chevron-down';
+import Circle from 'lucide-react-native/icons/circle';
 import Cloud from 'lucide-react-native/icons/cloud';
 import Flower from 'lucide-react-native/icons/flower';
 import Funnel from 'lucide-react-native/icons/funnel';
@@ -21,8 +22,8 @@ import Copy from 'lucide-react-native/icons/copy';
 import Crown from 'lucide-react-native/icons/crown';
 import Dices from 'lucide-react-native/icons/dices';
 import Ellipsis from 'lucide-react-native/icons/ellipsis';
-import FaceSlightlySmiling from 'lucide-react-native/icons/face-slightly-smiling';
 import Flame from 'lucide-react-native/icons/flame';
+
 import Gem from 'lucide-react-native/icons/gem';
 import Gift from 'lucide-react-native/icons/gift';
 import Globe from 'lucide-react-native/icons/globe';
@@ -168,7 +169,9 @@ const ICONS: Record<IconName, LucideIcon> = {
   moments: Orbit,
   rooms: AudioLines,
   messages: MessageCircle,
-  me: FaceSlightlySmiling,
+  // The reference's account tab is a plain circle, not a face — the dot badge
+  // floats on its rim.
+  me: Circle,
 
   search: Search,
   filter: Funnel,

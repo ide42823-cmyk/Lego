@@ -248,6 +248,8 @@ export interface AppTints {
   verified: string;
   /** The charm flower beside a discovery name. */
   flower: string;
+  /** The solo charm flower — the violet treatment for members without a seal. */
+  flowerAlone: string;
   /** The greeting control. */
   hi: {
     background: string;
@@ -324,7 +326,10 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     },
     online: '#22C55E',
     verified: '#1FC7A6',
-    flower: '#FF5C9E',
+    // The reference pairs the coral flower with the verified seal ...
+    flower: '#FB5A6E',
+    // ... and gives the members without a seal a violet charm instead.
+    flowerAlone: '#A87DF2',
     hi: {
       background: '#FFE4F1',
       backgroundTo: '#FFBEDA',
@@ -419,7 +424,8 @@ export const Tints: { light: AppTints; dark: AppTints } = {
     },
     online: '#4ADE80',
     verified: '#3EE0BC',
-    flower: '#FF8FBF',
+    flower: '#FF8B96',
+    flowerAlone: '#BF93FA',
     hi: {
       background: '#3A1D2B',
       backgroundTo: '#5A2540',
