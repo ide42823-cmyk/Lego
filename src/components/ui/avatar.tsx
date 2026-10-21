@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   presence: {
     position: 'absolute',
     top: 0,
-    end: 0,
+    start: 0,
     borderWidth: 2,
   },
   video: {

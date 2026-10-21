@@ -4,6 +4,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from '../themed-text';
+import { GradientFill } from './gradient-fill';
 import { Icon } from './icon';
 
 export interface HiButtonProps extends Omit<PressableProps, 'children' | 'style'> {
@@ -14,8 +15,8 @@ export interface HiButtonProps extends Omit<PressableProps, 'children' | 'style'
 /**
  * The greeting control.
  *
- * The reference turns "say hi" into the loudest affordance in a row — a filled
- * pill with a heart — so it gets its own component rather than being a text
+ * The reference turns "say hi" into the loudest affordance in a row — a glossy
+ * pink pill with a heart — so it gets its own component rather than being a text
  * button that every screen styles slightly differently.
  */
 export function HiButton({ name, ...rest }: HiButtonProps) {
@@ -28,14 +29,16 @@ export function HiButton({ name, ...rest }: HiButtonProps) {
       hitSlop={6}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: tints.hi.background, opacity: pressed ? 0.7 : 1 },
+        { backgroundColor: tints.hi.background, borderColor: tints.hi.border },
+        pressed && styles.pressed,
       ]}
       {...rest}
     >
+      <GradientFill from={tints.hi.background} to={tints.hi.backgroundTo} radius={Radius.pill} />
       <Icon
         name="greeting"
-        size={15}
-        strokeWidth={2.2}
+        size={18}
+        strokeWidth={1.8}
         color={tints.hi.icon}
         fill={tints.hi.icon}
       />
@@ -51,11 +54,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.one,
-    paddingHorizontal: Spacing.three,
+    gap: 5,
+    paddingHorizontal: Spacing.two + 4,
+    minWidth: 76,
+    minHeight: 36,
     paddingVertical: Spacing.two,
     borderRadius: Radius.pill,
-    minHeight: 36,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
-  label: { fontSize: 14, fontWeight: '800' },
+  pressed: { opacity: 0.82 },
+  label: { fontSize: 15, lineHeight: 20, fontWeight: '800', fontStyle: 'italic' },
 });

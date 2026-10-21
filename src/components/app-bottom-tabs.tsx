@@ -9,7 +9,7 @@ import {
 import { Pressable, StyleSheet, View, type PressableProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Radius, Spacing, TouchTarget } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useTints } from '@/hooks/use-tints';
 
@@ -24,6 +24,11 @@ import { Icon, type IconName } from './ui/icon';
  * Android and web. The reference design has a very specific bar, so the
  * platform's native tab bar is not used — but navigation semantics (state
  * preservation, deep links, back behaviour) still come from the router.
+ *
+ * Three glyphs are composed locally from Lucide primitives: the cloud home
+ * (with the reference's heart), the broadcast room (a house outline with level
+ * bars) and the chat bubble. They are generic line drawings of our own, not
+ * copies of the reference's proprietary icons.
  *
  * Tab badges are passed in by the layout rather than read here, so this
  * component stays free of data concerns.
@@ -44,9 +49,55 @@ interface TabItemProps extends TabTriggerSlotProps {
   dot?: boolean;
 }
 
+/** The Home, Rooms and Messages marks need a second shape around the Lucide glyph. */
+function TabGlyph({ name, color, focused }: { name: IconName; color: string; focused: boolean }) {
+  const weight = focused ? 2.4 : 2.1;
+  const size = 26;
+
+  if (name === 'home') {
+    return (
+      <View style={styles.glyph}>
+        <Icon name="cloud" size={size} strokeWidth={weight} color={color} />
+        <View pointerEvents="none" style={styles.homeHeart}>
+          <Icon name="greeting" size={10} strokeWidth={2.2} color={color} />
+        </View>
+      </View>
+    );
+  }
+
+  if (name === 'rooms') {
+    return (
+      <View style={styles.glyph}>
+        <Icon name="house" size={size} strokeWidth={weight} color={color} />
+        <View pointerEvents="none" style={styles.roomBars}>
+          {[5, 7, 5].map((height, index) => (
+            <View key={index} style={[styles.roomBar, { height, backgroundColor: color }]} />
+          ))}
+        </View>
+      </View>
+    );
+  }
+
+  if (name === 'messages') {
+    return (
+      <View style={styles.glyph}>
+        <Icon name="comment" size={size} strokeWidth={weight} color={color} />
+        <View pointerEvents="none" style={styles.messageSmileWrap}>
+          <View style={[styles.messageSmile, { borderColor: color }]} />
+        </View>
+      </View>
+    );
+  }
+
+  return <Icon name={name} size={size} strokeWidth={weight} color={color} />;
+}
+
 function TabBarItem({ label, name, tint, badge, dot, isFocused, ...props }: TabItemProps) {
   const theme = useTheme();
-  const color = isFocused ? theme.text : theme.textSecondary;
+  // The reference keeps every mark and label near-black; the active tab is
+  // signalled by the tint circle and the heavier label rather than by greying
+  // out the other four destinations.
+  const color = theme.text;
 
   return (
     <Pressable
@@ -60,7 +111,7 @@ function TabBarItem({ label, name, tint, badge, dot, isFocused, ...props }: TabI
       style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
     >
       <View style={[styles.iconSlot, isFocused && { backgroundColor: tint }]}>
-        <Icon name={name} size={22} strokeWidth={isFocused ? 2.5 : 2} color={color} />
+        <TabGlyph name={name} color={color} focused={Boolean(isFocused)} />
         {badge && badge > 0 ? (
           <View style={styles.badgeSlot}>
             <CountBadge count={badge} accessibilityLabel={`${badge} unread`} />
@@ -70,7 +121,7 @@ function TabBarItem({ label, name, tint, badge, dot, isFocused, ...props }: TabI
       </View>
       <ThemedText
         type="small"
-        style={[styles.label, { color, fontWeight: isFocused ? '800' : '600' }]}
+        style={[styles.label, { color, fontWeight: isFocused ? '700' : '600' }]}
       >
         {label}
       </ThemedText>
@@ -145,28 +196,62 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    paddingTop: Spacing.one + 2,
+    paddingTop: 6,
     paddingHorizontal: Spacing.two,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   item: {
     flex: 1,
-    minHeight: TouchTarget,
+    minHeight: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.half,
+    gap: 1,
     paddingVertical: Spacing.one,
   },
   itemPressed: { opacity: 0.6 },
-  // The active tab sits in a soft square of its own hue, as in the reference.
+  // The active tab sits in a soft circle of its own hue, as in the reference.
   iconSlot: {
-    width: 46,
-    height: 30,
-    borderRadius: Radius.medium,
+    width: 40,
+    height: 40,
+    borderRadius: Radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 1,
   },
-  label: { fontSize: 11, lineHeight: 14 },
-  badgeSlot: { position: 'absolute', top: -7, end: -10 },
-  dot: { position: 'absolute', top: -1, end: 4, width: 9, height: 9, borderRadius: Radius.pill },
+  glyph: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center' },
+  homeHeart: {
+    position: 'absolute',
+    start: 0,
+    end: 0,
+    bottom: 4,
+    alignItems: 'center',
+  },
+  roomBars: {
+    position: 'absolute',
+    start: 0,
+    end: 0,
+    bottom: 6,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    gap: 2.5,
+  },
+  roomBar: { width: 2, borderRadius: 1.5 },
+  messageSmileWrap: {
+    position: 'absolute',
+    start: 0,
+    end: 0,
+    top: 9,
+    alignItems: 'center',
+  },
+  messageSmile: {
+    width: 9,
+    height: 5,
+    borderBottomWidth: 1.6,
+    borderBottomLeftRadius: 5,
+    borderBottomRightRadius: 5,
+  },
+  label: { fontSize: 12.5, lineHeight: 15 },
+  badgeSlot: { position: 'absolute', top: -5, end: -5 },
+  dot: { position: 'absolute', top: 2, end: 2, width: 9, height: 9, borderRadius: Radius.pill },
 });

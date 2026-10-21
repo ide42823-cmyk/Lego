@@ -244,8 +244,20 @@ export interface AppTints {
   };
   /** Presence dot. */
   online: string;
+  /** The verified seal beside a discovery name. */
+  verified: string;
+  /** The charm flower beside a discovery name. */
+  flower: string;
   /** The greeting control. */
-  hi: { background: string; text: string; icon: string };
+  hi: {
+    background: string;
+    backgroundTo: string;
+    text: string;
+    icon: string;
+    border: string;
+  };
+  /** Full-bleed promotional gradients interleaved into feeds. */
+  promo: Record<'families' | 'event' | 'recharge', { from: string; to: string; ctaInk: string }>;
   /** Card drop shadow colour. */
   cardShadow: string;
 }
@@ -273,9 +285,9 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       rank: { background: '#CFF6F4', text: '#0B8B86' },
     },
     tier: {
-      vip: { from: '#FFE9A8', to: '#F5B301', text: '#6B4A00' },
-      svip: { from: '#FFD9D0', to: '#E05252', text: '#611414' },
-      aristocracy: { from: '#E2F6E8', to: '#2E9E5B', text: '#0E4023' },
+      vip: { from: '#FFD36A', to: '#F29B00', text: '#FFFFFF' },
+      svip: { from: '#FF9A8A', to: '#D93636', text: '#FFFFFF' },
+      aristocracy: { from: '#7EE0B0', to: '#1E8E4E', text: '#FFFFFF' },
     },
     age: { background: '#FFE3F0', text: '#D6336C' },
     gender: { female: '#D6336C', male: '#2B6CE0' },
@@ -311,7 +323,20 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       },
     },
     online: '#22C55E',
-    hi: { background: '#FFDCEA', text: '#E5307A', icon: '#F04088' },
+    verified: '#1FC7A6',
+    flower: '#FF5C9E',
+    hi: {
+      background: '#FFE4F1',
+      backgroundTo: '#FFBEDA',
+      text: '#E5307A',
+      icon: '#F04C93',
+      border: 'rgba(240, 76, 147, 0.20)',
+    },
+    promo: {
+      families: { from: '#8B5CF6', to: '#EC4899', ctaInk: '#8B2FA8' },
+      event: { from: '#F59E0B', to: '#EF4444', ctaInk: '#B45309' },
+      recharge: { from: '#0EA5E9', to: '#6366F1', ctaInk: '#1D4ED8' },
+    },
     me: {
       tierTile: {
         from: '#FFF7DE',
@@ -355,9 +380,9 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       rank: { background: '#0E3331', text: '#6FE0DA' },
     },
     tier: {
-      vip: { from: '#4A3A0E', to: '#B98A00', text: '#FFE9A8' },
-      svip: { from: '#4A1A1A', to: '#A83333', text: '#FFD9D0' },
-      aristocracy: { from: '#12331E', to: '#1F7A44', text: '#DFF5E4' },
+      vip: { from: '#8A6410', to: '#C98A00', text: '#FFF3D2' },
+      svip: { from: '#7A2424', to: '#A83333', text: '#FFE1DA' },
+      aristocracy: { from: '#1E4D30', to: '#1F7A44', text: '#E6FFEE' },
     },
     age: { background: '#3A1D2B', text: '#FF9EC4' },
     gender: { female: '#FF9EC4', male: '#8FBCFF' },
@@ -393,7 +418,20 @@ export const Tints: { light: AppTints; dark: AppTints } = {
       },
     },
     online: '#4ADE80',
-    hi: { background: '#3A1D2B', text: '#FF9EC4', icon: '#FF9EC4' },
+    verified: '#3EE0BC',
+    flower: '#FF8FBF',
+    hi: {
+      background: '#3A1D2B',
+      backgroundTo: '#5A2540',
+      text: '#FFB3D1',
+      icon: '#FF7FB6',
+      border: 'rgba(255, 158, 196, 0.22)',
+    },
+    promo: {
+      families: { from: '#6D28D9', to: '#BE185D', ctaInk: '#7A2A99' },
+      event: { from: '#B45309', to: '#B91C1C', ctaInk: '#9A3412' },
+      recharge: { from: '#1D4ED8', to: '#4338CA', ctaInk: '#1E40AF' },
+    },
     me: {
       tierTile: {
         from: '#332A14',

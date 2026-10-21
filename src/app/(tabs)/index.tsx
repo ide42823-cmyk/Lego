@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { FilterSheet } from '@/components/filter-sheet';
 import { PeopleRow } from '@/components/people-row';
@@ -46,6 +46,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const greet = useGreet();
   const theme = useTheme();
+  const { width } = useWindowDimensions();
+  // Three 44 pt actions plus four tabs do not fit across a 384 pt phone; trim
+  // the action *boxes* by 4 pt (hitSlop keeps the touch target above 44 pt).
+  const compactHeader = width < 390;
 
   const filterOptions = useAsync<PeopleFilterOptions>(
     () => fixtureDataSource.getPeopleFilterOptions(),
@@ -57,6 +61,10 @@ export default function HomeScreen() {
       ? countActivePeopleFilters(filters, filterOptions.data)
       : 0;
   const filterKey = filters ? JSON.stringify(filters) : 'all';
+  // The reference puts the filter beside search on Nearby and New users (the
+  // views with distance/age criteria), but not on the algorithmic tabs. Keep it
+  // visible on the others while a filter is active so it can always be undone.
+  const showFilter = mode === 'nearby' || mode === 'new' || activeFilterCount > 0;
 
   const list = usePaginated<DirectoryFeedItem>(
     (cursor) => fixtureDataSource.listPeople(mode, { cursor, limit: 12 }, filters ?? undefined),
@@ -92,26 +100,44 @@ export default function HomeScreen() {
           />
         </View>
         <View style={styles.actions}>
-          <IconButton name="search" label="Search people" onPress={openSearch} />
-          <View style={styles.filterWrap}>
-            <IconButton
-              name="filter"
-              label={
-                activeFilterCount > 0
-                  ? `Filter people, ${activeFilterCount} active`
-                  : 'Filter people'
-              }
-              tone={activeFilterCount > 0 ? 'brand' : 'default'}
-              onPress={() => setFilterOpen(true)}
-            />
-            {activeFilterCount > 0 ? (
-              <View
-                pointerEvents="none"
-                style={[styles.filterDot, { backgroundColor: theme.brand }]}
+          <IconButton
+            name="search"
+            size={26}
+            compact={compactHeader}
+            label="Search people"
+            onPress={openSearch}
+          />
+          {showFilter ? (
+            <View style={styles.filterWrap}>
+              <IconButton
+                name="filter"
+                size={26}
+                compact={compactHeader}
+                label={
+                  activeFilterCount > 0
+                    ? `Filter people, ${activeFilterCount} active`
+                    : 'Filter people'
+                }
+                tone={activeFilterCount > 0 ? 'brand' : 'default'}
+                onPress={() => setFilterOpen(true)}
               />
-            ) : null}
-          </View>
-          <IconButton name="trophy" label="Ranking" onPress={() => router.push('/ranking')} />
+              {activeFilterCount > 0 ? (
+                <View
+                  pointerEvents="none"
+                  style={[styles.filterDot, { backgroundColor: theme.brand }]}
+                />
+              ) : null}
+            </View>
+          ) : null}
+          <IconButton
+            name="trophy"
+            size={28}
+            compact={compactHeader}
+            tone="gold"
+            fill={theme.gold}
+            label="Ranking"
+            onPress={() => router.push('/ranking')}
+          />
         </View>
       </View>
 
@@ -137,6 +163,7 @@ export default function HomeScreen() {
           data={list.items}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           accessibilityLabel="People"
           refreshControl={
             <RefreshControl refreshing={list.isRefreshing} onRefresh={list.refresh} />
@@ -184,11 +211,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.two,
-    paddingBottom: Spacing.one,
+    paddingHorizontal: Spacing.three - 4,
+    paddingTop: Spacing.one,
+    paddingBottom: Spacing.two,
   },
-  tabs: { flex: 1, paddingStart: Spacing.two },
-  actions: { flexDirection: 'row', alignItems: 'center' },
+  tabs: {
+    flex: 1,
+    minWidth: 0,
+    paddingStart: Spacing.one,
+    // Leave a clean gap before the action cluster and hide a sliver of the next
+    // tab at the common 384–393 dp widths.
+    marginEnd: Spacing.two,
+  },
+  actions: { flexDirection: 'row', alignItems: 'center', flexShrink: 0 },
   filterWrap: { position: 'relative' },
   filterDot: {
     position: 'absolute',
@@ -201,9 +236,9 @@ const styles = StyleSheet.create({
   padded: { paddingHorizontal: Spacing.three },
   listContent: {
     paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.one,
-    paddingBottom: Spacing.six,
-    gap: Spacing.two,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.five,
+    gap: 14,
   },
   footer: { paddingTop: Spacing.three },
 });

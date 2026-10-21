@@ -14,8 +14,16 @@ export interface IconButtonProps extends Omit<PressableProps, 'children' | 'styl
   label: string;
   name: IconName;
   size?: number;
+  /** Fill the glyph, e.g. the solid gold ranking cup. */
+  fill?: string;
   /** Tint the icon; defaults to primary text. */
-  tone?: 'default' | 'accent' | 'brand' | 'muted';
+  tone?: 'default' | 'accent' | 'brand' | 'muted' | 'gold';
+  /**
+   * Shrink the layout box to 40 pt while keeping the 44 pt touch target through
+   * hitSlop. Used where three header actions share a row with four scrollable
+   * tabs on a 384 pt phone.
+   */
+  compact?: boolean;
   style?: PressableProps['style'];
 }
 
@@ -23,8 +31,10 @@ export function IconButton({
   label,
   name,
   size = 22,
+  fill,
   tone = 'default',
   disabled,
+  compact = false,
   style,
   ...rest
 }: IconButtonProps) {
@@ -35,6 +45,7 @@ export function IconButton({
     accent: theme.accent,
     brand: theme.brand,
     muted: theme.textSecondary,
+    gold: theme.gold,
   } as const;
 
   return (
@@ -46,6 +57,7 @@ export function IconButton({
       hitSlop={8}
       style={(state) => [
         styles.base,
+        compact && styles.compact,
         {
           backgroundColor: state.pressed ? theme.backgroundElement : 'transparent',
           opacity: disabled ? 0.4 : 1,
@@ -54,7 +66,7 @@ export function IconButton({
       ]}
       {...rest}
     >
-      <Icon name={name} size={size} color={tones[tone]} />
+      <Icon name={name} size={size} color={tones[tone]} fill={fill} />
     </Pressable>
   );
 }
@@ -67,4 +79,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: Radius.pill,
   },
+  compact: { minWidth: TouchTarget - 4, minHeight: TouchTarget - 4 },
 });

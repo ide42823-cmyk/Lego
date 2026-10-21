@@ -281,7 +281,7 @@ function withBanners(users: readonly UserSummary[]): DirectoryFeedItem[] {
   let bannerIndex = 0;
   users.forEach((user, index) => {
     feed.push({ kind: 'user', id: user.id, user });
-    const isSlot = (index + 1) % 5 === 0;
+    const isSlot = (index + 1) % 4 === 0;
     if (isSlot && bannerIndex < FIXTURE_BANNERS.length) {
       const banner = FIXTURE_BANNERS[bannerIndex] as (typeof FIXTURE_BANNERS)[number];
       feed.push({ kind: 'banner', id: banner.id, banner });

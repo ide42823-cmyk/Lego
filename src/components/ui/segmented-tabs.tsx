@@ -1,3 +1,4 @@
+import { useEffect, useRef, type ComponentRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Radius, Spacing } from '@/constants/theme';
@@ -40,9 +41,22 @@ export function SegmentedTabs<T extends string>({
   variant = 'underline',
 }: SegmentedTabsProps<T>) {
   const theme = useTheme();
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
+  const itemX = useRef<Record<string, number>>({});
+
+  // Bring the selected tab into view when the row is wider than the space the
+  // header leaves for it. Without this, choosing a half-visible tab would leave
+  // its label clipped under the header actions.
+  useEffect(() => {
+    const x = itemX.current[value];
+    if (typeof x === 'number') {
+      scrollRef.current?.scrollTo({ x: Math.max(0, x - Spacing.two), animated: true });
+    }
+  }, [value]);
 
   return (
     <ScrollView
+      ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
@@ -58,6 +72,9 @@ export function SegmentedTabs<T extends string>({
             accessibilityState={{ selected }}
             accessibilityLabel={item.label}
             onPress={() => onChange(item.key)}
+            onLayout={(event) => {
+              itemX.current[item.key] = event.nativeEvent.layout.x;
+            }}
             style={({ pressed }) => [
               styles.item,
               variant === 'pill' && [
@@ -110,19 +127,22 @@ const styles = StyleSheet.create({
     // Tight on purpose: the mode row shares the width with the header's action
     // controls, so the gap is what decides whether a whole tab or half a word
     // sits at the edge before the row scrolls.
-    gap: Spacing.three,
+    gap: 14,
     paddingVertical: Spacing.one,
+    // Trailing room lets the auto-scroll above pull a later tab clear of the
+    // search/filter/trophy cluster instead of stopping with its label clipped.
+    paddingEnd: Spacing.three + Spacing.two,
   },
-  item: { paddingBottom: Spacing.one, alignItems: 'center' },
-  tabLabel: { fontSize: 17, lineHeight: 24 },
+  item: { paddingBottom: Spacing.one + 1, alignItems: 'center' },
+  tabLabel: { fontSize: 16, lineHeight: 23 },
   // The reference marks the active tab with a short, heavy *arc* rather than a
   // full-width rule. A wide, short view whose only bottom border is rounded
   // curves the same way without an SVG per tab.
   underline: {
-    width: 30,
+    width: 32,
     height: 6,
-    marginTop: Spacing.one,
-    borderBottomWidth: 3,
+    marginTop: 2,
+    borderBottomWidth: 2.5,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
   },

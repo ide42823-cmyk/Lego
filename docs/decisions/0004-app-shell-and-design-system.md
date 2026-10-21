@@ -1078,10 +1078,36 @@ was wrong and is replaced by this one. The screen was then rebuilt against the i
 - **Accessibility attributes:** both rails expose `aria-selected` true/false; every row and
   podium spot is a button whose label starts "Rank N" and includes the value and metric.
 
+### Device pass (2026-10-21)
+
+A Xiaomi `24117RN76G` (HyperOS, Android 14, 1080x2400 ≈ 384x853 dp) was attached and the debug
+build loaded from Metro over `adb reverse`.
+
+- **Deep-linked screens:** charm daily and room daily in light and dark; weekly; Games and
+  Family; the `FR` empty region. The stage fills the width at 384 dp, all six category labels
+  fit without scrolling, portraits and avatar frames render, and the self bar sits above the
+  gesture area. Home, Rooms, Search, Me and a member profile were also captured (P5-P8 render
+  evidence).
+- **Safe areas:** the status-bar icons are light over the stage; the category rail, podium and
+  list are inset correctly; the sticky self bar clears the gesture bar. No clipped text or
+  horizontal overflow was visible.
+- **One Android-only artefact:** in light scheme, the system navigation-bar strip under the
+  sticky self bar follows the OS theme (white), so a light strip appears below the dark stage.
+  Matching it needs `expo-navigation-bar`/edge-to-edge configuration, which is not in this
+  dependency set; the reference is iOS and has no such strip.
+
+**Interactive controls were not exercised on this handset yet.** MIUI denies the shell
+`INJECT_EVENTS` and `WRITE_SECURE_SETTINGS` permissions ("USB debugging (Security settings)"
+is off), so taps and the native RTL flag cannot be injected from the host. The region sheet,
+tab/period taps, gift/Previous/room toasts, the P8 filter sheet and the P5 Honour tab still
+need a human tap; their logic is covered by the web pass and tests.
+
 ### NOT verified in P9
 
-- **Nothing on the handset.** No device was attached this pass; native touch on the rails,
-  FlatList momentum, safe-area insets and TalkBack/VoiceOver reading order are unproven.
+- **Touch and TalkBack.** No tap could be injected on the handset, so rail taps, FlatList
+  momentum, the region sheet, the toasts, the filter sheet and the Honour tab are unproven
+  natively; TalkBack/VoiceOver reading order is also unproven. Safe-area layout was verified by
+  screenshot.
 - **Real standings.** Every number is fixture data. Server-computed period aggregates,
   tie-breaking, anti-abuse and the member's own rank/country are backend work; the self bar
   therefore reads "Not ranked yet".
@@ -1091,9 +1117,88 @@ was wrong and is replaced by this one. The screen was then rebuilt against the i
 - **Error state visually.** The screen uses the keyed `useAsync` error path with a retry, but no
   failure was induced, so it was not captured.
 - **Full Arabic copy and native RTL.** The English screen was mirrored with DOM `dir="rtl"`;
-  Arabic labels and native `I18nManager` layout have not been reviewed, and React Native Web
-  hardcodes `isRTL: false`, so the native back-chevron flip is unproven.
+  Arabic labels and native `I18nManager` layout have not been reviewed. React Native Web
+  hardcodes `isRTL: false`, and MIUI blocks writing `debug.force_rtl` from the host, so the
+  native back-chevron flip and mirrored flex order are unproven.
 - **Reference art and copy.** The stage, arches, medals and copy are our own; the reference's
   original art, logos and wording are not reproduced.
 - **Games and Family product features.** Those boards need a score service and a family entity;
   this pass deliberately shows only their honest unavailable state.
+
+## P10 — Home fidelity pass (2026-10-21)
+
+A second pass over Home after P9, against the three Home references. It changes the P3
+directory's anatomy and the five-tab bar; routes, the data seam and the server-authority rules
+are unchanged.
+
+### What changed
+
+- **Header.** The four views keep their order (Recommend, Nearby, New users, Featured) and the
+  reference's gradient plate, but the mode labels are 16 pt with a 14 pt gap, a 24 pt trailing
+  pad and a per-item `onLayout` auto-scroll that pulls the selected label clear of the search /
+  filter / trophy cluster. The filter is only present on Nearby and New users, or when a filter
+  is active; on Recommend and Featured it is absent, matching the reference. At widths below
+  390 pt the three action boxes shrink from 44 to 40 pt; an 8 pt `hitSlop` keeps every target
+  above the 44 pt requirement. The `Recommend` row leaves only a sub-pixel sliver of `Featured`
+  at 384/393 pt; the row scrolls, and the auto-scroll reveals later labels after selection.
+- **Rows.** The card is 60 pt avatar, a 76 pt gradient Hi pill, a 2-line name budget, 16 pt
+  verified / flower marks, the age pill (the gender mark now lives only there), VIP/SVIP/AR
+  pills, the distance/bio line and the online dot. Directory rows use the quiet `verified` seal
+  plus the pink level flower, at most two badges, and no `NEW` chip. The card heights vary only
+  because the decorative names wrap; there is no horizontal overflow at 320, 384 or 393 pt.
+- **Names.** The data layer accepts arbitrary Unicode, including `꧁…꧂`, `༒` and Arabic
+  ornamentation. The fixture display names use inline ornaments (`♛ ♡ ☾ 『』 ୨୧`, emoji) rather
+  than tall Javanese / Tibetan frames: the web fallback font puts those frames on their own line
+  box and consumes the two-line name budget. Search tests assert the stable substrings
+  (`Maya`, `نورة`, `لمى`), not the decoration.
+- **Promotions.** Banners now follow every fourth member instead of every fifth, so the first
+  promo sits after the fourth card as in the references. The plates and copy are original
+  gradients; no reference art, logo, trade dress or the reference's name is reproduced.
+- **Bottom bar.** The five marks stay near-black in both schemes (the active tab is signalled by
+  the lavender circle and the heavier label, not by greying the other four). Glyphs are 26 pt,
+  labels 12.5 pt. The cloud home keeps an outlined heart, the room mark keeps its three bars, and
+  Messages is now a rounded speech bubble with a drawn smile rather than a plain circle. The
+  active Home circle, unread badge and Me dot are unchanged.
+- **No wallet arithmetic.** The pass adds no coin, purchase, entitlement, delivery or rank math.
+  Hi remains the existing local greeting; promos and badges are presentation-only fixtures.
+
+### Verified
+
+- `prettier --write`, `tsc --noEmit`, `expo lint` clean; `jest` **17 suites / 195 tests**.
+- **Web (Metro), 384x853 and 393x852, light and dark:** all four header views; the first promo
+  after four members; the four-card stack plus promo at the top; the full-name cards (`Sky
+  Lord`, `أميرة الظلام`, `Night King`, `Dragon Lord`, `Purple Soul`); the filter absent on
+  Recommend and Featured and present on Nearby and New users; the full `Nearby New users
+  Featured` header at 384 with the compact action boxes; `body.scrollWidth === innerWidth`
+  (no horizontal overflow) and zero console errors.
+- **320x568:** no horizontal overflow; the mode row scrolls and the later labels are a scroll
+  affordance; the `SVIP` pill can wrap below the age pill and long names can truncate. This is
+  treated as a stress width, not a target layout.
+- **RTL (DOM `dir="rtl"`):** the shell, cards, banner and bottom bar mirror (avatar right, Hi
+  left, CTA left, icon right, Home tab right); no horizontal overflow. The header's
+  `marginEnd` / `paddingEnd` stay physical on React Native Web because RNW hardcodes
+  `isRTL: false`, so the tab scroller leaves a clipped previous label and the auto-scroll is not
+  RTL-aware. The code uses logical properties; the native `I18nManager` path and a native Arabic
+  layout still need the device pass below.
+- **Not a device pass.** `adb devices` was empty for this pass; the Xiaomi handset used for P9
+  was not attached. Its earlier P5-P9 screenshots still cover the shell and safe areas, but the
+  new card anatomy, outlined cloud heart, Messages smile and compact header actions have only
+  web render evidence. Interactive taps (mode tabs, filter sheet, Hi toast, promo, search) and
+  native RTL remain open.
+
+### NOT verified in P10
+
+- **Native render of the new Home.** No handset was attached, so decorative Unicode rendering,
+  the 26 pt custom glyphs, safe-area insets around the taller bottom bar and Android font
+  fallbacks (Mathematical Script, Arabic, emoji) were not re-shot on the device.
+- **Native RTL.** React Native Web hardcodes `isRTL: false`; the DOM-dir capture cannot prove the
+  `I18nManager` margin resolution, the header scroller direction or the Hi/VIP internal order.
+  Full Arabic copy is also out of scope for this pass.
+- **Interactive states.** The mode tabs, filter sheet, Hi toast, promo actions and TalkBack
+  reading order are covered by the web pass and tests, not by injected device taps (MIUI blocks
+  `INJECT_EVENTS`).
+- **Promo and badge entitlement.** The banners, gradients and level marks are fixture
+  presentation. Real campaigns, VIP/Aristocracy entitlement and purchase delivery are backend
+  work; no success or entitlement is simulated on the client.
+- **Error state visually.** The keyed loading/error/empty branches are unchanged and were not
+  re-induced in this pass.

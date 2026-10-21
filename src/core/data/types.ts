@@ -232,12 +232,17 @@ export interface MomentPost {
   likedByMe: boolean;
 }
 
+/** Which original gradient plate a promotion is painted on. */
+export type PromoTone = 'families' | 'event' | 'recharge';
+
 export interface PromoBanner {
   id: string;
   title: string;
   subtitle?: string;
   imageUrl?: string;
   ctaLabel: string;
+  /** Presentation only; the campaign itself is server-owned. */
+  tone?: PromoTone;
 }
 
 /** A directory feed interleaves promo banners with user rows. */

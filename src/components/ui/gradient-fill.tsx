@@ -1,41 +1,57 @@
-import { StyleSheet } from 'react-native';
+import { useId } from 'react';
+import { StyleSheet, View, type ViewProps } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
-export interface GradientFillProps {
+export interface GradientFillProps extends ViewProps {
   from: string;
   to: string;
-  /** Diagonal (bottom-left to top-right) or straight down. */
-  diagonal?: boolean;
+  /** Corner radius. Pass the parent's radius so the wash is clipped to it. */
+  radius?: number;
+  /** Top-to-bottom instead of the default start-to-end. */
+  vertical?: boolean;
 }
 
 /**
- * A rounded surface's gradient, drawn behind its children.
+ * A flat, two-stop gradient painted behind a control.
  *
- * `ScreenGradient` is the page wash; this is the tile-sized one — membership
- * tiles, game covers, honour plaques. It paints the *whole* box and lets the
- * parent's `overflow: hidden` + radius do the clipping, so one component works
- * for every shape.
+ * The project deliberately avoids adding `expo-linear-gradient` (it would need
+ * a native rebuild for the already-installed dev client). `react-native-svg` is
+ * already a dependency, so the same wash is drawn as one absolutely positioned
+ * rect. The parent must be `position: relative` and clip its corners.
+ *
+ * The layer is non-interactive: presses always reach the control underneath.
  */
-export function GradientFill({ from, to, diagonal = true }: GradientFillProps) {
-  // Scoped by the colour pair: two tiles sharing a gradient share the def, which
-  // is harmless, and different pairs never collide.
-  const id = `tile-${from.replace('#', '')}-${to.replace('#', '')}`;
+export function GradientFill({
+  from,
+  to,
+  radius = 0,
+  vertical = false,
+  style,
+  ...rest
+}: GradientFillProps) {
+  // `useId` is stable across re-renders and unique per instance, so several
+  // gradients on one screen cannot resolve each other's paint.
+  const id = `gradient-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
   return (
-    <Svg
-      style={StyleSheet.absoluteFill}
-      width="100%"
-      height="100%"
+    <View
       pointerEvents="none"
-      aria-hidden
+      style={[StyleSheet.absoluteFill, styles.clip, { borderRadius: radius }, style]}
+      {...rest}
     >
-      <Defs>
-        <LinearGradient id={id} x1="0" y1="0" x2={diagonal ? '1' : '0'} y2="1">
-          <Stop offset="0" stopColor={from} />
-          <Stop offset="1" stopColor={to} />
-        </LinearGradient>
-      </Defs>
-      <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id})`} />
-    </Svg>
+      <Svg width="100%" height="100%">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2={vertical ? '0' : '1'} y2={vertical ? '1' : '0'}>
+            <Stop offset="0" stopColor={from} />
+            <Stop offset="1" stopColor={to} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" rx={radius} fill={`url(#${id})`} />
+      </Svg>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  clip: { overflow: 'hidden' },
+});

@@ -9,6 +9,9 @@ import CalendarDays from 'lucide-react-native/icons/calendar-days';
 import Camera from 'lucide-react-native/icons/camera';
 import Check from 'lucide-react-native/icons/check';
 import ChevronDown from 'lucide-react-native/icons/chevron-down';
+import Cloud from 'lucide-react-native/icons/cloud';
+import Flower from 'lucide-react-native/icons/flower';
+import Funnel from 'lucide-react-native/icons/funnel';
 import ChevronLeft from 'lucide-react-native/icons/chevron-left';
 import ChevronRight from 'lucide-react-native/icons/chevron-right';
 import CircleAlert from 'lucide-react-native/icons/circle-alert';
@@ -45,7 +48,6 @@ import Search from 'lucide-react-native/icons/search';
 import Settings from 'lucide-react-native/icons/settings';
 import Share2 from 'lucide-react-native/icons/share-2';
 import ShieldCheck from 'lucide-react-native/icons/shield-check';
-import SlidersHorizontal from 'lucide-react-native/icons/sliders-horizontal';
 import Sparkles from 'lucide-react-native/icons/sparkles';
 import SquarePlus from 'lucide-react-native/icons/square-plus';
 import Star from 'lucide-react-native/icons/star';
@@ -88,6 +90,8 @@ import { View } from 'react-native';
 export type IconName =
   // Primary navigation
   | 'home'
+  | 'cloud'
+  | 'house'
   | 'moments'
   | 'rooms'
   | 'messages'
@@ -118,6 +122,7 @@ export type IconName =
   | 'star'
   | 'verified'
   | 'trending'
+  | 'flower'
   | 'sparkle'
   | 'globe'
   | 'video'
@@ -158,13 +163,15 @@ export type IconName =
 
 const ICONS: Record<IconName, LucideIcon> = {
   home: House,
+  cloud: Cloud,
+  house: House,
   moments: Orbit,
   rooms: AudioLines,
   messages: MessageCircle,
   me: FaceSlightlySmiling,
 
   search: Search,
-  filter: SlidersHorizontal,
+  filter: Funnel,
   trophy: Trophy,
   create: SquarePlus,
   camera: Camera,
@@ -188,6 +195,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   star: Star,
   verified: BadgeCheck,
   trending: Flame,
+  flower: Flower,
   sparkle: Sparkles,
   globe: Globe,
   video: Video,

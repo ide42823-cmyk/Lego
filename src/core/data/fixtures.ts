@@ -75,35 +75,41 @@ function pickSome<T>(random: () => number, list: readonly T[], max: number): T[]
  * avatar photo all agree. Each pool is long enough for the 12 members per gender
  * that `buildUsers` creates.
  */
+/**
+ * Fancy display names, deliberately mixed Arabic/Latin and decorated. The
+ * ornaments stay inline (`♛`, `♡`, `☾`, `『』`, emoji) rather than using tall
+ * Javanese/Tibetan frame marks: on the web fallback font those marks sit on
+ * their own line and eat the two-line name budget. The data layer itself
+ * accepts any Unicode name, including the `꧁…꧂` style.
+ */
 const FEMALE_NAMES = [
-  'Maya K.',
-  'ليان',
-  'Ivy',
-  'نورة',
-  'سارة',
-  'Zara',
-  'ريم',
-  'Amara',
-  'هيا',
-  'لمى',
-  'دانة',
-  'Priya',
-  'منال',
+  '♛ 𝓟𝓾𝓻𝓹𝓵𝓮 𝓢𝓸𝓾𝓵 ♛',
+  '♛ Maya ♛',
+  '♡ نورة ♡',
+  '♡ 𝓡𝓸𝓼𝓮 𝓠𝓾𝓮𝓮𝓷 ♡',
+  '✧ لمى ✧',
+  '☾ أميرة القمر ☽',
+  '✧ 𝓗𝓮𝓪𝓿𝓮𝓷 𝓖𝓵𝓸𝔀 ✧',
+  '♡ ملاك السماء ♡',
+  '୨୧ 𝓛𝓲𝓵𝓪𝓬 𝓓𝓻𝓮𝓪𝓶 ୨୧',
+  '『💎』نبض الكريستال『💎』',
+  '☾ 𝓜𝓸𝓸𝓷 𝓟𝓻𝓲𝓷𝓬𝓮𝓼𝓼 ☽',
+  '♛ أميرة الظلام ♛',
 ] as const;
 
 const MALE_NAMES = [
-  'Leo',
-  'عبدالله',
-  'Noah',
-  'Theo',
-  'Milo',
-  'فهد',
-  'Kenji',
-  'خالد',
-  'Diego',
-  'Yusuf',
-  'Oskar',
-  'Omar',
+  '🔥 𝓓𝓻𝓪𝓰𝓸𝓷 𝓛𝓸𝓻𝓭 🔥',
+  '♛ الملك الأحمر ♛',
+  '♛ 𝓒𝓻𝓲𝓶𝓼𝓸𝓷 𝓚𝓲𝓷𝓰 ♛',
+  '🔥 سيد التنانين 🔥',
+  '☾ 𝕯𝖆𝖗𝖐 𝕾𝖔𝖚𝖑 ☽',
+  '『♛』𝑺𝑽𝑰𝑷『♛』',
+  '✦ ᴅʀᴇᴀᴍ ✦',
+  '♛ 𝐊𝐈𝐍𝐆 ♛',
+  '♕ 𝓟𝓻𝓲𝓷𝓬𝓮 ♕',
+  '✧ 𝓢𝓴𝔂 𝓛𝓸𝓻𝓭 ✧',
+  '『🌙』𝓝𝓲𝓰𝓱𝓽 𝓚𝓲𝓷𝓰『🌙』',
+  '♛ 𝓖𝓸𝓵𝓭𝓮𝓷 𝓚𝓲𝓷𝓰 ♛',
 ] as const;
 
 function mediaPool(folder: MediaFolder, prefix: string, count: number): string[] {
@@ -210,13 +216,21 @@ const BANNERS: PromoBanner[] = [
     title: 'Families Square',
     subtitle: 'Find a family that fits',
     ctaLabel: 'Explore',
+    tone: 'families',
   },
-  { id: 'banner-event', title: 'Event Center', subtitle: 'Party Square is live', ctaLabel: 'Open' },
+  {
+    id: 'banner-event',
+    title: 'Event Center',
+    subtitle: 'Party Square is live',
+    ctaLabel: 'Open',
+    tone: 'event',
+  },
   {
     id: 'banner-recharge',
     title: 'Recharge',
     subtitle: 'Top up and unlock rooms',
     ctaLabel: 'Recharge',
+    tone: 'recharge',
   },
 ];
 

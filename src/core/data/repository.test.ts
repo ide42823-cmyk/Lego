@@ -447,7 +447,7 @@ describe('searchPeople', () => {
     const page = await fixtureDataSource.searchPeople('maya', { limit: 1 });
 
     expect(page.items).toHaveLength(1);
-    expect(page.items[0]?.displayName.startsWith('Maya')).toBe(true);
+    expect(page.items[0]?.displayName).toContain('Maya');
     expect(page.total).toBeGreaterThanOrEqual(1);
   });
 
@@ -464,8 +464,8 @@ describe('searchPeople', () => {
     const taMarbuta = await fixtureDataSource.searchPeople('نوره', { limit: 50 });
     const alefMaqsura = await fixtureDataSource.searchPeople('لمي', { limit: 50 });
 
-    expect(taMarbuta.items.some((user) => user.displayName === 'نورة')).toBe(true);
-    expect(alefMaqsura.items.some((user) => user.displayName === 'لمى')).toBe(true);
+    expect(taMarbuta.items.some((user) => user.displayName.includes('نورة'))).toBe(true);
+    expect(alefMaqsura.items.some((user) => user.displayName.includes('لمى'))).toBe(true);
   });
 
   it('pages through matches without repeating one', async () => {
