@@ -134,17 +134,18 @@ const styles = StyleSheet.create({
     paddingEnd: Spacing.three + Spacing.two,
   },
   item: { paddingBottom: Spacing.one + 1, alignItems: 'center' },
-  tabLabel: { fontSize: 16, lineHeight: 23 },
+  tabLabel: { fontSize: 17, lineHeight: 24 },
   // The reference marks the active tab with a short, heavy *arc* rather than a
   // full-width rule. A wide, short view whose only bottom border is rounded
-  // curves the same way without an SVG per tab.
+  // curves the same way without an SVG per tab. The curve is deliberately broad
+  // so it reads as hand-drawn under a 17 pt label rather than as a flat rule.
   underline: {
-    width: 32,
-    height: 6,
+    width: 44,
+    height: 7,
     marginTop: 2,
-    borderBottomWidth: 2.5,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    borderBottomWidth: 3,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
   },
   // The profile's section strip uses a straight rule that spans the label.
   bar: {

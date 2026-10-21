@@ -30,7 +30,11 @@ export interface PeopleRowProps {
 }
 
 export function PeopleRow({ user, onOpenProfile, onGreet }: PeopleRowProps) {
-  const rank = RANK_BADGES.find((badge) => user.badges.includes(badge));
+  // The reference card never shows the aristocracy capsule beside the age —
+  // only a paid VIP rank does. Aristocracy stays visible on profiles.
+  const rank = RANK_BADGES.filter((badge) => badge !== 'aristocracy').find((badge) =>
+    user.badges.includes(badge),
+  );
   const distance = user.distanceKm === undefined ? null : formatDistanceKm(user.distanceKm);
 
   return (
@@ -45,7 +49,7 @@ export function PeopleRow({ user, onOpenProfile, onGreet }: PeopleRowProps) {
           id={user.id}
           name={user.displayName}
           uri={user.avatarUrl}
-          size={60}
+          size={64}
           frame={user.avatarFrame}
           online={user.isOnline}
           videoCall={user.videoCall}
@@ -92,9 +96,9 @@ export function PeopleRow({ user, onOpenProfile, onGreet }: PeopleRowProps) {
 
 const styles = StyleSheet.create({
   card: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, borderRadius: 22 },
-  main: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  main: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 14 },
   pressed: { opacity: 0.7 },
-  text: { flex: 1, gap: 5, minWidth: 0 },
+  text: { flex: 1, gap: 6, minWidth: 0 },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -102,7 +106,7 @@ const styles = StyleSheet.create({
     flexWrap: 'nowrap',
     minWidth: 0,
   },
-  name: { fontSize: 17, lineHeight: 22, flexShrink: 1, minWidth: 0 },
+  name: { fontSize: 18, lineHeight: 23, flexShrink: 1, minWidth: 0 },
   pillRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  status: { lineHeight: 19, opacity: 0.9, marginTop: 1 },
+  status: { fontSize: 14, lineHeight: 19, opacity: 0.9, marginTop: 1 },
 });

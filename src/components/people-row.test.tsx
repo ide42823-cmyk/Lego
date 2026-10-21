@@ -36,14 +36,14 @@ describe('PeopleRow', () => {
   it('shows a bucketed distance, never a precise location', async () => {
     await render(<PeopleRow user={USER} />);
 
-    expect(screen.getByText('6 km · هنا للدردشة والضحك.')).toBeTruthy();
+    expect(screen.getByText('6.0km · هنا للدردشة والضحك.')).toBeTruthy();
   });
 
-  it('keeps the distance coarse even when the directory sends a fraction', async () => {
+  it('rounds fractions to one decimal, never a precise position', async () => {
     await render(<PeopleRow user={{ ...USER, distanceKm: 6.42 }} />);
 
     expect(screen.queryByText(/6\.42/)).toBeNull();
-    expect(screen.getByText('6 km · هنا للدردشة والضحك.')).toBeTruthy();
+    expect(screen.getByText('6.4km · هنا للدردشة والضحك.')).toBeTruthy();
   });
 
   it('describes the age pill with its gender', async () => {

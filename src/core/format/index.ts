@@ -112,17 +112,23 @@ export function formatCompactCount(value: number): string {
 }
 
 /**
- * Coarse distance copy. Distances are already bucketed by the data layer so no
- * precise location can leak into the UI.
+ * Distance copy in the reference's shape: the figure sits tight against `km`
+ * (`7.5km`, `1376km`) rather than a spaced `7 km`. Sub-100 km rounds to one
+ * decimal, which is the coarsest granularity nearby vetting uses; anything at
+ * or beyond 100 prints whole kilometres. Distances stay directional estimates
+ * bucketed by the data layer — no precise location can leak into the UI.
  */
 export function formatDistanceKm(km: number): string {
   if (!Number.isFinite(km) || km < 0) {
     return '';
   }
   if (km < 1) {
-    return '<1 km';
+    return '<1km';
   }
-  return `${Math.round(km)} km`;
+  if (km < 100) {
+    return `${km.toFixed(1)}km`;
+  }
+  return `${Math.round(km)}km`;
 }
 
 /**

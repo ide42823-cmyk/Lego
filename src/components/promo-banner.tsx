@@ -105,6 +105,14 @@ export function PromoBanner({ banner, variant = 'banner', onPress }: PromoBanner
             {banner.ctaLabel}
           </ThemedText>
         </View>
+
+        {/* The reference's carousel indicators, drawn as quiet decoration: the
+            plate is a single static promo, so only the first dot is lit. */}
+        <View pointerEvents="none" style={styles.dots}>
+          {Array.from({ length: 5 }, (_, index) => (
+            <View key={index} style={[styles.dot, index === 0 && styles.dotActive]} />
+          ))}
+        </View>
       </Pressable>
     </AppCard>
   );
@@ -133,13 +141,31 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   bannerInner: {
-    minHeight: 108,
+    minHeight: 96,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     padding: Spacing.three,
+    // Leaves quiet room along the bottom edge for the pagination dots.
+    paddingBottom: Spacing.three + Spacing.two,
     overflow: 'hidden',
   },
+  dots: {
+    position: 'absolute',
+    start: 0,
+    end: 0,
+    bottom: 7,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  dot: {
+    width: 5,
+    height: 5,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+  },
+  dotActive: { backgroundColor: '#FFFFFF' },
   glow: {
     position: 'absolute',
     borderRadius: Radius.pill,

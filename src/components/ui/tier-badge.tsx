@@ -32,7 +32,7 @@ export function TierBadge({ tier, label, crowned = false, style, ...rest }: Tier
     <View style={[styles.pill, { backgroundColor: colors.from }, style]} {...rest}>
       <GradientFill from={colors.from} to={colors.to} radius={Radius.pill} />
       {crowned ? (
-        <Icon name="crown" size={12} strokeWidth={1.5} color={colors.text} fill={colors.text} />
+        <Icon name="crown" size={13} strokeWidth={1.5} color={colors.text} fill={colors.text} />
       ) : null}
       <ThemedText type="small" style={[styles.label, { color: colors.text }]}>
         {label}
@@ -45,9 +45,9 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
     paddingHorizontal: Spacing.two,
-    paddingVertical: 2,
+    paddingVertical: 2.5,
     // A capsule, so it sits in the identity row as one of the chips.
     borderRadius: Radius.pill,
     borderWidth: 1,
@@ -55,5 +55,5 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignSelf: 'flex-start',
   },
-  label: { fontSize: 11.5, lineHeight: 16, fontWeight: '800' },
+  label: { fontSize: 12.5, lineHeight: 18, fontWeight: '800' },
 });

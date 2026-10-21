@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.three,
     paddingBottom: Spacing.five,
-    gap: 14,
+    gap: 16,
   },
   footer: { paddingTop: Spacing.three },
 });

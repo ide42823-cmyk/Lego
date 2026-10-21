@@ -309,15 +309,29 @@ function withRoomBanner(rooms: readonly RoomSummary[]): RoomFeedItem[] {
 
 function selectPeople(mode: PeopleMode): UserSummary[] {
   switch (mode) {
-    case 'nearby':
+    case 'nearby': {
       // Nearby re-buckets by rank order so the list is genuinely closest-first.
-      // Buckets stay coarse and are never a precise position.
+      // Buckets stay coarse and are never a precise position. The nearby view
+      // also drops the two heaviest ranks: at doorstep distance the reference
+      // shows plain locals with the occasional VIP, never SVIP regalia.
       return FIXTURE_USERS.slice(0, 14).map((user, index) => ({
         ...user,
         distanceKm: (index + 1) * 3,
+        badges: user.badges.filter((badge) => badge !== 'svip' && badge !== 'aristocracy'),
       }));
+    }
     case 'new':
-      return [...FIXTURE_USERS].reverse().slice(0, 16);
+      // Fresh accounts are essentially unmarked — the reference's New users tab
+      // is deliberately plain, with a single charm flower on one member in four.
+      // The profile keeps its full cluster; only this directory view thins it.
+      return [...FIXTURE_USERS]
+        .reverse()
+        .slice(0, 16)
+        .map((user, index): UserSummary => ({
+          ...user,
+          badges: index % 4 === 3 ? ['level'] : [],
+          level: index % 4 === 3 ? user.level : undefined,
+        }));
     case 'featured':
       return FIXTURE_USERS.filter((user) => user.level !== undefined && user.level > 30);
     case 'recommend':

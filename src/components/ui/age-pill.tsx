@@ -30,7 +30,7 @@ export function AgePill({ age, gender, style, ...rest }: AgePillProps) {
       style={[styles.pill, { backgroundColor: tints.age.background }, style]}
       {...rest}
     >
-      {gender ? <Icon name={gender} size={12} strokeWidth={2.6} color={tints.age.text} /> : null}
+      {gender ? <Icon name={gender} size={13} strokeWidth={2.6} color={tints.age.text} /> : null}
       <ThemedText type="small" style={[styles.label, { color: tints.age.text }]}>
         {age}
       </ThemedText>
@@ -44,10 +44,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: Spacing.two,
-    paddingVertical: 2.5,
+    paddingVertical: 3,
     // The reference draws every identity chip as a capsule.
     borderRadius: Radius.pill,
     alignSelf: 'flex-start',
   },
-  label: { fontSize: 12, lineHeight: 16, fontWeight: '800' },
+  label: { fontSize: 13, lineHeight: 18, fontWeight: '800' },
 });

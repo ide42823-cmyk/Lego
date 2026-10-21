@@ -1131,6 +1131,37 @@ A second pass over Home after P9, against the three Home references. It changes 
 directory's anatomy and the five-tab bar; routes, the data seam and the server-authority rules
 are unchanged.
 
+### Correction pass (still P10, same day)
+
+Side-by-side comparison against the references showed the card was still visibly denser than
+the original. Corrected:
+
+- **Row anatomy** — avatar 60 → 64 pt, name 17 → 18 pt / 23 pt leading, Hi pill 76 × 36 → 92 × 38
+  pt with a 20 pt heart, marks 16 → 17 pt, pills grown to 13 pt labels (age) / 12.5 pt (tier),
+  text gaps 5 → 6 pt, card gap 14 → 16 pt so ~4 cards fill the viewport like the reference.
+- **Distance copy** — `formatDistanceKm` now prints the figure tight against the unit
+  (`7.5km`, `1376km`), with one decimal under 100 km (`27.0km`) and whole kilometres above,
+  matching the reference's `1376km` shape rather than the old spaced `6 km`.
+- **Aristocracy out of the card.** The reference card never shows an `AR` capsule beside the
+  age pill, so the directory row rank is now VIP/SVIP only; aristocracy stays visible on
+  profiles.
+- **Presence dot** moved to the avatar's trailing top corner (reference placement); the doc
+  comment already described it as the logical end edge, so the style now agrees.
+- **Tab scale** — mode labels 16 → 17 pt / 24 pt leading and the active arc widened to
+  44 × 7 pt with a 3 pt stroke so it reads as the reference's hand-drawn curve under the
+  heavier label.
+- **Banner plate** shortened 108 → 96 pt and carries the reference's five pagination dots
+  (first lit) as static decoration; the plate is still a single gradient, not a carousel.
+- **Data shaping (fixture-only, still server-shaped seam).** Nearby now drops `svip` /
+  `aristocracy` from its members — locals at doorstep distance are plain with the occasional
+  VIP. New users are mostly unmarked (badges removed, level hidden) with one charm flower in
+  four, matching the reference's plain fresh accounts. Profiles and other surfaces keep the
+  full clusters; real cohorts are backend work.
+- Verified again: `tsc`, `expo lint` clean; `jest` 17 suites / 196 tests (distance and row
+  assertions updated for the new `6.0km` copy); web captures at 384 light/dark and 320 show
+  the taller Hi pill, 2.0 km-style copy, plain New users, no horizontal overflow and zero
+  console errors.
+
 ### What changed
 
 - **Header.** The four views keep their order (Recommend, Nearby, New users, Featured) and the
@@ -1141,11 +1172,12 @@ are unchanged.
   390 pt the three action boxes shrink from 44 to 40 pt; an 8 pt `hitSlop` keeps every target
   above the 44 pt requirement. The `Recommend` row leaves only a sub-pixel sliver of `Featured`
   at 384/393 pt; the row scrolls, and the auto-scroll reveals later labels after selection.
-- **Rows.** The card is 60 pt avatar, a 76 pt gradient Hi pill, a 2-line name budget, 16 pt
-  verified / flower marks, the age pill (the gender mark now lives only there), VIP/SVIP/AR
-  pills, the distance/bio line and the online dot. Directory rows use the quiet `verified` seal
-  plus the pink level flower, at most two badges, and no `NEW` chip. The card heights vary only
-  because the decorative names wrap; there is no horizontal overflow at 320, 384 or 393 pt.
+- **Rows.** The card is a 64 pt avatar, a 92 pt gradient Hi pill, a 2-line name budget, 17 pt
+  verified / flower marks, the age pill (the gender mark now lives only there), VIP/SVIP pills
+  (aristocracy stays on profiles), the distance/bio line and the online dot. Directory rows use
+  the quiet `verified` seal plus the pink level flower, at most two badges, and no `NEW` chip.
+  The card heights vary only because the decorative names wrap; there is no horizontal overflow
+  at 320, 384 or 393 pt.
 - **Names.** The data layer accepts arbitrary Unicode, including `꧁…꧂`, `༒` and Arabic
   ornamentation. The fixture display names use inline ornaments (`♛ ♡ ☾ 『』 ୨୧`, emoji) rather
   than tall Javanese / Tibetan frames: the web fallback font puts those frames on their own line

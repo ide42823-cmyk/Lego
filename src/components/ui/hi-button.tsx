@@ -37,7 +37,7 @@ export function HiButton({ name, ...rest }: HiButtonProps) {
       <GradientFill from={tints.hi.background} to={tints.hi.backgroundTo} radius={Radius.pill} />
       <Icon
         name="greeting"
-        size={18}
+        size={20}
         strokeWidth={1.8}
         color={tints.hi.icon}
         fill={tints.hi.icon}
@@ -54,15 +54,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
+    gap: 6,
     paddingHorizontal: Spacing.two + 4,
-    minWidth: 76,
-    minHeight: 36,
+    // The reference's greeting pill is the widest thing in the row after the
+    // text column — bulk the pill rather than shrinking the heart into it.
+    minWidth: 92,
+    minHeight: 38,
     paddingVertical: Spacing.two,
     borderRadius: Radius.pill,
     borderWidth: 1,
     overflow: 'hidden',
   },
   pressed: { opacity: 0.82 },
-  label: { fontSize: 15, lineHeight: 20, fontWeight: '800', fontStyle: 'italic' },
+  label: { fontSize: 16, lineHeight: 21, fontWeight: '800', fontStyle: 'italic' },
 });

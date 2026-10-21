@@ -53,7 +53,7 @@ export function UserBadgeItem({
         return (
           <Icon
             name="flower"
-            size={16}
+            size={17}
             strokeWidth={2.1}
             color={tints.flower}
             fill={tints.flower}
@@ -69,7 +69,7 @@ export function UserBadgeItem({
     case 'aristocracy':
       return <TierBadge tier="aristocracy" label="AR" crowned />;
     case 'verified':
-      return <Icon name="verified" size={16} color={tints.verified} label="Verified" />;
+      return <Icon name="verified" size={17} color={tints.verified} label="Verified" />;
     case 'new':
       return <CategoryChip tone="trending" label="NEW" />;
     default:

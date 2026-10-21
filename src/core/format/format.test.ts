@@ -73,11 +73,16 @@ describe('formatCompactCount', () => {
 
 describe('formatDistanceKm', () => {
   it('buckets sub-kilometre distances', () => {
-    expect(formatDistanceKm(0.4)).toBe('<1 km');
+    expect(formatDistanceKm(0.4)).toBe('<1km');
   });
 
-  it('rounds to whole kilometres', () => {
-    expect(formatDistanceKm(6.6)).toBe('7 km');
+  it('keeps one decimal under 100 km, tight against the unit', () => {
+    expect(formatDistanceKm(6.6)).toBe('6.6km');
+    expect(formatDistanceKm(27)).toBe('27.0km');
+  });
+
+  it('prints whole kilometres from 100 km up', () => {
+    expect(formatDistanceKm(1376)).toBe('1376km');
   });
 
   it('returns an empty string for invalid input', () => {
