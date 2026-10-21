@@ -115,6 +115,50 @@ export const PremiumPalette = {
   aristocracy: '#2E9E5B',
 } as const;
 
+/**
+ * The ranking stage.
+ *
+ * Like `RoomPalette`, this is deliberately a dark surface in both colour
+ * schemes: the reference's leaderboard is a night-sky stage, not a light card.
+ * Light and dark still get their own gradients (the dark one is deeper), while
+ * the type, metallic medals and pink score heart stay constant. That keeps the
+ * stage legible without asking the rest of the app to give up its light theme.
+ */
+export const RankingPalette = {
+  text: '#FFFFFF',
+  textMuted: 'rgba(255, 255, 255, 0.68)',
+  textFaint: 'rgba(255, 255, 255, 0.45)',
+  border: 'rgba(255, 255, 255, 0.13)',
+  borderSoft: 'rgba(255, 255, 255, 0.07)',
+  surface: 'rgba(255, 255, 255, 0.07)',
+  surfaceStrong: 'rgba(255, 255, 255, 0.12)',
+  /** Unselected period pills sit darker than the sky, as in the reference. */
+  pill: 'rgba(18, 7, 36, 0.38)',
+  heart: '#FF4F9A',
+  brand: '#8B5CF6',
+  brandBright: '#B49CFF',
+  gold: '#F6C653',
+  silver: '#D6DFEF',
+  bronze: '#D99B6C',
+  selfBar: 'rgba(9, 4, 20, 0.94)',
+  skeleton: 'rgba(255, 255, 255, 0.10)',
+  skeletonSoft: 'rgba(255, 255, 255, 0.06)',
+  light: {
+    top: '#451D79',
+    middle: '#2A104F',
+    bottom: '#140A29',
+    glow: '#A46BFF',
+  },
+  dark: {
+    top: '#2C1152',
+    middle: '#1A0A33',
+    bottom: '#080310',
+    glow: '#7C3AED',
+  },
+} as const;
+
+export type RankingScheme = 'light' | 'dark';
+
 export type TabTintKey = 'home' | 'moments' | 'rooms' | 'messages' | 'me';
 
 export type ChipTintKey =
@@ -187,6 +231,16 @@ export interface AppTints {
     tierTile: { from: string; to: string; border: string; ink: string; accent: string };
     /** One gradient per mini-game; `ink` is the glyph colour on top. */
     game: Record<'spin' | 'quiz' | 'board', { from: string; to: string; ink: string }>;
+  };
+  /**
+   * The ranking podium medals. The stage is always dark, so both schemes use
+   * the same metallic inks: `fill` is a translucent column/medallion wash and
+   * `ink` is the light text drawn over it.
+   */
+  ranking: {
+    gold: { ring: string; fill: string; ink: string };
+    silver: { ring: string; fill: string; ink: string };
+    bronze: { ring: string; fill: string; ink: string };
   };
   /** Presence dot. */
   online: string;
@@ -272,6 +326,11 @@ export const Tints: { light: AppTints; dark: AppTints } = {
         board: { from: '#F59E0B', to: '#EF4444', ink: '#FFFFFF' },
       },
     },
+    ranking: {
+      gold: { ring: '#F6C653', fill: 'rgba(246, 198, 83, 0.18)', ink: '#FFE6A6' },
+      silver: { ring: '#D6DFEF', fill: 'rgba(214, 223, 239, 0.13)', ink: '#EEF3FB' },
+      bronze: { ring: '#D99B6C', fill: 'rgba(217, 155, 108, 0.16)', ink: '#F7D7BE' },
+    },
     cardShadow: 'rgba(46, 32, 84, 0.10)',
   },
   dark: {
@@ -348,6 +407,11 @@ export const Tints: { light: AppTints; dark: AppTints } = {
         quiz: { from: '#1D4ED8', to: '#0E7490', ink: '#FFFFFF' },
         board: { from: '#B45309', to: '#B91C1C', ink: '#FFFFFF' },
       },
+    },
+    ranking: {
+      gold: { ring: '#F6C653', fill: 'rgba(246, 198, 83, 0.18)', ink: '#FFE6A6' },
+      silver: { ring: '#D6DFEF', fill: 'rgba(214, 223, 239, 0.13)', ink: '#EEF3FB' },
+      bronze: { ring: '#D99B6C', fill: 'rgba(217, 155, 108, 0.16)', ink: '#F7D7BE' },
     },
     cardShadow: 'rgba(0, 0, 0, 0.5)',
   },

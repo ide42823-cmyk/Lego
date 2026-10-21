@@ -66,6 +66,10 @@ export default function RoomsScreen() {
     () => router.push({ pathname: '/search', params: { mode: 'rooms' } }),
     [router],
   );
+  const openRanking = useCallback(
+    () => router.push({ pathname: '/ranking', params: { category: 'room' } }),
+    [router],
+  );
   const isGrid = mode === 'video';
 
   // The promotion leads the feed, so it renders above the list — and above the
@@ -92,11 +96,7 @@ export default function RoomsScreen() {
             label="Create a room"
             onPress={() => notYet('Creating a room')}
           />
-          <IconButton
-            name="trophy"
-            label="Room leaderboard"
-            onPress={() => notYet('The room leaderboard')}
-          />
+          <IconButton name="trophy" label="Room ranking" onPress={openRanking} />
         </View>
       </View>
 

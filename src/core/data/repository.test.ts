@@ -582,6 +582,147 @@ describe('getSearchSuggestions', () => {
   });
 });
 
+describe('listLeaderboard', () => {
+  it('returns contiguous ranks sorted by a descending score', async () => {
+    const board = await fixtureDataSource.listLeaderboard('charm', 'daily');
+
+    expect(board.category).toBe('charm');
+    expect(board.period).toBe('daily');
+    expect(board.unavailable).toBeUndefined();
+    expect(board.region).toBeNull();
+    expect(board.regions.length).toBeGreaterThan(0);
+    expect(board.entries.length).toBeGreaterThanOrEqual(3);
+    expect(board.entries.map((entry) => entry.rank)).toEqual(
+      board.entries.map((_, index) => index + 1),
+    );
+
+    const scores = board.entries.map((entry) => entry.score);
+    expect(scores).toEqual([...scores].sort((a, b) => b - a));
+    expect(board.entries.every((entry) => entry.kind === 'member')).toBe(true);
+    expect(board.entries.every((entry) => entry.valueLabel.length > 0)).toBe(true);
+  });
+
+  it('uses the New users directory as the Newcomer cohort', async () => {
+    const page = await fixtureDataSource.listPeople('new', { limit: 100 });
+    const newIds = new Set(usersOf(page.items).map((user) => user.id));
+    const board = await fixtureDataSource.listLeaderboard('newcomer', 'daily');
+
+    expect(board.entries.length).toBeGreaterThanOrEqual(3);
+    expect(board.entries.every((entry) => newIds.has(entry.id))).toBe(true);
+  });
+
+  it('gives every period a larger scale than the one before', async () => {
+    const daily = await fixtureDataSource.listLeaderboard('charm', 'daily');
+    const weekly = await fixtureDataSource.listLeaderboard('charm', 'weekly');
+    const monthly = await fixtureDataSource.listLeaderboard('charm', 'monthly');
+
+    expect(weekly.entries[0]?.score ?? 0).toBeGreaterThan(daily.entries[0]?.score ?? 0);
+    expect(monthly.entries[0]?.score ?? 0).toBeGreaterThan(weekly.entries[0]?.score ?? 0);
+  });
+
+  it('ranks room activity with the host line attached', async () => {
+    const board = await fixtureDataSource.listLeaderboard('room', 'weekly');
+
+    expect(board.entries.length).toBeGreaterThanOrEqual(3);
+    expect(board.entries.every((entry) => entry.kind === 'room')).toBe(true);
+    expect(board.entries.every((entry) => entry.subtitle?.startsWith('Host ·'))).toBe(true);
+
+    const scores = board.entries.map((entry) => entry.score);
+    expect(scores).toEqual([...scores].sort((a, b) => b - a));
+  });
+
+  it('reports Games and Family as unavailable instead of inventing rows', async () => {
+    for (const category of ['games', 'family'] as const) {
+      for (const period of ['daily', 'weekly', 'monthly'] as const) {
+        const board = await fixtureDataSource.listLeaderboard(category, period);
+
+        expect(board.category).toBe(category);
+        expect(board.period).toBe(period);
+        expect(board.entries).toEqual([]);
+        expect(board.regions).toEqual([]);
+        expect(board.region).toBeNull();
+        expect(board.unavailable?.title).toMatch(/^No .+ rankings yet$/);
+        expect(board.unavailable?.message).toMatch(/backend phase/);
+      }
+    }
+  });
+
+  it('lists every region actually present on the board, sorted by label', async () => {
+    const board = await fixtureDataSource.listLeaderboard('charm', 'daily');
+
+    expect(new Set(board.regions.map((option) => option.value)).size).toBe(board.regions.length);
+    expect(board.regions.every((option) => option.label.length > 0)).toBe(true);
+    const labels = board.regions.map((option) => option.label);
+    expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)));
+    expect(board.entries.every((entry) => entry.locale)).toBe(true);
+  });
+
+  it('filters by region and renumbers the remaining ranks', async () => {
+    const board = await fixtureDataSource.listLeaderboard('charm', 'daily');
+    const region = board.regions[0];
+    expect(region).toBeDefined();
+    if (!region) {
+      throw new Error('Expected a region');
+    }
+
+    const filtered = await fixtureDataSource.listLeaderboard('charm', 'daily', region.value);
+
+    expect(filtered.region).toBe(region.value);
+    expect(filtered.entries.length).toBeGreaterThan(0);
+    expect(filtered.entries.every((entry) => entry.locale?.toUpperCase() === region.value)).toBe(
+      true,
+    );
+    expect(filtered.entries.map((entry) => entry.rank)).toEqual(
+      filtered.entries.map((_, index) => index + 1),
+    );
+    expect(filtered.regions).toEqual(board.regions);
+  });
+
+  it('filters room boards by the room region too', async () => {
+    const board = await fixtureDataSource.listLeaderboard('room', 'weekly');
+    const region = board.regions[0];
+    expect(region).toBeDefined();
+    if (!region) {
+      throw new Error('Expected a region');
+    }
+
+    const filtered = await fixtureDataSource.listLeaderboard('room', 'weekly', region.value);
+
+    expect(filtered.entries.length).toBeGreaterThan(0);
+    expect(filtered.entries.every((entry) => entry.locale?.toUpperCase() === region.value)).toBe(
+      true,
+    );
+  });
+
+  it('returns an honest empty slice for a region with no rankings', async () => {
+    const board = await fixtureDataSource.listLeaderboard('charm', 'daily', 'ZZ');
+
+    expect(board.entries).toEqual([]);
+    expect(board.region).toBe('ZZ');
+    expect(board.regions.length).toBeGreaterThan(0);
+  });
+
+  it('is deterministic and hands back isolated rows', async () => {
+    const first = await fixtureDataSource.listLeaderboard('wealth', 'monthly');
+    const second = await fixtureDataSource.listLeaderboard('wealth', 'monthly');
+
+    expect(second).toEqual(first);
+
+    const originalName = first.entries[0]?.name;
+    const top = first.entries[0];
+    expect(top).toBeDefined();
+    if (!top) {
+      throw new Error('Expected a ranked row');
+    }
+    top.name = 'Changed by a caller';
+    top.score = -1;
+
+    const third = await fixtureDataSource.listLeaderboard('wealth', 'monthly');
+    expect(third.entries[0]?.name).toBe(originalName);
+    expect(third.entries[0]?.score ?? -1).toBeGreaterThan(-1);
+  });
+});
+
 describe('failure simulation', () => {
   it('rejects the configured number of reads and then recovers', async () => {
     devControls.failReads = 1;

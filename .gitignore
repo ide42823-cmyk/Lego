@@ -50,3 +50,8 @@ expo-env.d.ts
 
 # the project owner's working art; the production copies live in assets/media
 /Sprites
+
+# downloaded reference imagery and screenshots; never part of the product
+/docs/REfs
+/reference_screenshots
+/reference_screenshots.rar

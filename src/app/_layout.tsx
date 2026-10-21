@@ -34,6 +34,8 @@ export default function RootLayout() {
               <Stack.Screen name="person/[id]" options={{ headerShown: false }} />
               {/* Search owns its header (field + Cancel), so the stack one is hidden. */}
               <Stack.Screen name="search" options={{ headerShown: false }} />
+              {/* Ranking draws its own centred back header. */}
+              <Stack.Screen name="ranking" options={{ headerShown: false }} />
               <Stack.Screen name="dev/rtc-spike" options={{ title: 'RTC spike (dev only)' }} />
             </Stack>
           </ToastProvider>

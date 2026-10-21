@@ -111,7 +111,7 @@ export default function HomeScreen() {
               />
             ) : null}
           </View>
-          <IconButton name="trophy" label="Leaderboard" onPress={() => notYet('The leaderboard')} />
+          <IconButton name="trophy" label="Ranking" onPress={() => router.push('/ranking')} />
         </View>
       </View>
 

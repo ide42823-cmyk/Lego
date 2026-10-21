@@ -104,6 +104,64 @@ export interface PeopleFilters {
   language: string | null;
 }
 
+/**
+ * The leaderboards the ranking screen can show. `games` and `family` are real
+ * product categories but have no standings yet; the data layer reports that
+ * explicitly rather than inventing rows.
+ */
+export type LeaderboardCategory = 'charm' | 'wealth' | 'newcomer' | 'room' | 'games' | 'family';
+
+export type LeaderboardPeriod = 'daily' | 'weekly' | 'monthly';
+
+/**
+ * One row on a leaderboard.
+ *
+ * The ranking key and the printed value are separate on purpose. A server will
+ * eventually own both; the screen only formats `valueLabel` and never derives a
+ * position from client state.
+ */
+export interface LeaderboardEntry {
+  id: string;
+  kind: 'member' | 'room';
+  name: string;
+  /** Portrait for a member, cover for a room. */
+  avatarUrl?: string;
+  avatarFrame?: AvatarFrameKey;
+  /** Country/locale hint for the flag and subtitle. */
+  locale?: string;
+  level?: number;
+  vipTier?: number;
+  badges?: readonly UserBadge[];
+  isOnline?: boolean;
+  /** Short supporting line, e.g. "Saudi Arabia" or "Host · Maya". */
+  subtitle?: string;
+  /** 1-based position in the board. */
+  rank: number;
+  /** Sort key from the data source. Higher is better for every board. */
+  score: number;
+  /** Already formatted for display, e.g. "12.4k" or "Today". */
+  valueLabel: string;
+}
+
+export interface Leaderboard {
+  category: LeaderboardCategory;
+  period: LeaderboardPeriod;
+  /** Ordered by `rank`; the screen renders the first three on the podium. */
+  entries: LeaderboardEntry[];
+  /**
+   * Every region represented on the *unfiltered* board, sorted by label. The
+   * screen offers these in its region picker; an unavailable board has none.
+   */
+  regions: FilterOption[];
+  /** The applied alpha-2 region code, or null when the board is not filtered. */
+  region: string | null;
+  /**
+   * Set when the category has no real standings yet. The screen renders this
+   * copy instead of a table, so an empty board is never mistaken for zero data.
+   */
+  unavailable?: { title: string; message: string };
+}
+
 export interface RoomSummary {
   id: string;
   name: string;

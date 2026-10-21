@@ -983,3 +983,117 @@ pass brings Search to that structure; Filter and Ranking are separate passes.
   belongs to the server phase and is deliberately not simulated.
 - **Rooms filtering.** This pass filters the people directory only, which is the directory the
   reference's filter belongs to. Rooms' filter control remains a later pass.
+
+## P9 - Regional Rank (2026-10-21)
+
+The reference for this pass is the ranking screen (`17.33.06`): a dark purple "cosmic stage"
+titled **Regional Rank**, a flat text category rail, individual Daily/Weekly/Monthly pills and a
+region control, a second-first-third podium under arch columns, large divider-less rows, a
+floating **Previous** pill, a sticky self-row and pink heart score marks. The first attempt at
+P9 read the file names rather than the pixels and built a light lavender screen; that write-up
+was wrong and is replaced by this one. The screen was then rebuilt against the image.
+
+### What changed
+
+- **The trophy is now a real destination.** Home's header trophy pushes `/ranking`; the Rooms
+  trophy deep-links to `/ranking?category=room`. Ranking is a pushed route with
+  `headerShown: false` and draws its own stage header, so it does not disturb the five-tab
+  shell.
+- **The stage is deliberately dark in both schemes.** `RankingPalette` (like `RoomPalette` and
+  `PremiumPalette`) is a fixed night-sky palette, so a light-scheme device still gets the
+  reference's purple sky, white text and gold gift. `RankingBackground` draws the original
+  composition - an SVG sky gradient, a radial glow behind the podium and a scatter of static
+  stars - with no animation, so it needs no reduced-motion branch. A light `StatusBar` sits over
+  it. The region sheet and toasts stay on the normal app theme.
+- **Controls match the reference, not a segmented track.** `CategoryTabs` is a horizontal
+  tablist of plain text labels (Charm, Wealth, Newcomer, Room, Games, Family); the selected one
+  turns white and bold and the strip scrolls the selection into view, including on a deep link.
+  `PeriodTabs` renders Daily/Weekly/Monthly as individual translucent pills (the selected pill
+  is brand purple). `RegionButton` sits at the trailing edge with the active region or "All".
+  Every control is a 44 pt `accessibilityRole="tab"` / `"button"` with an explicit
+  `aria-selected` (React Native Web ignores `accessibilityState`).
+- **The region filter is real, and lives in the data layer.** `Leaderboard` now carries
+  `regions: FilterOption[]` and the active `region`; `DataSource.listLeaderboard(category,
+  period, region?)` filters entries by `locale` (members) or room country and **renumbers the
+  surviving rows**, so a filtered board never shows a rank gap. `regions` is derived from the
+  unfiltered board and sorted by label, so the sheet can never offer a place with no standings.
+  Region persists across category and period changes. The row, podium and self-bar rendering
+  never sort or re-rank; that is the source's job.
+- **Podium and rows are an original composition.** `LeaderboardPodium` is a 2-1-3 arrangement
+  with original arch columns, a stage floor, a gold crown on the winner, per-rank medal rings
+  and medallions, the VIP/host line and a heart score. `LeaderboardRow` is an airy 76 pt row -
+  rank, 56 pt avatar, name, tier or host, heart and value - with no card and no separators. The
+  reference's engraved columns and ornate metal frames are trade dress and are **not**
+  reproduced; portraits reuse the app's own frame art.
+- **The self bar is honest.** `RankingSelfBar` is pinned above the safe-area inset and shows
+  "You", the account's presentation-only active VIP badge from `FIXTURE_ME.memberships`, and
+  **"Not ranked yet"**. There is no viewer position or score on the wire, so none is invented;
+  the accessible label says the rank arrives with the backend phase.
+- **The heart is a score mark, not a currency.** Every board uses the filled pink heart for its
+  value column; the accessible metric still comes from each category's own label, so a room is
+  not announced as charisma.
+- **Fixture scores, no client arithmetic.** The data layer builds a deterministic board per
+  category/period/region from the existing member profiles and room summaries. Names,
+  portraits, frames, levels, VIP ranks, countries, hosts and covers are the same fixture
+  objects the rest of the app uses. Scores are explicit fixture aggregates because real
+  period standings are server work; the view never presents them as server data and does no
+  wallet, purchase or entitlement arithmetic.
+- **Out-of-scope controls state the phase.** The gift raises "Gifting arrives with the backend
+  phase.", Previous raises "Previous rankings arrive with the backend phase.", and a room row or
+  podium spot raises "The room screen for ... arrives with the backend phase." A member row or
+  podium spot opens that person's real `/person/[id]` profile. No dead control was added.
+- **Games and Family are honest unavailable states.** There is no game score table and no family
+  entity in this build, so both render a centred icon, "No ... rankings yet" and the
+  backend-phase copy - never a fake table or zeroed list. `states.tsx`-style loading, error and
+  empty views are provided stage-side: a static arch-and-row skeleton (no shimmer), a retry, and
+  an empty state with a "Show all regions" action.
+
+### Verified
+
+- `prettier --write`, `tsc --noEmit`, `expo lint` clean; `jest` **17 suites / 195 tests**,
+  including the leaderboard vocabulary/`splitPodium` suite and the data-source board and region
+  contract cases.
+- **Live web (Metro) capture, 393x852:** light and dark both render the stage; `scrollWidth ===
+  clientWidth` (no horizontal overflow) and zero console errors. Category rail now fits all six
+  labels at 393 pt (Family right edge 355).
+- **320x568:** `body.scrollWidth` stays 320; the selected tab and the region button stay inside
+  the row; the list scrolls under the fixed controls with the bottom inset reserved.
+- **Region sheet:** opens from "All"; a real board filters to the chosen country and the podium
+  renumbers (Germany charm: ranks 1/2/3 only).
+- **Empty region:** `/ranking?category=charm&region=FR` renders "No standings in FR / No one
+  from FR has ranked on the daily charm board yet." with a "Show all regions" action, which
+  returns the full board.
+- **Unavailable boards:** Games and Family render their icon, title and backend-phase copy with
+  no rows, and the region control is hidden when the board has no regions.
+- **Room board:** `/ranking?category=room` shows room covers, host lines and hearts; the room
+  row raised "The room screen for "Late Night Radio" arrives with the backend phase."
+- **Loading:** the first paint before the 450 ms simulated latency shows the arch/row skeleton
+  with the tabs still usable.
+- **Toasts:** gift and Previous each raised their backend-phase notice.
+- **RTL:** setting `dir="rtl"` on the DOM mirrors the whole screen - the back control jumps from
+  x 8 to x 341, the category and period rails reverse, the podium reads 3-1-2, rows put the rank
+  on the right and the value on the left, and Previous and the self bar swap sides - with no
+  overflow. (The app uses logical flex order and `marginStart`, so this is CSS direction rather
+  than `I18nManager`.)
+- **Accessibility attributes:** both rails expose `aria-selected` true/false; every row and
+  podium spot is a button whose label starts "Rank N" and includes the value and metric.
+
+### NOT verified in P9
+
+- **Nothing on the handset.** No device was attached this pass; native touch on the rails,
+  FlatList momentum, safe-area insets and TalkBack/VoiceOver reading order are unproven.
+- **Real standings.** Every number is fixture data. Server-computed period aggregates,
+  tie-breaking, anti-abuse and the member's own rank/country are backend work; the self bar
+  therefore reads "Not ranked yet".
+- **Region empty state via the picker.** `regions` is derived from the unfiltered board, so the
+  picker only lists places that have standings; the empty state was exercised through a deep
+  link to a region the board does not contain.
+- **Error state visually.** The screen uses the keyed `useAsync` error path with a retry, but no
+  failure was induced, so it was not captured.
+- **Full Arabic copy and native RTL.** The English screen was mirrored with DOM `dir="rtl"`;
+  Arabic labels and native `I18nManager` layout have not been reviewed, and React Native Web
+  hardcodes `isRTL: false`, so the native back-chevron flip is unproven.
+- **Reference art and copy.** The stage, arches, medals and copy are our own; the reference's
+  original art, logos and wording are not reproduced.
+- **Games and Family product features.** Those boards need a score service and a family entity;
+  this pass deliberately shows only their honest unavailable state.

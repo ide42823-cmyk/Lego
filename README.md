@@ -36,7 +36,14 @@ layout/flow inspiration.
 > states. The people directory now has a working filter sheet — gender, age and
 > distance ranges, online-only, language and country — with a draft/confirm flow,
 > a hand-built accessible dual slider, and an empty state that offers to clear
-> the filters — see
+> the filters. The trophy on Home now opens Regional Rank: a deliberately dark
+> stage (in both colour schemes, like the reference) for Charm, Wealth, Newcomer,
+> Room, Games and Family across Daily, Weekly and Monthly, with a real region
+> filter, a second-first-third podium and airy rows that open members' profiles;
+> the Rooms trophy deep-links to the room board. Scores stay fixture data behind
+> the data seam, the pinned self row says "Not ranked yet" rather than inventing
+> a position, and Games and Family are honest backend-phase states rather than
+> invented rows. See
 > [`docs/decisions/`](docs/decisions) for the decisions and their evidence,
 > including what is **not** verified yet.
 

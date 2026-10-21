@@ -14,14 +14,22 @@
  */
 
 import { mediaRef, type MediaFolder } from '@/core/media/images';
+import { formatCompactCount } from '@/core/format';
+import { LEADERBOARD_CATEGORIES, LEADERBOARD_PERIODS } from '@/core/leaderboard';
+import { countryName } from '@/core/search';
 
 import type {
   AvatarFrameKey,
   ConversationSummary,
+  FilterOption,
   Gender,
   HonorArt,
   HonorEntry,
   HonorWall,
+  Leaderboard,
+  LeaderboardCategory,
+  LeaderboardEntry,
+  LeaderboardPeriod,
   MeDashboard,
   MomentPost,
   ProfileInfoRow,
@@ -861,3 +869,159 @@ function buildProfileMoments(user: UserSummary, random: () => number): MomentPos
 export const FIXTURE_PROFILES: UserProfile[] = FIXTURE_USERS.map((user, index) =>
   buildProfile(user, index, FIXTURE_USERS),
 );
+
+/**
+ * Leaderboards are the one place where the fixture *value* is not an existing
+ * profile field: real period standings are aggregates the server will compute.
+ * Everything else (who appears, their name, portrait, level, VIP rank and
+ * country) is borrowed from the same profile objects the rest of the app uses,
+ * so a ranking row can never contradict that member elsewhere.
+ *
+ * Games and Family deliberately have no rows. There is no game score table and
+ * no family entity in this build; the data layer reports that instead of
+ * fabricating a top ten.
+ */
+const LEADERBOARD_SEED = 20261022;
+/** The Newcomer board uses the same cohort as the "New users" directory. */
+const NEWCOMER_COHORT_SIZE = 16;
+
+const UNAVAILABLE_BOARDS: Record<
+  Extract<LeaderboardCategory, 'games' | 'family'>,
+  { title: string; message: string }
+> = {
+  games: {
+    title: 'No game rankings yet',
+    message: 'Game scores are not recorded yet. Game rankings arrive with the backend phase.',
+  },
+  family: {
+    title: 'No family rankings yet',
+    message:
+      'Family groups are not available yet, so there is nothing to rank. Family rankings arrive with the backend phase.',
+  },
+};
+
+/**
+ * The regions a board can be filtered to, taken from its own rows. A region
+ * with no ranked members or rooms is not invented: the picker only lists
+ * places that actually appear on this board.
+ */
+function regionsOf(entries: readonly LeaderboardEntry[]): FilterOption[] {
+  const byCode = new Map<string, string>();
+  for (const entry of entries) {
+    const code = entry.locale?.toUpperCase();
+    if (!code) {
+      continue;
+    }
+    if (!byCode.has(code)) {
+      byCode.set(code, countryName(code) || code);
+    }
+  }
+  return [...byCode.entries()]
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+function buildLeaderboards(): Record<LeaderboardCategory, Record<LeaderboardPeriod, Leaderboard>> {
+  const usersById = new Map(FIXTURE_USERS.map((user) => [user.id, user]));
+  const newcomerIds = new Set(
+    [...FIXTURE_PROFILES]
+      .reverse()
+      .slice(0, NEWCOMER_COHORT_SIZE)
+      .map((profile) => profile.id),
+  );
+
+  const boards = {} as Record<LeaderboardCategory, Record<LeaderboardPeriod, Leaderboard>>;
+
+  LEADERBOARD_CATEGORIES.forEach((category, categoryIndex) => {
+    boards[category] = {} as Record<LeaderboardPeriod, Leaderboard>;
+
+    LEADERBOARD_PERIODS.forEach((period, periodIndex) => {
+      if (category === 'games' || category === 'family') {
+        boards[category][period] = {
+          category,
+          period,
+          entries: [],
+          regions: [],
+          region: null,
+          unavailable: UNAVAILABLE_BOARDS[category],
+        };
+        return;
+      }
+
+      // Separate stream per board, so adding a category cannot reshuffle an
+      // existing one. The multiplier gives each period its own scale.
+      const random = createRandom(LEADERBOARD_SEED + categoryIndex * 101 + periodIndex * 17);
+      const multiplier = period === 'daily' ? 1 : period === 'weekly' ? 1.9 : 3.4;
+
+      let entries: LeaderboardEntry[];
+
+      if (category === 'room') {
+        entries = FIXTURE_ROOMS.map((room) => {
+          const base = 1400 + room.participantCount * 48;
+          const jitter = Math.floor(random() * 9000);
+          const score = Math.round((base + jitter) * multiplier);
+          return {
+            id: room.id,
+            kind: 'room' as const,
+            name: room.name,
+            avatarUrl: room.coverUrl,
+            locale: room.country,
+            subtitle: `Host · ${room.hostName}`,
+            rank: 0,
+            score,
+            valueLabel: formatCompactCount(score),
+          };
+        });
+      } else {
+        const profiles =
+          category === 'newcomer'
+            ? FIXTURE_PROFILES.filter((profile) => newcomerIds.has(profile.id))
+            : FIXTURE_PROFILES;
+
+        entries = profiles.map((profile) => {
+          const user = usersById.get(profile.id);
+          const stat =
+            category === 'wealth'
+              ? (profile.wealthLevel ?? 1)
+              : category === 'newcomer'
+                ? (profile.level ?? 1)
+                : (profile.charmLevel ?? 1);
+          const unit = category === 'wealth' ? 2100 : category === 'newcomer' ? 950 : 1600;
+          const base = stat * unit;
+          const jitter = Math.floor(random() * (base * 0.8 + 500));
+          const score = Math.round((base + jitter) * multiplier);
+          return {
+            id: profile.id,
+            kind: 'member' as const,
+            name: profile.displayName,
+            avatarUrl: profile.avatarUrl,
+            avatarFrame: profile.avatarFrame,
+            locale: user?.locale,
+            level: profile.level,
+            vipTier: profile.vipTier,
+            badges: profile.badges,
+            isOnline: profile.isOnline,
+            subtitle: countryName(user?.locale) || 'Member',
+            rank: 0,
+            score,
+            valueLabel: formatCompactCount(score),
+          };
+        });
+      }
+
+      entries.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+      entries = entries.map((entry, index) => ({ ...entry, rank: index + 1 }));
+      boards[category][period] = {
+        category,
+        period,
+        entries,
+        regions: regionsOf(entries),
+        region: null,
+      };
+    });
+  });
+
+  return boards;
+}
+
+export const FIXTURE_LEADERBOARDS = buildLeaderboards();

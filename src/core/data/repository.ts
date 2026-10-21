@@ -16,6 +16,7 @@ import { ROOM_CATEGORY_LABELS } from '@/core/room-labels';
 import {
   FIXTURE_BANNERS,
   FIXTURE_CONVERSATIONS,
+  FIXTURE_LEADERBOARDS,
   FIXTURE_ME,
   FIXTURE_MOMENTS,
   FIXTURE_PROFILES,
@@ -27,6 +28,9 @@ import type {
   ConversationFilter,
   ConversationSummary,
   DirectoryFeedItem,
+  Leaderboard,
+  LeaderboardCategory,
+  LeaderboardPeriod,
   MeDashboard,
   MomentPost,
   MomentsMode,
@@ -66,6 +70,15 @@ export interface DataSource {
   ): Promise<Page<DirectoryFeedItem>>;
   /** Facets and bounds for the people filter sheet, derived from the directory. */
   getPeopleFilterOptions(): Promise<PeopleFilterOptions>;
+  /**
+   * One board at a time. The data source owns ordering and ranks; the screen
+   * only splits the first three onto the podium.
+   */
+  listLeaderboard(
+    category: LeaderboardCategory,
+    period: LeaderboardPeriod,
+    region?: string | null,
+  ): Promise<Leaderboard>;
   listRooms(
     mode: RoomMode,
     options?: PageRequest & { relationship?: RoomRelationshipFilter },
@@ -142,6 +155,25 @@ function paginate<T>(items: readonly T[], request: PageRequest = {}): Page<T> {
   const slice = items.slice(start, start + limit);
   const next = start + limit < items.length ? String(start + limit) : null;
   return { items: slice, nextCursor: next };
+}
+
+/** A ranking board is read-only; hand each caller its own rows anyway. */
+function cloneLeaderboard(board: Leaderboard, region: string | null): Leaderboard {
+  const entries = (
+    region ? board.entries.filter((entry) => entry.locale?.toUpperCase() === region) : board.entries
+  ).map((entry, index) => ({
+    ...entry,
+    rank: index + 1,
+    ...(entry.badges ? { badges: [...entry.badges] } : {}),
+  }));
+
+  return {
+    ...board,
+    entries,
+    region,
+    regions: board.regions.map((option) => ({ ...option })),
+    ...(board.unavailable ? { unavailable: { ...board.unavailable } } : {}),
+  };
 }
 
 /** A search page also carries the full match count, not just the slice. */
@@ -403,6 +435,11 @@ export const fixtureDataSource: DataSource = {
 
   getPeopleFilterOptions() {
     return simulate(buildPeopleFilterOptions);
+  },
+
+  listLeaderboard(category, period, region) {
+    const active = region?.trim().toUpperCase() || null;
+    return simulate(() => cloneLeaderboard(FIXTURE_LEADERBOARDS[category][period], active));
   },
 
   listRooms(mode, options) {
