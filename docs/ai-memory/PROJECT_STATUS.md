@@ -19,8 +19,9 @@
 ## Current state
 - Current phase: **Page-by-page front-end passes** (the historical Phase 0 audit is complete; see `PHASE_0_PRELIMINARY_AUDIT_AND_SETUP.md` and `docs/decisions/`).
 - Git branch/commit at last verification: `main`, app work at `7007561` ("Thread P13 full-match rework + Cairo typography pass") plus the config/memory commit on top, pushed to `origin/main`.
-- Approved work in progress: **Room shell T005** — the live room canvas (`/room/[id]`) built against reference 015/002: host pill + power/exit overlay, rank + ticker + free-draw banners, ten numbered seats, audience strip, chat overlay (pinned welcome, introduction, event notices with GO), floating event card, composer with 99+ bubble badge and gold gift. All money/sound actions toast-gated. Room cards now open the room instead of toasting. Verified: typecheck, lint, 230 tests, web light/dark/exit-overlay captures with zero console errors. Device pass pending (phone left adb mid-task).
-- Next proposed task (needs approval): **commit the room shell**, then choose the next surface (Room Details sheet from ref 003, or a strictly-backend page).
+- Approved work in progress: **None.**
+- Last completed task (T006, 2026-10-23): **room shell committed** — `0285587` ("Rooms T005: /room/[id] live-room shell against refs 015/002", 23 files +1593/−7) pushed to `origin/main`, memory riding in the same commit. Device deep-link pass for the room still pending (phone off adb; plain verification, no approval needed).
+- Next proposed task (needs approval): **pick the next surface** — Room Details bottom sheet (reference 003), the gift picker family (references 004–012, backend phase), or a strictly-backend page.
 - KNOWN_ISSUES #9 (uncommitted work) resolved; #11 (MIUI foreground/deep-link workaround) recorded 2026-10-23.
 - User approval required before new source changes: **Yes** (the user's standing instruction is one page/pass at a time).
 

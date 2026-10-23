@@ -82,3 +82,11 @@
 - **Result:** complete (web-verified; device pass pending).
 - **Next proposal:** on reconnection — device capture `04-room-device.png` via `letgo:///room/room-1`, then commit the room shell. Later bounded follow-ups from the same reference set: Room Details sheet (ref 003), then gift picker (004–012) in the treasury phase.
 - **Stopped for approval:** yes.
+
+### 2026-10-23 — T006: Room shell committed (user approved "do it")
+- **Approval/scope:** user approved committing the T005 room shell.
+- **Files changed / actions:** commit `0285587` = "Rooms T005: /room/[id] live-room shell against refs 015/002" (23 files, +1593/−7) pushed to `origin/main`; the memory files ride in the same commit. Working tree clean except the untracked kit artifacts (`opencode_sugo_persistent_memory_kit/` + `.zip`), still left out of git by decision.
+- **Verification actually run:** `git status` review, `git push` success (`76e3aa4..0285587`). Device pass (deep link `letgo:///room/room-1` + screencap) NOT RUN — phone was off adb at commit time; run it on the next cable session as plain verification, no approval needed.
+- **Result:** complete.
+- **Next proposal:** next surface with the user — Room Details bottom sheet (reference 003), gift picker family (004–012, treasurer phase), or a strictly-backend page.
+- **Stopped for approval:** yes.
