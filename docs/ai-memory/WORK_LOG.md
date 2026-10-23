@@ -111,3 +111,11 @@
 - **Result:** complete (web-verified; device pass pending on the next cable session, together with the pending room + details-sheet device shots).
 - **Next proposal:** room tools drawer (reference 013, the `apps` button) or a strictly-backend page; also the two pending device verification passes on the next cable session.
 - **Stopped for approval:** yes (commit gate + next surface).
+
+### 2026-10-23 - T009: T008 gift panel committed (user approved "do it")
+- **Approval/scope:** user approved committing the T008 gift panel.
+- **Files changed / actions:** commit `45b8361` = "Rooms T008: gift panel over the room against refs 004-012" (8 files, +1682/-4) pushed to `origin/main`; memory rides in the same commit. Working tree clean (kit artifacts now ignored).
+- **Verification actually run:** `git status` review before commit, `git push` success (`84eb5fe..45b8361`).
+- **Result:** complete.
+- **Next proposal:** next surface with the user - room tools drawer (reference 013, the `apps` button) or a strictly-backend page. Device verification passes (room shell, details sheet, gift panel) queued for the next cable session as plain verification.
+- **Stopped for approval:** yes (next surface).

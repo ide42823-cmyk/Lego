@@ -19,7 +19,7 @@
 ## Current state
 - Current phase: **Page-by-page front-end passes** (the historical Phase 0 audit is complete; see `PHASE_0_PRELIMINARY_AUDIT_AND_SETUP.md` and `docs/decisions/`).
 - Git branch/commit at last verification: `main`, through `84eb5fe` (T007 Room Details ce5fd27 + gitignore 84eb5fe), pushed to `origin/main`.
-- Approved work in progress: **T008 Gift panel (references 004-012)** - implemented, verified (typecheck/lint PASS, jest 26 suites / 237 tests, captures `Temp\opencode\thread-p1\06-gift-panel-gift.png` + `07-gift-panel-lucky.png` + `08-gift-panel-tokens.png`), awaits commit approval.
+- Approved work in progress: **None.** Last completed: T008 gift panel, committed as `45b8361` and pushed (T009).
 - Pending device verifications (no approval needed, next cable session): room shell `04-room-device.png` + a details-sheet deep-link pass.
 - Next proposed task (needs approval): commit T008; then pick - room tools drawer (reference 013, the `apps` button) or a strictly-backend page.
 - KNOWN_ISSUES #9 (uncommitted work) resolved; #11 (MIUI foreground/deep-link workaround) recorded 2026-10-23.
