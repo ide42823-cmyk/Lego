@@ -1262,3 +1262,37 @@ the original. Corrected:
   work; no success or entitlement is simulated on the client.
 - **Error state visually.** The keyed loading/error/empty branches are unchanged and were not
   re-induced in this pass.
+
+## P11 — Search landing and the location gate (2026-10-23)
+
+The Oct-20 references cover three surfaces: the Regional Rank board (shipped as P9), the
+people filter sheet (already built to it — Gender pills, Age/Distance dual sliders, the
+online switch, the gold "VIP Privileges" and "Aristocracy Privileges" rows and the
+Reset/Confirm footer) and the Search screen. P11 completes the Search screen against its
+reference.
+
+### What changed
+
+- **Location gate.** The People tab's landing now opens with the reference's ask: a large
+  quiet pin (Lucide's map pin at 92 pt in the border tone over a soft ellipse), one line of
+  copy — ours: "Turn on location to see more people nearby" — a full-width `Enable Now`
+  capsule and a privacy note pointing at Me › Privacy with an underlined `Go to settings`
+  link. Rooms and Families keep their straight landing. Recents and suggested chips remain
+  below the gate, so the feature set is not sacrificed to the state.
+- **No permission is implied.** The client never reads a position and no location
+  permission flow exists client-side; distance stays a data-layer bucket. `Enable Now` and
+  the settings link toast the backend-phase wording like every out-of-scope control, so the
+  screen cannot imply a granted permission or a live fix.
+- Copy in the gate is our own wording; the pin is a generic glyph, not the reference's
+  artwork.
+
+### Verified
+
+- `tsc --noEmit`, `expo lint` clean; `jest` **18 suites / 198 tests** (new `LocationGate`
+  tests: labels, no position claim, enable and settings routing).
+- Web captures at 384, light and dark: Search shows back + centred title, the three
+  full-width tabs, the pill field with the disabled Search button, the pin/line/enable/note
+  stack and the recents + chips; the filter sheet (opened on Nearby) shows all ten sections
+  and the footer in both schemes; no horizontal overflow; zero console errors.
+- Roles read back: one dialog, four sliders (two per range control), two visible gender
+  radios.

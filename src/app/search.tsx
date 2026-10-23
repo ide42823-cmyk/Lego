@@ -7,6 +7,7 @@ import { SearchHeader } from '@/components/search/search-header';
 import { SearchLanding } from '@/components/search/search-landing';
 import { SearchResults } from '@/components/search/search-results';
 import { SearchTabs, type SearchTabItem } from '@/components/search/search-tabs';
+import { LocationGate } from '@/components/search/location-gate';
 import { AppScreen } from '@/components/ui/app-screen';
 import { LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
@@ -29,6 +30,12 @@ import { useTheme } from '@/hooks/use-theme';
  * ranking live behind the data seam, so this screen never looks at fixtures.
  * The Families tab is a view of the room directory restricted to the family
  * category; there is no separate family entity yet.
+ *
+ * On the People tab the landing opens with the reference's location ask: a
+ * generic pin, one explanatory line, the enable pill and a privacy note. The
+ * client never reads a position — distance stays a data-layer bucket — and the
+ * real permission prompt is backend work, so both controls toast instead of
+ * implying a granted permission.
  *
  * Search history is genuinely account state. Until there is a backend it is
  * kept for the session only (see `core/search-recents`); the screen says
@@ -89,6 +96,13 @@ export default function SearchScreen() {
     recentSearches.add(term);
   }, []);
 
+  const notYet = useCallback(
+    (what: string) => {
+      toast.show(`${what} arrives with the backend phase.`);
+    },
+    [toast],
+  );
+
   const cancel = useCallback(() => {
     if (router.canGoBack()) {
       router.back();
@@ -142,6 +156,12 @@ export default function SearchScreen() {
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
           >
+            {mode === 'people' ? (
+              <LocationGate
+                onEnable={() => notYet('The location prompt')}
+                onOpenSettings={() => notYet('Privacy settings')}
+              />
+            ) : null}
             <SearchLanding
               mode={mode}
               recents={recents}
