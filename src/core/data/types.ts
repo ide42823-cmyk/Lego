@@ -13,7 +13,7 @@ export type PeopleMode = 'recommend' | 'nearby' | 'new' | 'featured';
 export type MomentsMode = 'recommend' | 'new';
 export type RoomMode = 'recommend' | 'video' | 'new' | 'me' | 'global';
 export type RoomRelationshipFilter = 'joined' | 'following' | 'recents';
-export type ConversationFilter = 'all' | 'online' | 'most_chatted' | 'unread';
+export type ConversationFilter = 'all' | 'online' | 'most_chatted' | 'unread' | 'favorites';
 export type ContactsFilter = 'following' | 'friends' | 'followers';
 export type MessagesTab = 'messages' | 'contacts';
 /**
@@ -192,6 +192,8 @@ export interface ConversationSummary {
   lastMessageAt: string;
   unreadCount: number;
   isOnline: boolean;
+  /** The viewer starred this chat; the favourites inbox tab builds on it. */
+  isFavorite: boolean;
 }
 
 export interface MomentPost {

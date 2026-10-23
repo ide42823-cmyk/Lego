@@ -249,6 +249,13 @@ describe('listConversations', () => {
 
     expect(page.items.every((conversation) => conversation.isOnline)).toBe(true);
   });
+
+  it('returns only starred chats for the favorites filter', async () => {
+    const page = await fixtureDataSource.listConversations('favorites', { limit: 50 });
+
+    expect(page.items.length).toBeGreaterThan(0);
+    expect(page.items.every((conversation) => conversation.isFavorite)).toBe(true);
+  });
 });
 
 describe('listMoments', () => {

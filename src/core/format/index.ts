@@ -57,6 +57,43 @@ export function formatRelativeTime(iso: string, now: number = Date.now()): strin
 }
 
 /**
+ * Inbox timestamp in the reference's shape: the sender's local clock for
+ * today (`14:34`), `Yesterday 21:06` for the calendar day before, and a
+ * numeric `DD-MM-YY` for anything older. Calendar days are compared on
+ * midnight boundaries, so a 23:59 message is never mislabelled "Yesterday"
+ * by a one-hour race. No `Intl`: Hermes on Android has a reduced ICU, and a
+ * global inbox must not format per device locale yet.
+ */
+export function formatInboxTime(iso: string, now: number = Date.now()): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) {
+    return '';
+  }
+
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const clock = (date: Date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+  const thenDate = new Date(then);
+  const midnight = (value: number) => {
+    const date = new Date(value);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+  };
+
+  const dayGap = Math.round((midnight(now) - midnight(then)) / DAY);
+
+  if (dayGap === 0) {
+    return clock(thenDate);
+  }
+  if (dayGap === 1) {
+    return `Yesterday ${clock(thenDate)}`;
+  }
+  return `${pad(thenDate.getDate())}-${pad(thenDate.getMonth() + 1)}-${String(
+    thenDate.getFullYear() % 100,
+  ).padStart(2, '0')}`;
+}
+
+/**
  * Long-form age of a timestamp: `Just now`, `59 minutes ago`, `3 hours ago`,
  * `2 days ago`, then `Active 12 Mar`.
  *

@@ -3,6 +3,7 @@ import {
   formatCompactCount,
   formatDistanceKm,
   formatElapsedLong,
+  formatInboxTime,
   formatRelativeTime,
 } from './index';
 
@@ -88,6 +89,34 @@ describe('formatDistanceKm', () => {
   it('returns an empty string for invalid input', () => {
     expect(formatDistanceKm(Number.NaN)).toBe('');
     expect(formatDistanceKm(-1)).toBe('');
+  });
+});
+
+describe('formatInboxTime', () => {
+  // Built on local dates on purpose: the calendar-day comparisons in the
+  // formatter run on the device's zone, so the tests must not assume UTC.
+  const noon = new Date(2026, 9, 18, 12, 0, 0, 0).getTime();
+  const atLocal = (day: number, hour: number, minute: number) =>
+    new Date(2026, 9, day, hour, minute, 0, 0).toISOString();
+
+  it('prints the clock for today', () => {
+    expect(formatInboxTime(atLocal(18, 14, 34), noon)).toBe('14:34');
+  });
+
+  it('labels the previous calendar day as yesterday with the clock', () => {
+    expect(formatInboxTime(atLocal(17, 21, 6), noon)).toBe('Yesterday 21:06');
+  });
+
+  it('still says yesterday for 23:59 the night before, not a two-day gap', () => {
+    expect(formatInboxTime(atLocal(17, 23, 59), noon)).toBe('Yesterday 23:59');
+  });
+
+  it('prints a numeric date for anything older', () => {
+    expect(formatInboxTime(atLocal(15, 9, 30), noon)).toBe('15-10-26');
+  });
+
+  it('degrades to an empty string for invalid input', () => {
+    expect(formatInboxTime('not-a-date', noon)).toBe('');
   });
 });
 

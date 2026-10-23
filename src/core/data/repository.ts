@@ -374,6 +374,8 @@ function selectConversations(filter: ConversationFilter): ConversationSummary[] 
       return FIXTURE_CONVERSATIONS.filter((conversation) => conversation.isOnline);
     case 'unread':
       return FIXTURE_CONVERSATIONS.filter((conversation) => conversation.unreadCount > 0);
+    case 'favorites':
+      return FIXTURE_CONVERSATIONS.filter((conversation) => conversation.isFavorite);
     case 'most_chatted':
       return [...FIXTURE_CONVERSATIONS].sort((a, b) => b.unreadCount - a.unreadCount);
     case 'all':

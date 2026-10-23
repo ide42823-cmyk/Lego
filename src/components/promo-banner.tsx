@@ -7,6 +7,7 @@ import { useTints } from '@/hooks/use-tints';
 
 import { ThemedText } from './themed-text';
 import { AppCard } from './ui/app-card';
+import { Avatar } from './ui/avatar';
 import { GradientFill } from './ui/gradient-fill';
 import { Icon, type IconName } from './ui/icon';
 
@@ -16,10 +17,12 @@ import { Icon, type IconName } from './ui/icon';
  * Kept visually distinct from data rows on purpose: promoted content must not
  * be mistaken for an organic result. `banner` is the wide, full-bleed gradient
  * plate used inside discovery feeds; `row` is the compact card used above an
- * inbox.
+ * inbox — a filled circular programme mark, the programme's copy and, when the
+ * caller passes real members, an overlapping stack of them.
  *
  * The reference uses third-party campaign artwork. This component deliberately
- * does not: the plate is our own gradient, with our own icon and copy.
+ * does not: the mark is a generic glyph and the stack can only carry members
+ * the app already knows, never stock faces.
  */
 export type PromoBannerVariant = 'banner' | 'row';
 
@@ -29,19 +32,30 @@ const TONE_ICON: Record<'families' | 'event' | 'recharge', IconName> = {
   recharge: 'coin',
 };
 
+export interface PromoBannerStackMember {
+  /** Stable identity for the accessibility tree and dedupe, e.g. a peer id. */
+  id: string;
+  name: string;
+  uri?: string;
+}
+
 export interface PromoBannerProps {
   banner: PromoBannerModel;
   variant?: PromoBannerVariant;
+  /** Real members shown in the row variant's overlap stack. Optional. */
+  stack?: readonly PromoBannerStackMember[];
   onPress?: (bannerId: string) => void;
 }
 
-export function PromoBanner({ banner, variant = 'banner', onPress }: PromoBannerProps) {
+export function PromoBanner({ banner, variant = 'banner', stack, onPress }: PromoBannerProps) {
   const theme = useTheme();
   const tints = useTints();
 
   const accessibilityLabel = `${banner.title}. ${banner.subtitle ?? ''} ${banner.ctaLabel}`.trim();
 
   if (variant === 'row') {
+    const visibleStack = (stack ?? []).slice(0, 3);
+
     return (
       <AppCard padded={false} style={styles.rowCard}>
         <Pressable
@@ -50,11 +64,22 @@ export function PromoBanner({ banner, variant = 'banner', onPress }: PromoBanner
           onPress={() => onPress?.(banner.id)}
           style={({ pressed }) => [styles.rowInner, pressed && { opacity: 0.8 }]}
         >
-          <View style={[styles.rowIcon, { backgroundColor: tints.tab.home }]}>
-            <Icon name="friends" size={24} color={theme.brand} />
+          <View style={styles.rowIcon}>
+            <GradientFill
+              from={tints.promo[banner.tone ?? 'families'].from}
+              to={tints.promo[banner.tone ?? 'families'].to}
+              radius={28}
+            />
+            <Icon
+              name={
+                banner.tone === 'recharge' ? 'coin' : banner.tone === 'event' ? 'party' : 'house'
+              }
+              size={26}
+              color="#FFFFFF"
+            />
           </View>
           <View style={styles.copy}>
-            <ThemedText type="smallBold" numberOfLines={1}>
+            <ThemedText numberOfLines={1} style={styles.rowTitle}>
               {banner.title}
             </ThemedText>
             {banner.subtitle ? (
@@ -63,7 +88,29 @@ export function PromoBanner({ banner, variant = 'banner', onPress }: PromoBanner
               </ThemedText>
             ) : null}
           </View>
-          <Icon name="forward" size={18} color={theme.textSecondary} />
+          {visibleStack.length > 0 ? (
+            <View
+              style={styles.stack}
+              pointerEvents="none"
+              accessible
+              accessibilityLabel={visibleStack.map((member) => member.name).join(', ')}
+            >
+              {visibleStack.map((member, index) => (
+                <View
+                  key={member.id}
+                  style={[
+                    styles.stackItem,
+                    { borderColor: theme.surface },
+                    index > 0 && styles.stackOverlap,
+                  ]}
+                >
+                  <Avatar id={member.id} name={member.name} uri={member.uri} size={38} />
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Icon name="forward" size={18} color={theme.textSecondary} />
+          )}
         </Pressable>
       </AppCard>
     );
@@ -124,16 +171,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
-    padding: Spacing.two + 2,
+    padding: Spacing.three,
   },
   rowIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: Radius.medium,
+    width: 56,
+    height: 56,
+    borderRadius: Radius.pill,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
   copy: { flex: 1, gap: Spacing.half },
+  rowTitle: { fontSize: 18, lineHeight: 24, fontWeight: '700' },
+  stack: { flexDirection: 'row', alignItems: 'center' },
+  stackItem: {
+    width: 42,
+    height: 42,
+    borderRadius: Radius.pill,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stackOverlap: { marginStart: -12 },
 
   bannerCard: {
     borderRadius: 20,

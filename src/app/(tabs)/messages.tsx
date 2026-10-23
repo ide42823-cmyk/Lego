@@ -11,11 +11,12 @@ import { AppScreen } from '@/components/ui/app-screen';
 import { Divider } from '@/components/ui/divider';
 import { FilterChips, type FilterChipItem } from '@/components/ui/filter-chips';
 import { FloatingAction } from '@/components/ui/floating-action';
+import { Icon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SegmentedTabs, type SegmentedTabItem } from '@/components/ui/segmented-tabs';
 import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
-import { Radius, Spacing } from '@/constants/theme';
+import { CardShadow, Radius, Spacing } from '@/constants/theme';
 import { fixtureDataSource } from '@/core/data/repository';
 import type {
   ContactsFilter,
@@ -27,6 +28,7 @@ import type {
 } from '@/core/data/types';
 import { usePaginated } from '@/hooks/use-async';
 import { useGreet } from '@/hooks/use-greet';
+import { useTheme } from '@/hooks/use-theme';
 import { useTints } from '@/hooks/use-tints';
 
 /**
@@ -35,6 +37,11 @@ import { useTints } from '@/hooks/use-tints';
  * Two sub-sections share one header. Only the active section loads, so opening
  * the inbox does not also fetch the contact list. The rows are flat with rules
  * between them because an inbox is a dense list, not a wall of cards.
+ *
+ * The notification prompt sits above the chips in the reference's order and is
+ * a screen surface, not a list item: it must stay put while the list pages.
+ * Promising "important" notifications risks implying permissions the client
+ * does not hold, so the copy stays our own and "Go enable" only toasts.
  */
 const SECTIONS: readonly SegmentedTabItem<MessagesTab>[] = [
   { key: 'messages', label: 'Messages' },
@@ -46,6 +53,7 @@ const CONVERSATION_FILTERS: readonly FilterChipItem<ConversationFilter>[] = [
   { key: 'online', label: 'Online' },
   { key: 'most_chatted', label: 'Most Chatted' },
   { key: 'unread', label: 'Unread' },
+  { key: 'favorites', label: 'Favorites' },
 ];
 
 const CONTACT_FILTERS: readonly FilterChipItem<ContactsFilter>[] = [
@@ -69,6 +77,7 @@ const FAMILY_PROMO: PromoBannerModel = {
 
 export default function MessagesScreen() {
   const tints = useTints();
+  const theme = useTheme();
   const toast = useToast();
   const router = useRouter();
   const greet = useGreet();
@@ -104,6 +113,27 @@ export default function MessagesScreen() {
   const active = section === 'messages' ? conversations : contacts;
   const unreadTotal = conversations.items.reduce((total, item) => total + item.unreadCount, 0);
 
+  /**
+   * The reference's promo avatars are real members, so the stack is built from
+   * the peers already in the inbox — the card cannot show anyone the app does
+   * not know. Deduped by id, capped at three, absent while the page loads.
+   */
+  const stack = (() => {
+    const seen = new Set<string>();
+    const members: { id: string; name: string; uri?: string }[] = [];
+    for (const item of conversations.items) {
+      if (seen.has(item.peerId)) {
+        continue;
+      }
+      seen.add(item.peerId);
+      members.push({ id: item.peerId, name: item.peerName, uri: item.avatarUrl });
+      if (members.length === 3) {
+        break;
+      }
+    }
+    return members;
+  })();
+
   return (
     <AppScreen padded={false} tint="messages">
       <View style={styles.header}>
@@ -128,6 +158,41 @@ export default function MessagesScreen() {
           />
         </View>
       </View>
+
+      {section === 'messages' && !promptDismissed ? (
+        <View
+          style={[
+            styles.notice,
+            { backgroundColor: theme.surface, ...CardShadow, shadowColor: tints.cardShadow },
+          ]}
+          accessibilityRole="summary"
+          accessibilityLabel="Turn on notifications to hear about replies and invites. Go enable."
+        >
+          <Icon name="bell" size={22} color={theme.brand} />
+          <ThemedText
+            type="small"
+            themeColor="textSecondary"
+            numberOfLines={1}
+            style={styles.noticeCopy}
+          >
+            Turn on notifications to hear about replies and invites
+          </ThemedText>
+          <AppButton
+            label="Go enable"
+            variant="primary"
+            onPress={() => {
+              setPromptDismissed(true);
+              notYet('Notification permissions');
+            }}
+          />
+          <IconButton
+            name="close"
+            label="Dismiss"
+            tone="muted"
+            onPress={() => setPromptDismissed(true)}
+          />
+        </View>
+      ) : null}
 
       <View style={styles.chips}>
         <FilterChips
@@ -168,45 +233,10 @@ export default function MessagesScreen() {
           ItemSeparatorComponent={Divider}
           ListHeaderComponent={
             <View style={styles.notices}>
-              {promptDismissed ? null : (
-                <View
-                  style={[styles.notice, { backgroundColor: tints.chip.chat.background }]}
-                  accessibilityRole="summary"
-                >
-                  <View style={styles.noticeCopy}>
-                    <ThemedText
-                      type="smallBold"
-                      style={{ color: tints.chip.chat.text }}
-                      numberOfLines={1}
-                    >
-                      Turn on notifications
-                    </ThemedText>
-                    <ThemedText
-                      type="small"
-                      style={[styles.noticeHint, { color: tints.chip.chat.text }]}
-                    >
-                      Know when someone replies or invites you to a room.
-                    </ThemedText>
-                  </View>
-                  <AppButton
-                    label="Go enable"
-                    variant="primary"
-                    onPress={() => {
-                      setPromptDismissed(true);
-                      notYet('Notification permissions');
-                    }}
-                  />
-                  <IconButton
-                    name="close"
-                    label="Dismiss"
-                    tone="muted"
-                    onPress={() => setPromptDismissed(true)}
-                  />
-                </View>
-              )}
               <PromoBanner
                 banner={FAMILY_PROMO}
                 variant="row"
+                stack={stack}
                 onPress={() => notYet('Joining a family')}
               />
             </View>
@@ -271,15 +301,18 @@ const styles = StyleSheet.create({
   chips: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.one },
   padded: { paddingHorizontal: Spacing.three },
   listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
-  notices: { gap: Spacing.two, paddingBottom: Spacing.two },
+  notices: { paddingBottom: Spacing.two },
   notice: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
-    padding: Spacing.three,
+    marginHorizontal: Spacing.three,
+    marginBottom: Spacing.two,
+    paddingStart: Spacing.three,
+    paddingEnd: Spacing.two,
+    paddingVertical: Spacing.two,
     borderRadius: Radius.large,
   },
-  noticeCopy: { flex: 1, gap: Spacing.half },
-  noticeHint: { opacity: 0.75 },
+  noticeCopy: { flex: 1 },
   fab: { position: 'absolute', bottom: Spacing.four, end: Spacing.three },
 });

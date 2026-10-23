@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import type { ConversationSummary } from '@/core/data/types';
-import { countryFlag, formatRelativeTime } from '@/core/format';
+import { countryFlag, formatInboxTime } from '@/core/format';
 import { useTheme } from '@/hooks/use-theme';
 
 import { ThemedText } from './themed-text';
@@ -25,7 +25,8 @@ export interface ConversationRowProps {
 
 export function ConversationRow({ conversation, onPress }: ConversationRowProps) {
   const theme = useTheme();
-  const time = formatRelativeTime(conversation.lastMessageAt);
+  // Inbox rows speak the reference's clock dialect — `Yesterday 21:06`, not `3h`.
+  const time = formatInboxTime(conversation.lastMessageAt);
   const unread = conversation.unreadCount > 0;
   const flag = countryFlag(conversation.locale);
 

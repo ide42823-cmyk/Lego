@@ -1296,3 +1296,47 @@ reference.
   and the footer in both schemes; no horizontal overflow; zero console errors.
 - Roles read back: one dialog, four sliders (two per range control), two visible gender
   radios.
+
+## P12 — Messages inbox fidelity (2026-10-23)
+
+The Messages tab already had the reference's skeleton (segmented Messages/Contacts, search
+and menu actions, notification prompt, filter chips, family promo, dense rows). This pass
+closes the four measurable gaps against its reference.
+
+### What changed
+
+- **Favorites filter.** `'favorites'` joins `ConversationFilter`, chats carry an
+  `isFavorite` flag (every fourth fixture), `selectConversations` filters on it, and the
+  chips row ends with **Favorites** — reachable by scroll exactly as the reference crops it.
+- **Inbox clock.** New `formatInboxTime` replaces `formatRelativeTime` in
+  `ConversationRow` only: today prints the clock (`14:34`), the previous calendar day
+  `Yesterday 21:06`, older messages a numeric `DD-MM-YY`. Calendar-day comparison runs on
+  midnight boundaries, so a 23:59 message is never mislabelled, and it stays free of
+  `Intl` for the reduced-ICU Hermes build. Moments keep the compact feed clock.
+- **Notification prompt.** Moved out of the list header to sit above the chips in the
+  reference's order (it stays put while the list pages, inbox only), restyled as the
+  reference's card: purple bell, one truncated line — our own copy — the `Go enable`
+  capsule and the dismiss control. The copy never promises "important" notifications or a
+  held permission; enabling still only toasts.
+- **Family promo row.** Restyled to the reference anatomy: a 56 pt circle filled with the
+  same Families gradient as the discovery plate and a white house glyph, the programme
+  title at 18 pt, and — new — an overlapping three-avatar stack built only from peers
+  already in the inbox, so the card cannot show a member the app does not know. The stack
+  falls back to the forward chevron while the page loads. The banner variant glyphs are
+  untouched, so the Home plate keeps its verified look.
+
+### Verified
+
+- `tsc --noEmit`, `expo lint` clean; `jest` **18 suites / 204 tests** (+5
+  `formatInboxTime` cases on local-date boundaries, +1 favorites repository test).
+- Web captures at 384, light and dark: banner/chips/promo/rows all present, Favorites in
+  the chip rail, row copy reading `Yesterday 11:07` / `15-10-26` styles, unread pills and
+  top-right presence dots, avatar stack labelled with member names; no horizontal
+  overflow; zero console errors.
+
+## P13 — Threads, calls and the wallet pages
+
+Remaining surfaces split into new screens (conversation thread, room shell) and strictly
+server-side territory (wallet, SVIP pools, couples, rank history). The conversation
+thread is next: bubbles and a draft sending flow with nothing that implies delivery the
+backend has not confirmed.

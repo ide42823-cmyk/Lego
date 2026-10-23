@@ -331,6 +331,7 @@ function buildConversations(users: UserSummary[], count: number): ConversationSu
       lastMessageAt: new Date(NOW - Math.floor(random() * 5 * DAY)).toISOString(),
       unreadCount: random() > 0.6 ? 1 + Math.floor(random() * 9) : 0,
       isOnline: random() > 0.5,
+      isFavorite: index % 4 === 1,
     };
   });
 }
