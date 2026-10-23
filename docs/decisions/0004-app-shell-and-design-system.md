@@ -1176,6 +1176,19 @@ the original. Corrected:
   (`#1FC7A6` + `#FB5A6E` light / `#3EE0BC` + `#FF8B96` dark), the solo flower is violet
   (`#A87DF2` light / `#BF93FA` dark), the header funnel fills in text ink and the Ranking cup
   fills gold.
+- **Device pass (2026-10-23).** The Xiaomi handset was attached and the debug build
+  (`com.letgo.app`) loaded the corrected Home over `adb reverse tcp:8081`. Captured at the
+  device's 360 dp logical width, light and dark: the filled teal seal with the white check, the
+  coral flower beside the seal and the violet solo flower, the decorative Unicode names
+  (mathematical-script, Arabic, emoji) with Android's font fallbacks, gender-safe ♂/♀ glyphs,
+  violet solo charm, SVIP capsule with crown, tight `233km` copy, the stacked four-card rhythm,
+  the banner plate with its dots, the compact header with the arc under the active tab, the
+  full bottom bar (cloud heart, planet Moments, house-and-bars Rooms, bubble-plus-smile
+  Messages with the capped badge, plain-circle Me with the red dot) and the safe-area padding.
+  Zero renderer crashes. Restriction unchanged: MIUI blocks `INJECT_EVENTS`, so injected
+  taps/swipes (mode tabs, filter sheet, Hi toast, promo) still cannot be scripted from the host;
+  they were verified on web and left for hand use. Phone night mode restored to `yes` and
+  `debug.force_rtl=0` confirmed after the pass. Native RTL is still the open gap.
 
 ### What changed
 
@@ -1235,9 +1248,9 @@ the original. Corrected:
 
 ### NOT verified in P10
 
-- **Native render of the new Home.** No handset was attached, so decorative Unicode rendering,
-  the 26 pt custom glyphs, safe-area insets around the taller bottom bar and Android font
-  fallbacks (Mathematical Script, Arabic, emoji) were not re-shot on the device.
+- **Native render of the new Home.** Closed on 2026-10-23: the Xiaomi handset was attached and
+  the corrected Home was captured on the device (see the correction pass above). The still-open
+  device gaps are interactive taps and native RTL.
 - **Native RTL.** React Native Web hardcodes `isRTL: false`; the DOM-dir capture cannot prove the
   `I18nManager` margin resolution, the header scroller direction or the Hi/VIP internal order.
   Full Arabic copy is also out of scope for this pass.
