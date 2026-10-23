@@ -55,3 +55,8 @@ expo-env.d.ts
 /docs/REfs
 /reference_screenshots
 /reference_screenshots.rar
+
+# the OpenCode persistent-memory installer artifacts; the living memory
+# (docs/ai-memory) is tracked, the kit copy and its archive are not
+/opencode_sugo_persistent_memory_kit
+/opencode_sugo_persistent_memory_kit.zip
