@@ -36,6 +36,8 @@ export default function RootLayout() {
               <Stack.Screen name="search" options={{ headerShown: false }} />
               {/* Ranking draws its own centred back header. */}
               <Stack.Screen name="ranking" options={{ headerShown: false }} />
+              {/* Threads own their bar, with the composer anchored below. */}
+              <Stack.Screen name="thread/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="dev/rtc-spike" options={{ title: 'RTC spike (dev only)' }} />
             </Stack>
           </ToastProvider>

@@ -1334,9 +1334,49 @@ closes the four measurable gaps against its reference.
   top-right presence dots, avatar stack labelled with member names; no horizontal
   overflow; zero console errors.
 
-## P13 — Threads, calls and the wallet pages
+## P13 — Conversation thread (2026-10-23)
 
-Remaining surfaces split into new screens (conversation thread, room shell) and strictly
-server-side territory (wallet, SVIP pools, couples, rank history). The conversation
-thread is next: bubbles and a draft sending flow with nothing that implies delivery the
-backend has not confirmed.
+The "threads, calls and the wallet pages" stubs split into a new screen — the
+conversation thread, built this pass — and strictly server-side territory (wallet, SVIP
+pools, couples, rank history). No dedicated thread reference exists in the reference
+sets: the unexplored shots cover settings, Families Square, the notifications inbox, the
+rooms filters and the store. The screen therefore follows the app's own design language —
+the bar mirrors the profile's, and bubbles answer with the brand accent the Hi and
+Explore states already use.
+
+### What changed
+
+- **Data seam.** `listMessages(conversationId)` returns a `ConversationThread` — the
+  summary plus text bubbles, oldest first. Threads are built *from* the inbox: the last
+  bubble is the snippet the row shows, so the two surfaces cannot disagree. Timestamps
+  walk back from the summary with a cadence larger than the per-message jitter, so the
+  history is strictly ascending across reloads. The viewer id (`FIXTURE_ME_ID`) marks
+  outgoing bubbles; a strict two-party thread needs no viewer identity on the screen.
+- **Bubbles and dividers.** Text only: incoming on the muted surface, the viewer's on
+  the brand fill, each with the tighter corner facing its own sender. A
+  `formatDayDivider` (`Today` / `Yesterday` / `15-10-26`) shares the midnight-boundary
+  comparison with the inbox clock, and a clock caption rides only the bubble that closes
+  a cluster. No read receipts, no delivery ticks — neither state is client-owned, so
+  none is drawn.
+- **Composer.** A pill draft field with an emoji affordance and one round send control.
+  Sending is deliberately not a client feature: pressing send states the backend-phase
+  wording and the draft stays in the field, so nothing the member wrote is lost and no
+  bubble is ever local-echoed. Voice call and chat options in the bar state the same.
+- **Icon vocabulary.** `send` (Lucide send-horizontal) and `smile` — this Lucide build
+  has no plain smile file, so the meaning is drawn by `face-grinning` — joined the
+  meaning-named set.
+
+### Verified
+
+- `tsc --noEmit`, `expo lint` clean; `jest` **20 suites / 216 tests** — new: repository
+  thread seams (ascending order, snippet agreement, two-party authors, unknown id
+  rejects), `formatDayDivider` boundary cases, `ChatBubble` authorship labels (author
+  spoken as words — `peerName: …` / `You: …`) and its deliberately non-pressable
+  surface, `ChatComposer` draft handoff, the draft kept after an unconfirmed send and
+  the emoji routing. The ordering test caught the fixture cadence bug before a capture
+  ever did.
+- Web captures at 384, light and dark: bar (back, avatar with presence, name, call,
+  options), bottom-anchored history with the centred day divider, per-side clock
+  captions, bubbles flushed to their own edges, the composer row, no horizontal
+  overflow and zero console errors.
+

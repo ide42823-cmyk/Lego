@@ -74,13 +74,7 @@ export function formatInboxTime(iso: string, now: number = Date.now()): string {
   const clock = (date: Date) => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
   const thenDate = new Date(then);
-  const midnight = (value: number) => {
-    const date = new Date(value);
-    date.setHours(0, 0, 0, 0);
-    return date.getTime();
-  };
-
-  const dayGap = Math.round((midnight(now) - midnight(then)) / DAY);
+  const dayGap = calendarDayGap(then, now);
 
   if (dayGap === 0) {
     return clock(thenDate);
@@ -88,8 +82,45 @@ export function formatInboxTime(iso: string, now: number = Date.now()): string {
   if (dayGap === 1) {
     return `Yesterday ${clock(thenDate)}`;
   }
-  return `${pad(thenDate.getDate())}-${pad(thenDate.getMonth() + 1)}-${String(
-    thenDate.getFullYear() % 100,
+  return numericDate(thenDate, pad);
+}
+
+/**
+ * The calendar-day separator above a thread's bubbles: `Today`, `Yesterday`,
+ * then the same numeric date the inbox rows use. Shares the midnight-boundary
+ * comparison with `formatInboxTime`, so the two can never disagree about which
+ * day a bubble belongs to.
+ */
+export function formatDayDivider(iso: string, now: number = Date.now()): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) {
+    return '';
+  }
+
+  const dayGap = calendarDayGap(then, now);
+  if (dayGap === 0) {
+    return 'Today';
+  }
+  if (dayGap === 1) {
+    return 'Yesterday';
+  }
+  return numericDate(new Date(then), (value) => String(value).padStart(2, '0'));
+}
+
+/** Whole calendar days between two instants, compared on midnight boundaries. */
+function calendarDayGap(thenMs: number, nowMs: number): number {
+  const midnight = (value: number) => {
+    const date = new Date(value);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
+  };
+  return Math.round((midnight(nowMs) - midnight(thenMs)) / DAY);
+}
+
+/** `15-10-26`, the thread and inbox's shared numeric old-date form. */
+function numericDate(date: Date, pad: (value: number) => string): string {
+  return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${String(
+    date.getFullYear() % 100,
   ).padStart(2, '0')}`;
 }
 

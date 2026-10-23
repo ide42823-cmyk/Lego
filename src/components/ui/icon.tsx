@@ -19,6 +19,8 @@ import CircleAlert from 'lucide-react-native/icons/circle-alert';
 import Clock from 'lucide-react-native/icons/clock';
 import Coins from 'lucide-react-native/icons/coins';
 import Copy from 'lucide-react-native/icons/copy';
+import SendHorizontal from 'lucide-react-native/icons/send-horizontal';
+import FaceGrinning from 'lucide-react-native/icons/face-grinning';
 import Crown from 'lucide-react-native/icons/crown';
 import Dices from 'lucide-react-native/icons/dices';
 import Ellipsis from 'lucide-react-native/icons/ellipsis';
@@ -156,6 +158,8 @@ export type IconName =
   // Profile contact and attribute rows
   | 'phone'
   | 'copy'
+  | 'send'
+  | 'smile'
   | 'height'
   | 'weight'
   | 'occupation'
@@ -231,6 +235,8 @@ const ICONS: Record<IconName, LucideIcon> = {
 
   phone: Phone,
   copy: Copy,
+  send: SendHorizontal,
+  smile: FaceGrinning,
   height: Ruler,
   weight: Weight,
   occupation: Briefcase,

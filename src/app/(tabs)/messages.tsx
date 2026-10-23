@@ -110,6 +110,12 @@ export default function MessagesScreen() {
     [router],
   );
 
+  const openThread = useCallback(
+    (conversationId: string) =>
+      router.push({ pathname: '/thread/[id]', params: { id: conversationId } }),
+    [router],
+  );
+
   const active = section === 'messages' ? conversations : contacts;
   const unreadTotal = conversations.items.reduce((total, item) => total + item.unreadCount, 0);
 
@@ -249,12 +255,7 @@ export default function MessagesScreen() {
           }
           onEndReachedThreshold={0.6}
           onEndReached={conversations.loadMore}
-          renderItem={({ item }) => (
-            <ConversationRow
-              conversation={item}
-              onPress={(id) => notYet(`The conversation for ${id}`)}
-            />
-          )}
+          renderItem={({ item }) => <ConversationRow conversation={item} onPress={openThread} />}
         />
       ) : (
         <FlatList

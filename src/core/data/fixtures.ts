@@ -20,6 +20,7 @@ import { countryName } from '@/core/search';
 
 import type {
   AvatarFrameKey,
+  ChatMessage,
   ConversationSummary,
   FilterOption,
   Gender,
@@ -198,6 +199,18 @@ const CONVERSATION_SNIPPETS = [
   'تصبح على خير.',
 ] as const;
 
+/** Thread copy is bilingual like the inbox snippets, and only readable text. */
+const THREAD_LINES = [
+  'That playlist was perfect.',
+  'اتحداك تجرب الغرفة الصوتية اليوم.',
+  'I saved that clip, send it over.',
+  'ههههه وصلت.',
+  'The room was calm tonight, join us.',
+  'أصبحت متاخمة، اتكلم غداً.',
+  'Did you see the new banner?',
+  'سأرسل لك الملف بكرا.',
+] as const;
+
 const MOMENT_TEXTS = [
   'Trying the new room format tonight — come say hi.',
   'من أجمل غروب شفته هذا الأسبوع.',
@@ -374,6 +387,9 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
   });
 }
 
+/** The viewer's own id. Defined early: the thread builder marks outgoing bubbles. */
+export const FIXTURE_ME_ID = 'user-me';
+
 export const FIXTURE_USERS = buildUsers(24);
 export const FIXTURE_ROOMS = buildRooms(18);
 export const FIXTURE_CONVERSATIONS = buildConversations(FIXTURE_USERS, 14);
@@ -381,8 +397,48 @@ export const FIXTURE_MOMENTS = buildMoments(FIXTURE_USERS, 10);
 
 export const FIXTURE_BANNERS: PromoBanner[] = BANNERS;
 
+/**
+ * The threads behind the inbox, built *from* the inbox: the last bubble of a
+ * thread always is the snippet the row shows, so the two surfaces cannot
+ * disagree. Timestamps walk backwards from the summary with deterministic
+ * gaps, so lists stay stable across reloads.
+ */
+export const FIXTURE_THREADS: Map<string, ChatMessage[]> = new Map(
+  FIXTURE_CONVERSATIONS.map((conversation, index) => {
+    const count = 5 + (index % 4);
+    const messages: ChatMessage[] = [];
+
+    for (let i = 0; i < count; i += 1) {
+      // The peer opens, then the two sides alternate — a two-party thread.
+      const isMine = i % 2 === 1;
+      // The last bubble is the snippet, so the inbox and the thread agree.
+      const text =
+        i === count - 1
+          ? conversation.snippet
+          : (THREAD_LINES[(index * 31 + i * 13) % THREAD_LINES.length] ?? THREAD_LINES[0]);
+      // Inter-bubble cadence stays over the largest jitter so the walk back
+      // from the summary is strictly ascending.
+      const cadenceMs = 45 * MINUTE;
+      const jitterMs = ((i * 29 + index * 17) % 40) * MINUTE;
+
+      messages.push({
+        id: `${conversation.id}-message-${i + 1}`,
+        conversationId: conversation.id,
+        authorId: isMine ? FIXTURE_ME_ID : conversation.peerId,
+        kind: 'text',
+        text,
+        sentAt: new Date(
+          new Date(conversation.lastMessageAt).getTime() - (count - 1 - i) * cadenceMs - jitterMs,
+        ).toISOString(),
+      });
+    }
+
+    return [conversation.id, messages] as const;
+  }),
+);
+
 export const FIXTURE_ME: MeDashboard = {
-  userId: 'user-me',
+  userId: FIXTURE_ME_ID,
   displayName: 'My Account',
   handle: '@myaccount',
   avatarUrl: mediaRef('portraits', 'self'),

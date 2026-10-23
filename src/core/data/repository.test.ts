@@ -1,5 +1,11 @@
 import { devControls, fixtureDataSource } from './repository';
-import type { DirectoryFeedItem, RoomFeedItem, RoomSummary } from './types';
+import type {
+  ChatMessage,
+  ConversationSummary,
+  DirectoryFeedItem,
+  RoomFeedItem,
+  RoomSummary,
+} from './types';
 import { defaultPeopleFilters } from '../people-filters';
 
 /**
@@ -255,6 +261,36 @@ describe('listConversations', () => {
 
     expect(page.items.length).toBeGreaterThan(0);
     expect(page.items.every((conversation) => conversation.isFavorite)).toBe(true);
+  });
+
+  describe('listMessages', () => {
+    it('returns a thread whose last bubble is the inbox snippet, oldest first', async () => {
+      const inbox = await fixtureDataSource.listConversations('all', { limit: 50 });
+      const conversation = inbox.items[0] as ConversationSummary;
+      const thread = await fixtureDataSource.listMessages(conversation.id);
+
+      const times = thread.messages.map((message) => message.sentAt);
+      expect([...times].sort()).toEqual(times);
+
+      const last = thread.messages.at(-1) as ChatMessage;
+      expect(last.text).toBe(conversation.snippet);
+    });
+
+    it('runs a strict two-party thread, with only text bubbles', async () => {
+      const inbox = await fixtureDataSource.listConversations('all', { limit: 50 });
+      const conversation = inbox.items[0] as ConversationSummary;
+      const thread = await fixtureDataSource.listMessages(conversation.id);
+
+      const authors = new Set(thread.messages.map((message) => message.authorId));
+      expect([...authors].sort()).toStrictEqual([conversation.peerId].concat('user-me').sort());
+      expect(thread.messages.every((message) => message.kind === 'text')).toBe(true);
+    });
+
+    it('rejects an unknown conversation id instead of an empty thread', async () => {
+      await expect(fixtureDataSource.listMessages('conversation-does-not-exist')).rejects.toThrow(
+        /Unknown conversation/,
+      );
+    });
   });
 });
 

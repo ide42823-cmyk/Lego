@@ -21,12 +21,14 @@ import {
   FIXTURE_MOMENTS,
   FIXTURE_PROFILES,
   FIXTURE_ROOMS,
+  FIXTURE_THREADS,
   FIXTURE_USERS,
 } from './fixtures';
 import type {
   ContactsFilter,
   ConversationFilter,
   ConversationSummary,
+  ConversationThread,
   DirectoryFeedItem,
   Leaderboard,
   LeaderboardCategory,
@@ -87,6 +89,8 @@ export interface DataSource {
     filter: ConversationFilter,
     request?: PageRequest,
   ): Promise<Page<ConversationSummary>>;
+  /** One conversation's history, oldest first. Rejects for an unknown id. */
+  listMessages(conversationId: string): Promise<ConversationThread>;
   listContacts(filter: ContactsFilter, request?: PageRequest): Promise<Page<UserSummary>>;
   listMoments(mode: MomentsMode, request?: PageRequest): Promise<Page<MomentPost>>;
   /**
@@ -465,6 +469,21 @@ export const fixtureDataSource: DataSource = {
 
   listConversations(filter, request) {
     return simulate(() => paginate(selectConversations(filter), request));
+  },
+
+  listMessages(conversationId) {
+    return simulate(() => {
+      const conversation = FIXTURE_CONVERSATIONS.find((item) => item.id === conversationId);
+      const messages = FIXTURE_THREADS.get(conversationId);
+      if (!conversation || !messages) {
+        throw new Error(`Unknown conversation: ${conversationId}`);
+      }
+      // Copies: the screen may read timestamps while the map stays pristine.
+      return {
+        conversation: { ...conversation },
+        messages: messages.map((item) => ({ ...item })),
+      };
+    });
   },
 
   listContacts(filter, request) {

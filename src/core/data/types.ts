@@ -196,6 +196,28 @@ export interface ConversationSummary {
   isFavorite: boolean;
 }
 
+/**
+ * One bubble in a conversation. Text only on purpose: media, voice and gift
+ * messages are server-phase — presenting them as a client fixture would imply
+ * features the backend has to meter. The viewer's own id marks outgoing
+ * bubbles; every other author is the conversation's peer.
+ */
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  authorId: string;
+  kind: 'text';
+  text: string;
+  /** ISO-8601, ascending across the thread. Formatting happens in the UI layer. */
+  sentAt: string;
+}
+
+/** A conversation's history, oldest first, with the summary it belongs to. */
+export interface ConversationThread {
+  conversation: ConversationSummary;
+  messages: ChatMessage[];
+}
+
 export interface MomentPost {
   id: string;
   authorId: string;
