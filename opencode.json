@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "docs/ai-memory/PROJECT_STATUS.md",
+    "docs/ai-memory/ARCHITECTURE_DECISIONS.md",
+    "docs/ai-memory/KNOWN_ISSUES.md"
+  ]
+}

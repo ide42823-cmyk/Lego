@@ -1,0 +1,35 @@
+# Project Status — Social Voice App (Letgo)
+
+> Persistent status memory. Update this file at the end of every approved task. Facts only; unknown values must stay marked unknown.
+
+## Product
+- Build an original iOS/Android social discovery and live voice-room app inspired by the provided SUGO reference screenshots (JPEGs under `reference_screenshots/`, gitignored — count 103 files as of 2026-10-23, mapping to screen IDs still to be verified).
+- Core areas built so far: discovery (Home), moments feed, profiles, rankings, search + filters, rooms directory, messages inbox, conversation thread, Me dashboard. Voice rooms (RTC), wallet/SVIP/couples, and delivery are backend-phase territory.
+
+## Source-of-truth documents
+- `README_AI_START_HERE.md` (repo root)
+- `MASTER_AI_CODING_PROMPT.md` (repo root)
+- `sugo_inspired_app_architecture_and_flows.md` (repo root)
+- `sugo_screen_by_screen_analysis.md` (repo root)
+- `REPEATABLE_TASK_GATE_PROMPT.md` (repo root)
+- `PHASE_0_PRELIMINARY_AUDIT_AND_SETUP.md` (repo root)
+- Detailed design ADRs: `docs/decisions/0001`–`0004`
+- Original JPEG screenshots: `reference_screenshots/`
+
+## Current state
+- Current phase: **Page-by-page front-end passes** (the historical Phase 0 audit is complete; see `PHASE_0_PRELIMINARY_AUDIT_AND_SETUP.md` and `docs/decisions/`).
+- Git branch/commit at last verification: `main`, app work at `7007561` ("Thread P13 full-match rework + Cairo typography pass") plus the config/memory commit on top, pushed to `origin/main`.
+- Approved work in progress: **None.**
+- Last completed task (T004, 2026-10-23): **commit gate opened with user approval** — P13 rework + T003 typography committed as `7007561` (23 files, +863/−316; the two tasks shared edits inside the reworked chat files, so one app commit), config/memory commit right after, both pushed. `AGENTS.md.bak` deleted after user review. Kit zip + kit folder left untracked by decision (gitignore deferred to user).
+- Next proposed task (needs approval): **pick the next surface** — room shell (front-end, toast-gated behind RTC) vs. a strictly-backend page kept toast-gated. Optionally gitignore the kit artifacts first.
+- KNOWN_ISSUES #9 (uncommitted work) resolved; #11 (MIUI foreground/deep-link workaround) recorded 2026-10-23.
+- User approval required before new source changes: **Yes** (the user's standing instruction is one page/pass at a time).
+
+## Approval gate
+Do not start a new surface (room shell, wallet, SVIP, couples) or change architecture without explicit approval. Do not record planned work as completed.
+
+## Completed milestones (summary)
+- P1–P8: design system, data seam, fixtures, bottom-bar shell, discovery, moments, rooms, Me, person profile, RTC spike. Details: `docs/decisions/`.
+- P9: Ranking page + device pass. P10: Home fidelity + device pass (Xiaomi, light+dark). P11: Search location gate. P12: Messages inbox fidelity (favorites chip, inbox clock, notification card, promo member stack). P13 (first cut): `/thread/[id]` thread with two-party bubbles, honest composer; native crash from web-only `accessibilityRole="form"` fixed and verified on device.
+- T002: typography/icon audit delivered read-only. T003: Cairo bundled + type scale retuned + icon fill/stroke policy (bell/gift/heart filled, stroke 2.25) — verified light+dark on web and on device (captures 04–06 at `Temp\opencode\device-thread\`). T004: commit gate — all delivered, pushed (`7007561` + config/memory commit).
+- Full verification history lives in `WORK_LOG.md` and the kit's ADRs under `docs/decisions/`.
