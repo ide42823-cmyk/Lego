@@ -2,12 +2,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
+import * as Clipboard from 'expo-clipboard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RoomAudienceStrip } from '@/components/room/room-audience-strip';
 import { RoomBannerRow } from '@/components/room/room-banner-row';
 import { RoomChatOverlay } from '@/components/room/room-chat-overlay';
 import { RoomComposer } from '@/components/room/room-composer';
+import { RoomDetailsSheet } from '@/components/room/room-details-sheet';
 import { RoomEventCard } from '@/components/room/room-event-card';
 import { RoomExitOverlay } from '@/components/room/room-exit-overlay';
 import { RoomHeaderBar } from '@/components/room/room-header-bar';
@@ -40,6 +42,7 @@ export default function RoomScreen() {
   const toast = useToast();
   const insets = useSafeAreaInsets();
   const [exitOpen, setExitOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const state = useAsync(
     () => fixtureDataSource.getLiveRoom(String(id ?? '')),
@@ -62,6 +65,16 @@ export default function RoomScreen() {
   }, [router]);
 
   const room = state.status === 'ready' ? state.data : undefined;
+
+  const copyRoomId = useCallback(() => {
+    if (!room) {
+      return;
+    }
+    const raw = room.host.idLabel.replace(/^ID:\s*/, '');
+    Clipboard.setStringAsync(raw)
+      .then(() => toast.show('Room id copied.'))
+      .catch(() => notYet('Copying the room id'));
+  }, [room, toast, notYet]);
 
   if (state.status === 'loading') {
     return <LoadingSkeleton />;
@@ -99,7 +112,7 @@ export default function RoomScreen() {
           <RoomHeaderBar
             host={room.host}
             floatAvatars={room.floatAvatars}
-            onDetails={() => notYet('Room details')}
+            onDetails={() => setDetailsOpen(true)}
             onExit={() => setExitOpen(true)}
           />
           <RoomBannerRow
@@ -146,6 +159,20 @@ export default function RoomScreen() {
         </View>
       </KeyboardAvoidingView>
       <RoomExitOverlay visible={exitOpen} onKeep={() => setExitOpen(false)} onExit={exitRoom} />
+      <RoomDetailsSheet
+        visible={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        host={room.host}
+        details={room.details}
+        joined
+        onCopyId={copyRoomId}
+        onShare={() => notYet('Sharing')}
+        onFavorite={() => notYet('Following the room')}
+        onJoin={() => notYet('Joining another room')}
+        onMembers={() => notYet('The member list')}
+        onAchievements={() => notYet('The achievements')}
+        onInfo={() => notYet('The room info')}
+      />
     </View>
   );
 }

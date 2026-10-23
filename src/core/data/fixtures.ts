@@ -452,7 +452,14 @@ function buildLiveRooms(rooms: RoomSummary[], users: UserSummary[]): LiveRoom[] 
   return rooms.map((room, index): LiveRoom => {
     const random = createRandom(61_000 + hashText(room.id));
     const host = users[(index * 5 + 1) % users.length] as UserSummary;
-    const audience = [users[(index * 3) % users.length], users[(index * 3 + 7) % users.length], users[(index * 3 + 11) % users.length]] as UserSummary[];
+    const memberPool = [
+      users[(index * 3) % users.length],
+      users[(index * 3 + 7) % users.length],
+      users[(index * 3 + 11) % users.length],
+      users[(index * 3 + 15) % users.length],
+      users[(index * 3 + 19) % users.length],
+    ] as UserSummary[];
+    const audience = memberPool.slice(0, 5);
     const seated = users[(index * 11 + 4) % users.length] as UserSummary;
     const lockedSeat = 2 + (index % 3);
     const seatedSeat = 4 + ((index * 2) % 5);
@@ -465,6 +472,7 @@ function buildLiveRooms(rooms: RoomSummary[], users: UserSummary[]): LiveRoom[] 
         displayName: host.displayName,
         idLabel: `ID: ${8_500_000 + index * 173}`,
         avatarUrl: host.avatarUrl,
+        level: host.level ?? 1,
       },
       seats: Array.from({ length: 10 }, (_, seatIndex): RoomSeat => {
         const position = seatIndex + 1;
@@ -503,6 +511,34 @@ function buildLiveRooms(rooms: RoomSummary[], users: UserSummary[]): LiveRoom[] 
       welcomeText: LIVE_ROOM_WELCOME,
       introduction: pick(random, LIVE_ROOM_INTRODUCTIONS),
       eventNotices: buildLiveRoomNotices(random, users),
+      details: {
+        level: host.level ?? 1,
+        levelProgress: 0.12 + Math.floor(random() * 80) / 100,
+        achievements: [
+          {
+            id: 'ach-daily-speakers',
+            tone: 'violet',
+            tierLabel: 'Lv.1',
+            valueLabel: '20+',
+            caption: 'daily speakers',
+          },
+          {
+            id: 'ach-daily-visitors',
+            tone: 'blue',
+            tierLabel: 'Lv.1',
+            valueLabel: '100+',
+            caption: 'daily visitors',
+          },
+        ],
+        // The first member has the host's mic, the second the steward's headset.
+        members: audience.map((member, position) => ({
+          id: member.id,
+          avatarUrl: member.avatarUrl,
+          avatarFrame: member.avatarFrame,
+          badge: position === 0 ? ('mic' as const) : position === 1 ? ('headset' as const) : undefined,
+        })),
+        info: room.description,
+      },
       eventCard: {
         title: pick(random, LIVE_ROOM_EVENT_TITLES),
         countdownLabel: LIVE_ROOM_CLOCKS[(index + 2) % LIVE_ROOM_CLOCKS.length],

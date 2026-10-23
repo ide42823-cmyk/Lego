@@ -15,6 +15,12 @@ module.exports = {
     // `expo-image` does async native work that escapes `act()` in Jest; see the
     // mock for why that is safe to replace.
     '^expo-image$': '<rootDir>/jest/expo-image-mock.js',
+    // The real provider measures the window on layout, and under the Jest web
+    // renderer that measurement never lands, so `SafeAreaProvider` (and its
+    // Modal subtrees) never mounts children. The mock resolves flat zero
+    // insets synchronously; see the mock for the detail.
+    '^(react-native-safe-area-context)$': '<rootDir>/jest/safe-area-mock.js',
+    '^(react-native-safe-area-context)/(.*)$': '<rootDir>/jest/safe-area-mock.js',
   },
   // The Expo preset whitelists RN/Expo packages for Babel. Lucide ships ESM
   // only, so it must be transformed too or Jest trips over its `import`.

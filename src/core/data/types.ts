@@ -212,6 +212,37 @@ export interface RoomHost {
   /** The `ID: …` tag from the reference header. Show format, not identity math. */
   idLabel: string;
   avatarUrl?: string;
+  level: number;
+}
+
+/** A detail-sheet member wears a service badge or none. */
+export type RoomMemberBadge = 'mic' | 'headset';
+
+/** The sheet's medal row. The medal art is our own; tone only selects its tint. */
+export interface RoomAchievement {
+  id: string;
+  tone: 'violet' | 'blue';
+  tierLabel: string;
+  valueLabel: string;
+  caption: string;
+}
+
+export interface RoomDetailsMember {
+  id: string;
+  avatarUrl?: string;
+  avatarFrame?: AvatarFrameKey;
+  badge?: RoomMemberBadge;
+}
+
+export interface LiveRoomDetails {
+  /** The host's level crest number. */
+  level: number;
+  /** Fill fraction of the level bar; display-only progress. */
+  levelProgress: number;
+  achievements: RoomAchievement[];
+  members: RoomDetailsMember[];
+  /** The info card's standing copy — the room's directory description. */
+  info: string;
 }
 
 /**
@@ -233,6 +264,8 @@ export interface LiveRoom {
   audienceCount: number;
   /** The few faces the strip itself shows. */
   audience: { id: string; avatarUrl?: string; avatarFrame?: AvatarFrameKey }[];
+  /** The Room Details sheet's content, opened from the room's calendar control. */
+  details: LiveRoomDetails;
   /** The tiny win-ticker portraits between the host pill and the exit button. */
   floatAvatars: string[];
   /** E.g. "Hourly Top 50" — a display label, not a computed rank. */

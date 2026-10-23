@@ -10,7 +10,7 @@ export interface RoomHeaderBarProps {
   host: { id: string; displayName: string; idLabel: string; avatarUrl?: string };
   /** The tiny win-ticker portraits grouped right of centre — decorative. */
   floatAvatars: string[];
-  /** Room details entry; the details sheet is a later task, so this reports. */
+  /** Opens the Room Details sheet; the deeper rows inside it report the gate. */
   onDetails: () => void;
   /** Opens the keep/exit overlay. */
   onExit: () => void;
