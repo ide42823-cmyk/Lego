@@ -178,10 +178,80 @@ export interface RoomSummary {
   tags: string[];
 }
 
+/** A voice seat is an open slot, a locked slot, or an occupied slot. */
+export type RoomSeatStatus = 'open' | 'locked' | 'occupied';
+
+export interface RoomSeat {
+  /** 1-based position; the reference numbers seats 1–10 in two rows of five. */
+  index: number;
+  status: RoomSeatStatus;
+  /** Portrait of the seated member — `occupied` only. */
+  avatarUrl?: string;
+  avatarFrame?: AvatarFrameKey;
+  /** Gift coins contributed from this seat. Display-only; the ledger is server-owned. */
+  contribution: number;
+}
+
+/** A notice inside the room's chat overlay. */
+export type RoomFeedKind = 'welcome' | 'introduction' | 'event';
+
+export interface RoomFeedNotice {
+  id: string;
+  kind: RoomFeedKind;
+  /** Event notices carry their headline; welcome and introduction do not. */
+  title?: string;
+  text: string;
+  /** The pinned event card's remaining time, already formatted server-side. */
+  countdownLabel?: string;
+  artUrl?: string;
+}
+
+export interface RoomHost {
+  id: string;
+  displayName: string;
+  /** The `ID: …` tag from the reference header. Show format, not identity math. */
+  idLabel: string;
+  avatarUrl?: string;
+}
+
+/**
+ * The live room page. The reference draws one full-bleed room canvas: host
+ * header, event banners, ten numbered seats, an audience strip, a chat overlay
+ * with welcome/system notices, a floating event card, and a composer.
+ *
+ * Voice delivery, seating, gifting and draws are server-phase: this type only
+ * carries what the shell paints. Every money/sound action is toast-gated.
+ */
+export interface LiveRoom {
+  id: string;
+  name: string;
+  coverUrl?: string;
+  host: RoomHost;
+  /** Seat list, always length ten so the grid never needs emptiness handling. */
+  seats: RoomSeat[];
+  /** Well-above-body count for the audience strip. */
+  audienceCount: number;
+  /** The few faces the strip itself shows. */
+  audience: { id: string; avatarUrl?: string; avatarFrame?: AvatarFrameKey }[];
+  /** The tiny win-ticker portraits between the host pill and the exit button. */
+  floatAvatars: string[];
+  /** E.g. "Hourly Top 50" — a display label, not a computed rank. */
+  rankLabel: string;
+  /** The marquee banner: who just won, board fill, next draw clock. */
+  ticker: { headline: string; progressLabel: string; countdownLabel: string };
+  /** Whether the gold free-draw banner shows (event phase is backend-gated). */
+  freeDraw: boolean;
+  welcomeText: string;
+  introduction: string;
+  /** Event notices render under the introduction with a GO affordance. */
+  eventNotices: RoomFeedNotice[];
+  /** The floating promo card above the composer, art + title + clock. */
+  eventCard: { title: string; countdownLabel: string; artUrl: string };
+}
+
 export interface ConversationSummary {
   id: string;
-  peerId: string;
-  peerName: string;
+  peerId: string;  peerName: string;
   avatarUrl?: string;
   /** The peer's avatar frame, mirroring their directory entry. */
   avatarFrame?: AvatarFrameKey;

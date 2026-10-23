@@ -243,6 +243,43 @@ describe('listRooms', () => {
   });
 });
 
+describe('getLiveRoom', () => {
+  it('builds a ten-seat canvas for a directory room', async () => {
+    const page = await fixtureDataSource.listRooms('recommend', { limit: 3 });
+    const first = roomsOf(page.items)[0];
+    const liveRoom = await fixtureDataSource.getLiveRoom(first.id);
+
+    expect(liveRoom).not.toBeNull();
+    expect(liveRoom?.seats).toHaveLength(10);
+    expect(liveRoom?.seats.map((seat) => seat.index)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(liveRoom?.name.length).toBeGreaterThan(0);
+    expect(liveRoom?.host.idLabel).toMatch(/^ID: /);
+    expect(liveRoom?.welcomeText.length).toBeGreaterThan(0);
+    expect(liveRoom?.eventNotices.length).toBeGreaterThan(0);
+    expect(liveRoom?.eventCard.countdownLabel.length).toBeGreaterThan(0);
+  });
+
+  it('mutating a returned canvas leaves the pinned fixture untouched', async () => {
+    const first = roomsOf(
+      (await fixtureDataSource.listRooms('recommend', { limit: 3 })).items,
+    )[0];
+    const firstRead = await fixtureDataSource.getLiveRoom(first.id);
+    const secondRead = await fixtureDataSource.getLiveRoom(first.id);
+
+    if (!firstRead || !secondRead) {
+      throw new Error('getLiveRoom should resolve for a directory room');
+    }
+
+    secondRead.seats[0].contribution = 9_999;
+
+    expect(firstRead.seats[0].contribution).not.toBe(9_999);
+  });
+
+  it('returns null for an unknown room instead of inventing one', async () => {
+    expect(await fixtureDataSource.getLiveRoom('room-does-not-exist')).toBeNull();
+  });
+});
+
 describe('listConversations', () => {
   it('returns only unread conversations for the unread filter', async () => {
     const page = await fixtureDataSource.listConversations('unread', { limit: 50 });

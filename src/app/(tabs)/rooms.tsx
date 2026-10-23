@@ -140,7 +140,9 @@ export default function RoomsScreen() {
             <RoomCard
               room={item}
               variant={isGrid ? 'grid' : 'list'}
-              onPress={() => notYet(`The room screen for “${item.name}”`)}
+              onPress={(roomId) =>
+                router.push({ pathname: '/room/[id]', params: { id: roomId } })
+              }
             />
           )}
           ListFooterComponent={

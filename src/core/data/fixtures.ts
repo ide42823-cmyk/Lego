@@ -32,6 +32,7 @@ import type {
   LeaderboardCategory,
   LeaderboardEntry,
   LeaderboardPeriod,
+  LiveRoom,
   MeDashboard,
   MomentPost,
   ProfileInfoRow,
@@ -40,6 +41,8 @@ import type {
   RelationshipRecord,
   RoomBadge,
   RoomCategory,
+  RoomFeedNotice,
+  RoomSeat,
   RoomSummary,
   UserBadge,
   UserProfile,
@@ -388,11 +391,133 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
   });
 }
 
+/**
+ * Live rooms are the canvas behind the room cards. Each one is synthesised
+ * from its directory room (name, cover, host, audience) plus the same member
+ * pool every other fixture uses, so a seated face always belongs to someone
+ * who exists elsewhere in the app. A seeded hash per room id keeps screens,
+ * captures and tests pinned to the same canvas for any given room.
+ */
+function hashText(value: string): number {
+  let hash = 7;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) % 100_000;
+  }
+  return hash;
+}
+
+const LIVE_ROOM_WELCOME =
+  'Welcome to the room! Keep the chat kind and respectful, and keep minors ' +
+  'out of the spotlight: no broadcasting here and no content that puts them ' +
+  'at risk. Threats, harassment and personal attacks are forbidden — report ' +
+  'violations right away and the moderators will step in.';
+
+const LIVE_ROOM_INTRODUCTIONS = [
+  'Make yourself at home — everyone is welcome here 😄',
+  'Take any open seat and say hello 👋',
+  'Music on requests — drop your favourite track 🎶',
+];
+
+const LIVE_ROOM_TICKER_HEADLINES = [
+  'Nadia won the Lucky Draw jackpot',
+  'Silver Rose left the board one time',
+  "Tonight's boosted drops are live",
+];
+
+const LIVE_ROOM_EVENT_TITLES = ['Lucky Draw Finals', 'Midnight Splash', 'Rise & Shine'];
+const LIVE_ROOM_CLOCKS = ['03:54:02', '18:18:06', '01:24:19', '06:22:41'];
+
+/** The two helper notices under the introduction; winners come from the pool. */
+function buildLiveRoomNotices(random: () => number, users: UserSummary[]): RoomFeedNotice[] {
+  const winner = users[2 + Math.floor(random() * (users.length - 2))] as UserSummary;
+  const prize = { title: 'Royal Chess', coins: 92_000 };
+  return [
+    {
+      id: 'event-note-1',
+      kind: 'event',
+      title: 'Lucky Draw',
+      text: 'The Basic Arena jackpot is live — drop odds are boosted for tonight. Jump in!',
+    },
+    {
+      id: 'event-note-2',
+      kind: 'event',
+      title: 'Lucky Draw',
+      text: `Congratulations to ${winner.displayName} on winning ${prize.title} (worth ` +
+        `${prize.coins.toLocaleString('en-US')} coins). Let me try too!`,
+    },
+  ];
+}
+
+function buildLiveRooms(rooms: RoomSummary[], users: UserSummary[]): LiveRoom[] {
+  return rooms.map((room, index): LiveRoom => {
+    const random = createRandom(61_000 + hashText(room.id));
+    const host = users[(index * 5 + 1) % users.length] as UserSummary;
+    const audience = [users[(index * 3) % users.length], users[(index * 3 + 7) % users.length], users[(index * 3 + 11) % users.length]] as UserSummary[];
+    const seated = users[(index * 11 + 4) % users.length] as UserSummary;
+    const lockedSeat = 2 + (index % 3);
+    const seatedSeat = 4 + ((index * 2) % 5);
+    return {
+      id: room.id,
+      name: room.name,
+      coverUrl: room.coverUrl,
+      host: {
+        id: host.id,
+        displayName: host.displayName,
+        idLabel: `ID: ${8_500_000 + index * 173}`,
+        avatarUrl: host.avatarUrl,
+      },
+      seats: Array.from({ length: 10 }, (_, seatIndex): RoomSeat => {
+        const position = seatIndex + 1;
+        if (position === lockedSeat) {
+          return { index: position, status: 'locked', contribution: 0 };
+        }
+        if (position === seatedSeat) {
+          return {
+            index: position,
+            status: 'occupied',
+            avatarUrl: seated.avatarUrl,
+            avatarFrame: seated.avatarFrame,
+            contribution: 0,
+          };
+        }
+        return { index: position, status: 'open', contribution: 0 };
+      }),
+      audienceCount: room.participantCount,
+      audience: audience.map((member) => ({
+        id: member.id,
+        avatarUrl: member.avatarUrl,
+        avatarFrame: member.avatarFrame,
+      })),
+      floatAvatars: [
+        users[(index + 6) % users.length].avatarUrl ?? '',
+        users[(index + 14) % users.length].avatarUrl ?? '',
+        users[(index + 2) % users.length].avatarUrl ?? '',
+      ],
+      rankLabel: 'Hourly Top 50',
+      ticker: {
+        headline: pick(random, LIVE_ROOM_TICKER_HEADLINES),
+        progressLabel: `${Math.floor(random() * 100)}%`,
+        countdownLabel: LIVE_ROOM_CLOCKS[index % LIVE_ROOM_CLOCKS.length],
+      },
+      freeDraw: index % 4 !== 3,
+      welcomeText: LIVE_ROOM_WELCOME,
+      introduction: pick(random, LIVE_ROOM_INTRODUCTIONS),
+      eventNotices: buildLiveRoomNotices(random, users),
+      eventCard: {
+        title: pick(random, LIVE_ROOM_EVENT_TITLES),
+        countdownLabel: LIVE_ROOM_CLOCKS[(index + 2) % LIVE_ROOM_CLOCKS.length],
+        artUrl: room.coverUrl ?? '',
+      },
+    };
+  });
+}
+
 /** The viewer's own id. Defined early: the thread builder marks outgoing bubbles. */
 export const FIXTURE_ME_ID = 'user-me';
 
 export const FIXTURE_USERS = buildUsers(24);
 export const FIXTURE_ROOMS = buildRooms(18);
+export const FIXTURE_LIVE_ROOMS = buildLiveRooms(FIXTURE_ROOMS, FIXTURE_USERS);
 export const FIXTURE_CONVERSATIONS = buildConversations(FIXTURE_USERS, 14);
 export const FIXTURE_MOMENTS = buildMoments(FIXTURE_USERS, 10);
 

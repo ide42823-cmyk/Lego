@@ -45,6 +45,12 @@ import Orbit from 'lucide-react-native/icons/orbit';
 import PartyPopper from 'lucide-react-native/icons/party-popper';
 import Phone from 'lucide-react-native/icons/phone';
 import Image from 'lucide-react-native/icons/image';
+import LayoutGrid from 'lucide-react-native/icons/layout-grid';
+import Lock from 'lucide-react-native/icons/lock';
+import Megaphone from 'lucide-react-native/icons/megaphone';
+import Pencil from 'lucide-react-native/icons/pencil';
+import Plus from 'lucide-react-native/icons/plus';
+import Power from 'lucide-react-native/icons/power';
 import Radio from 'lucide-react-native/icons/radio';
 import RefreshCw from 'lucide-react-native/icons/refresh-cw';
 import Ruler from 'lucide-react-native/icons/ruler';
@@ -166,6 +172,13 @@ export type IconName =
   | 'weight'
   | 'occupation'
   | 'address'
+  // Room shell
+  | 'power'
+  | 'plus'
+  | 'lock'
+  | 'pencil'
+  | 'apps'
+  | 'megaphone'
   | 'invite';
 
 const ICONS: Record<IconName, LucideIcon> = {
@@ -244,6 +257,12 @@ const ICONS: Record<IconName, LucideIcon> = {
   weight: Weight,
   occupation: Briefcase,
   address: MapPin,
+  power: Power,
+  plus: Plus,
+  lock: Lock,
+  pencil: Pencil,
+  apps: LayoutGrid,
+  megaphone: Megaphone,
   invite: UserPlus,
 };
 

@@ -17,6 +17,7 @@ import {
   FIXTURE_BANNERS,
   FIXTURE_CONVERSATIONS,
   FIXTURE_LEADERBOARDS,
+  FIXTURE_LIVE_ROOMS,
   FIXTURE_ME,
   FIXTURE_MOMENTS,
   FIXTURE_PROFILES,
@@ -33,6 +34,7 @@ import type {
   Leaderboard,
   LeaderboardCategory,
   LeaderboardPeriod,
+  LiveRoom,
   MeDashboard,
   MomentPost,
   MomentsMode,
@@ -85,6 +87,8 @@ export interface DataSource {
     mode: RoomMode,
     options?: PageRequest & { relationship?: RoomRelationshipFilter },
   ): Promise<Page<RoomFeedItem>>;
+  /** One live room's canvas, or `null` for an unknown id — the screen handles it. */
+  getLiveRoom(roomId: string): Promise<LiveRoom | null>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -465,6 +469,18 @@ export const fixtureDataSource: DataSource = {
   listRooms(mode, options) {
     const { relationship, ...request } = options ?? {};
     return simulate(() => paginate(withRoomBanner(selectRooms(mode, relationship)), request));
+  },
+
+  getLiveRoom(roomId) {
+    return simulate(() => {
+      const room = FIXTURE_LIVE_ROOMS.find((candidate) => candidate.id === roomId);
+      if (!room) {
+        return null;
+      }
+      // Structural clone: a screen may mutate its copy without touching the
+      // pinned fixture canvas (same policy as the thread payloads).
+      return structuredClone(room);
+    });
   },
 
   listConversations(filter, request) {
