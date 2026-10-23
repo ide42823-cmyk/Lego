@@ -18,10 +18,10 @@
 
 ## Current state
 - Current phase: **Page-by-page front-end passes** (the historical Phase 0 audit is complete; see `PHASE_0_PRELIMINARY_AUDIT_AND_SETUP.md` and `docs/decisions/`).
-- Git branch/commit at last verification: `main`, app work through `0285587`, pushed to `origin/main`; T007 (Room Details sheet) is verified and waiting on the commit gate.
-- Approved work in progress: **T007 Room Details bottom sheet** - implemented, verified (typecheck/lint PASS, jest 26 suites / 233 tests, CDP captures `Temp\opencode\thread-p1\04-room-details-light.png` + `05-room-details-dark.png`), awaits commit approval.
+- Git branch/commit at last verification: `main`, through `84eb5fe` (T007 Room Details ce5fd27 + gitignore 84eb5fe), pushed to `origin/main`.
+- Approved work in progress: **T008 Gift panel (references 004-012)** - implemented, verified (typecheck/lint PASS, jest 26 suites / 237 tests, captures `Temp\opencode\thread-p1\06-gift-panel-gift.png` + `07-gift-panel-lucky.png` + `08-gift-panel-tokens.png`), awaits commit approval.
 - Pending device verifications (no approval needed, next cable session): room shell `04-room-device.png` + a details-sheet deep-link pass.
-- Next proposed task (needs approval): commit T007; then pick the next surface - gift picker family (references 004-012, backend phase) or a strictly-backend page.
+- Next proposed task (needs approval): commit T008; then pick - room tools drawer (reference 013, the `apps` button) or a strictly-backend page.
 - KNOWN_ISSUES #9 (uncommitted work) resolved; #11 (MIUI foreground/deep-link workaround) recorded 2026-10-23.
 - User approval required before new source changes: **Yes** (the user's standing instruction is one page/pass at a time).
 

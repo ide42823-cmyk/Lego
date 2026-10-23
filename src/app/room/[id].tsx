@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RoomAudienceStrip } from '@/components/room/room-audience-strip';
 import { RoomBannerRow } from '@/components/room/room-banner-row';
 import { RoomChatOverlay } from '@/components/room/room-chat-overlay';
+import { GiftPanel } from '@/components/room/gift-panel';
 import { RoomComposer } from '@/components/room/room-composer';
 import { RoomDetailsSheet } from '@/components/room/room-details-sheet';
 import { RoomEventCard } from '@/components/room/room-event-card';
@@ -43,11 +44,14 @@ export default function RoomScreen() {
   const insets = useSafeAreaInsets();
   const [exitOpen, setExitOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
 
   const state = useAsync(
     () => fixtureDataSource.getLiveRoom(String(id ?? '')),
     `live-room:${String(id ?? '')}`,
   );
+
+  const catalogState = useAsync(() => fixtureDataSource.getGiftCatalog(), 'gift-catalog');
 
   const notYet = useCallback(
     (what: string) => toast.show(`${what} arrives with the backend phase.`),
@@ -153,12 +157,24 @@ export default function RoomScreen() {
             onSend={() => notYet('Sending to the room')}
             onChatList={() => notYet('The room chat list')}
             onApps={() => notYet('Room utilities')}
-            onGift={() => notYet('Gifts')}
+            onGift={() => setGiftOpen(true)}
             unreadCount={99}
           />
         </View>
       </KeyboardAvoidingView>
       <RoomExitOverlay visible={exitOpen} onKeep={() => setExitOpen(false)} onExit={exitRoom} />
+      {catalogState.status === 'ready' ? (
+        <GiftPanel
+          visible={giftOpen}
+          onClose={() => setGiftOpen(false)}
+          catalog={catalogState.data}
+          audienceCount={room.audienceCount}
+          onOffer={() => notYet('The offer board')}
+          onAristocracy={() => notYet('Aristocracy')}
+          onUpgrade={() => notYet('The room upgrade')}
+          onBanner={() => notYet('That promotion')}
+          />
+      ) : null}
       <RoomDetailsSheet
         visible={detailsOpen}
         onClose={() => setDetailsOpen(false)}

@@ -18,6 +18,7 @@ import {
   FIXTURE_CONVERSATIONS,
   FIXTURE_LEADERBOARDS,
   FIXTURE_LIVE_ROOMS,
+  FIXTURE_GIFT_CATALOG,
   FIXTURE_ME,
   FIXTURE_MOMENTS,
   FIXTURE_PROFILES,
@@ -31,6 +32,7 @@ import type {
   ConversationSummary,
   ConversationThread,
   DirectoryFeedItem,
+  GiftCatalogModel,
   Leaderboard,
   LeaderboardCategory,
   LeaderboardPeriod,
@@ -89,6 +91,8 @@ export interface DataSource {
   ): Promise<Page<RoomFeedItem>>;
   /** One live room's canvas, or `null` for an unknown id — the screen handles it. */
   getLiveRoom(roomId: string): Promise<LiveRoom | null>;
+  /** The gift panel's catalog; static display payloads until the backend owns it. */
+  getGiftCatalog(): Promise<GiftCatalogModel>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -480,6 +484,14 @@ export const fixtureDataSource: DataSource = {
       // Structural clone: a screen may mutate its copy without touching the
       // pinned fixture canvas (same policy as the thread payloads).
       return structuredClone(room);
+    });
+  },
+
+  getGiftCatalog() {
+    return simulate(() => {
+      // Structural clone: the panel mutates nothing today, but the contract
+      // stays the room-shaped "own your copy" seam.
+      return structuredClone(FIXTURE_GIFT_CATALOG);
     });
   },
 

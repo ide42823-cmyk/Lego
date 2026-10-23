@@ -245,6 +245,107 @@ export interface LiveRoomDetails {
   info: string;
 }
 
+/** The gift panel's category tabs, read visually right-to-left in the reference. */
+export type GiftCategoryKey =
+  | 'backpack'
+  | 'gift'
+  | 'lucky'
+  | 'event'
+  | 'privilege'
+  | 'tokens'
+  | 'interactive'
+  | 'countries'
+  | 'customize'
+  | 'members';
+
+/**
+ * Tile art meanings — our own glyphs stand in for the reference's proprietary
+ * illustrations. The panel maps each meaning to a Lucide glyph.
+ */
+export type GiftArt =
+  | 'mic'
+  | 'crown'
+  | 'star'
+  | 'bell'
+  | 'heart'
+  | 'flower'
+  | 'gem'
+  | 'party'
+  | 'globe'
+  | 'sparkle'
+  | 'gift'
+  | 'trophy'
+  | 'ticket'
+  | 'diamonds'
+  | 'camera'
+  | 'disk'
+  | 'piano';
+
+export type GiftBadgeKind =
+  | 'new'
+  | 'vip'
+  | 'couple'
+  | 'friend'
+  | 'jackpot'
+  | 'combo'
+  | 'level';
+
+export interface GiftBadge {
+  kind: GiftBadgeKind;
+  /** Tier labels ride in the badge text itself on the panel (VIP6, Lv.14). */
+  label?: string;
+}
+
+export interface GiftEntry {
+  id: string;
+  name: string;
+  /** Coin price. Displayed only — the wallet is server-side. */
+  price: number;
+  art: GiftArt;
+  badge?: GiftBadge;
+  /** The little clock chip marks a limited-time item. */
+  timeLimited?: boolean;
+  /** The camera chip marks a gift that plays over the occupant's camera. */
+  onCamera?: boolean;
+}
+
+export interface GiftCategoryData {
+  key: GiftCategoryKey;
+  label: string;
+  /** Notification dot; clears only after the content is viewed server-side. */
+  unviewed?: boolean;
+  entries: GiftEntry[];
+}
+
+export interface GiftUpgradeProgress {
+  /** 0..1 display fraction of the room upgrade bar. */
+  fraction: number;
+  /** The "… Coins needed to upgrade" line; display-only. */
+  coinsNeeded: number;
+}
+
+export interface LuckyMeters {
+  /** The jackpot pill's total; dynamic server data shown as text. */
+  jackpotTotal: number;
+  /** Multiplier chips around the lucky sack, in panel order. */
+  multipliers: string[];
+}
+
+export interface GiftCountdown {
+  days: number;
+  /** The `HH MM SS` segment chips. */
+  clockSegments: [string, string, string];
+}
+
+export interface GiftCatalogModel {
+  categories: GiftCategoryData[];
+  upgrade: GiftUpgradeProgress;
+  lucky: LuckyMeters;
+  countdown: GiftCountdown;
+  /** The event bumper's title. */
+  eventTitle: string;
+}
+
 /**
  * The live room page. The reference draws one full-bleed room canvas: host
  * header, event banners, ten numbered seats, an audience strip, a chat overlay
