@@ -4,6 +4,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import type { ChatMessage } from '@/core/data/types';
 import { useTheme } from '@/hooks/use-theme';
 
+import { Icon } from '../ui/icon';
 import { ThemedText } from '../themed-text';
 
 export interface ChatBubbleProps {
@@ -11,62 +12,64 @@ export interface ChatBubbleProps {
   /** True for the viewer's own bubble. A strict two-party thread has no other authors. */
   mine: boolean;
   peerName: string;
-  /** Clock caption printed beneath the cluster's last bubble, ISO-formatted by the caller. */
-  time?: string;
+  /** The peer's follow/relationship notice draws the ornamented square shape. */
+  ornamented?: boolean;
 }
 
 /**
- * One text bubble. Text only on purpose: media, voice and gift messages are
- * server-phase, and a client fixture for them would imply features the
- * backend has to meter.
- *
- * Outgoing bubbles answer the incoming ones on the brand fill, the way the
- * app's accent languages (Hi, Explore) already answer violet-on-light. Bubbles
- * are not pressable: there is no delivery, copy or reaction state to imply.
+ * One bubble's box. Both sides carry the brand fill, the way the reference
+ * reads: incoming rows are the ornamented squares the reference draws for its
+ * relationship notices and replies, the viewer's are the softer rounded
+ * shapes. Bubbles are not pressable — there is no reaction or copy state to
+ * imply — and the author is spoken as words in the label, never a dot.
  */
-export function ChatBubble({ message, mine, peerName, time }: ChatBubbleProps) {
+export function ChatBubble({ message, mine, peerName, ornamented = false }: ChatBubbleProps) {
   const theme = useTheme();
 
   return (
-    <View style={[styles.row, mine ? styles.rowMine : styles.rowTheirs]}>
-      <View
-        accessible
-        accessibilityLabel={`${mine ? 'You' : peerName}: ${message.text}${time ? `. ${time}` : ''}`}
-        style={[
-          styles.bubble,
-          {
-            maxWidth: '82%',
-            backgroundColor: mine ? theme.brand : theme.backgroundElement,
-            borderTopEndRadius: mine ? Radius.small : Radius.large,
-            borderTopStartRadius: mine ? Radius.large : Radius.small,
-          },
-        ]}
-      >
-        <ThemedText type="default" style={{ color: mine ? theme.onBrand : theme.text }} selectable>
-          {message.text}
-        </ThemedText>
-      </View>
-      {time ? (
-        <ThemedText
-          type="small"
-          themeColor="textSecondary"
-          style={[styles.time, mine ? styles.rowMine : styles.rowTheirs]}
-        >
-          {time}
-        </ThemedText>
+    <View
+      accessible
+      accessibilityLabel={`${mine ? 'You' : peerName}: ${message.text}`}
+      style={[
+        styles.bubble,
+        ornamented ? styles.ornamented : null,
+        { backgroundColor: theme.brand },
+      ]}
+    >
+      {ornamented ? (
+        <>
+          {(['topStart', 'topEnd', 'bottomStart', 'bottomEnd'] as const).map((corner) => (
+            <View key={corner} style={[styles.ornament, styles[corner]]}>
+              <Icon
+                name="sparkle"
+                size={15}
+                strokeWidth={2}
+                fill="rgba(255, 255, 255, 0.45)"
+                color="rgba(255, 255, 255, 0.45)"
+              />
+            </View>
+          ))}
+        </>
       ) : null}
+      <ThemedText type="default" style={{ color: theme.onBrand }} selectable>
+        {message.text}
+      </ThemedText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { alignItems: 'flex-end', gap: Spacing.half },
-  rowMine: { alignItems: 'flex-end' },
-  rowTheirs: { alignItems: 'flex-start' },
   bubble: {
+    // 82% keeps the author's avatar and the action glyph on screen beside it.
+    maxWidth: '78%',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     borderRadius: Radius.large,
   },
-  time: { marginHorizontal: Spacing.two },
+  ornamented: { borderRadius: Radius.small },
+  ornament: { position: 'absolute', opacity: 0.55 },
+  topStart: { top: -6, start: -5 },
+  topEnd: { top: -6, end: -5 },
+  bottomStart: { bottom: -6, start: -5 },
+  bottomEnd: { bottom: -6, end: -5 },
 });

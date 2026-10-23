@@ -174,7 +174,7 @@ export default function MessagesScreen() {
           accessibilityRole="summary"
           accessibilityLabel="Turn on notifications to hear about replies and invites. Go enable."
         >
-          <Icon name="bell" size={22} color={theme.brand} />
+          <Icon name="bell" size={22} color={theme.brand} fill={theme.brand} />
           <ThemedText
             type="small"
             themeColor="textSecondary"

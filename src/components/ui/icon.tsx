@@ -44,6 +44,7 @@ import Mic from 'lucide-react-native/icons/mic';
 import Orbit from 'lucide-react-native/icons/orbit';
 import PartyPopper from 'lucide-react-native/icons/party-popper';
 import Phone from 'lucide-react-native/icons/phone';
+import Image from 'lucide-react-native/icons/image';
 import Radio from 'lucide-react-native/icons/radio';
 import RefreshCw from 'lucide-react-native/icons/refresh-cw';
 import Ruler from 'lucide-react-native/icons/ruler';
@@ -157,6 +158,7 @@ export type IconName =
   | 'warning'
   // Profile contact and attribute rows
   | 'phone'
+  | 'image'
   | 'copy'
   | 'send'
   | 'smile'
@@ -234,6 +236,7 @@ const ICONS: Record<IconName, LucideIcon> = {
   warning: TriangleAlert,
 
   phone: Phone,
+  image: Image,
   copy: Copy,
   send: SendHorizontal,
   smile: FaceGrinning,
@@ -259,12 +262,17 @@ export interface IconProps {
 /**
  * A single icon. Decorative by default: the surrounding control owns the
  * accessible name, so an icon never adds a second, redundant announcement.
+ *
+ * The default stroke is a touch over Lucide's own 2, because the reference
+ * glyph art reads heavier; identity glyphs (hearts, crowns, gift, star) are
+ * additionally drawn with a fill through the `solid` style flag callers send
+ * on the `solid` position in their own palette.
  */
 export function Icon({
   name,
   size = 22,
   color = '#111111',
-  strokeWidth = 2,
+  strokeWidth = 2.25,
   fill = 'none',
   label,
 }: IconProps) {

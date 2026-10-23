@@ -17,22 +17,17 @@ describe('ChatBubble', () => {
   it('names the author as words, never an unread-style dot', async () => {
     await render(
       <>
-        <ChatBubble message={message()} mine={false} peerName="SOUF جود" />
-        <ChatBubble
-          message={message({ authorId: 'user-me' })}
-          mine
-          peerName="SOUF جود"
-          time="20:15"
-        />
+        <ChatBubble message={message()} mine={false} peerName="SOUF جود" ornamented />
+        <ChatBubble message={message({ authorId: 'user-me' })} mine peerName="SOUF جود" />
       </>,
     );
 
     expect(screen.getByLabelText('SOUF جود: See you in the room tonight?')).toBeTruthy();
-    expect(screen.getByLabelText('You: See you in the room tonight?. 20:15')).toBeTruthy();
+    expect(screen.getByLabelText('You: See you in the room tonight?')).toBeTruthy();
   });
 
   it('keeps the bubble static: nothing to press, nothing to imply', async () => {
-    await render(<ChatBubble message={message()} mine={false} peerName="SOUF جود" />);
+    await render(<ChatBubble message={message()} mine={false} peerName="SOUF جود" ornamented />);
 
     expect(screen.queryByRole('button')).toBeNull();
   });

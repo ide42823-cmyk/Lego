@@ -473,15 +473,19 @@ export const fixtureDataSource: DataSource = {
 
   listMessages(conversationId) {
     return simulate(() => {
-      const conversation = FIXTURE_CONVERSATIONS.find((item) => item.id === conversationId);
-      const messages = FIXTURE_THREADS.get(conversationId);
-      if (!conversation || !messages) {
+      const thread = FIXTURE_THREADS.get(conversationId);
+      if (!thread) {
         throw new Error(`Unknown conversation: ${conversationId}`);
       }
-      // Copies: the screen may read timestamps while the map stays pristine.
+      // Deep copy of the payload: the screen may read the pieces while the map
+      // stays pristine.
       return {
-        conversation: { ...conversation },
-        messages: messages.map((item) => ({ ...item })),
+        conversation: { ...thread.conversation },
+        peer: { ...thread.peer },
+        peerMedia: [...thread.peerMedia],
+        viewer: { ...thread.viewer },
+        intimacyLevel: thread.intimacyLevel,
+        messages: thread.messages.map((item) => ({ ...item })),
       };
     });
   },

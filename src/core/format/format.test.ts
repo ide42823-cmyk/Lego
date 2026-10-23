@@ -1,7 +1,7 @@
 import {
   countryFlag,
+  formatClusterStamp,
   formatCompactCount,
-  formatDayDivider,
   formatDistanceKm,
   formatElapsedLong,
   formatInboxTime,
@@ -121,26 +121,19 @@ describe('formatInboxTime', () => {
   });
 });
 
-describe('formatDayDivider', () => {
-  const noon = new Date(2026, 9, 18, 12, 0, 0, 0).getTime();
-  const atLocal = (day: number, hour: number) => new Date(2026, 9, day, hour, 0).toISOString();
-
-  it('names today and yesterday in words', () => {
-    expect(formatDayDivider(atLocal(18, 9), noon)).toBe('Today');
-    expect(formatDayDivider(atLocal(17, 23), noon)).toBe('Yesterday');
+describe('formatClusterStamp', () => {
+  it('prints the absolute date-and-time the thread strips use', () => {
+    const stamp = new Date(2026, 9, 17, 17, 20).toISOString();
+    expect(formatClusterStamp(stamp)).toBe('2026/10/17 17:20');
   });
 
-  it('agrees with the inbox clock about which day a bubble belongs to', () => {
-    const boundary = new Date(2026, 9, 17, 23, 59, 59, 999).toISOString();
-    expect(formatDayDivider(boundary, noon)).toBe('Yesterday');
-  });
-
-  it('prints the numeric date for anything older', () => {
-    expect(formatDayDivider(atLocal(15, 9), noon)).toBe('15-10-26');
+  it('pads single digits so stamps align in a column', () => {
+    const stamp = new Date(2026, 0, 4, 8, 5).toISOString();
+    expect(formatClusterStamp(stamp)).toBe('2026/01/04 08:05');
   });
 
   it('degrades to an empty string for invalid input', () => {
-    expect(formatDayDivider('not-a-date', noon)).toBe('');
+    expect(formatClusterStamp('not-a-date')).toBe('');
   });
 });
 

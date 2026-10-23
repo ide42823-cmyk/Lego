@@ -197,25 +197,55 @@ export interface ConversationSummary {
 }
 
 /**
- * One bubble in a conversation. Text only on purpose: media, voice and gift
- * messages are server-phase — presenting them as a client fixture would imply
- * features the backend has to meter. The viewer's own id marks outgoing
- * bubbles; every other author is the conversation's peer.
+ * One bubble in a conversation. Media, voice and gift messages are
+ * server-phase — presenting them as a client fixture would imply features the
+ * backend has to meter — so threads carry three text kinds only:
+ *
+ * - `text` — an ordinary two-party bubble.
+ * - `notice` — the peer's follow/relationship notice, drawn with the ornamented
+ *   corners the reference gives its system-adjacent lines.
+ * - `milestone` — a server-issued relationship level strip. Its author id is
+ *   empty: the viewer and the peer did not write it.
  */
 export interface ChatMessage {
   id: string;
   conversationId: string;
+  /** The peer, the viewer (`FIXTURE_ME_ID`), or empty for a `milestone`. */
   authorId: string;
-  kind: 'text';
+  kind: 'text' | 'notice' | 'milestone';
   text: string;
   /** ISO-8601, ascending across the thread. Formatting happens in the UI layer. */
   sentAt: string;
 }
 
-/** A conversation's history, oldest first, with the summary it belongs to. */
+/**
+ * A conversation's full page: the summary it belongs to, its history oldest
+ * first, plus everything the top card and the composer need. `intimacyLevel`
+ * and the media strips are server-owned presentation — displayed values the
+ * client never adjusts — and `viewer` carries the identity the outgoing rows
+ * need for their avatar (the summary's `peerId` marks the other side).
+ */
 export interface ConversationThread {
   conversation: ConversationSummary;
+  /** The peer's directory entry, for the card's pills and profile deep link. */
+  peer: UserSummaryIdentity;
+  /** Four stills the peer presents on their card. Reading only, never a picker. */
+  peerMedia: string[];
+  viewer: { avatarUrl?: string; avatarFrame?: AvatarFrameKey };
+  /** Relationship level between the two sides. Server-owned; shown, not computed. */
+  intimacyLevel: number;
   messages: ChatMessage[];
+}
+
+/** The fields of `UserSummary` the thread's card relies on. */
+export interface UserSummaryIdentity {
+  id: string;
+  displayName: string;
+  status: string;
+  age?: number;
+  gender?: Gender;
+  vipTier?: number;
+  locale?: string;
 }
 
 export interface MomentPost {

@@ -1,36 +1,32 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useRef } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-  type ScrollViewInstance,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ScrollViewInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ChatComposer } from '@/components/chat/chat-composer';
 import { ChatThread } from '@/components/chat/chat-thread';
 import { ThreadHeader } from '@/components/chat/thread-header';
+import { ThreadProfileCard } from '@/components/chat/thread-profile-card';
 import { AppScreen } from '@/components/ui/app-screen';
 import { IconButton } from '@/components/ui/icon-button';
 import { ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
 import { Spacing } from '@/constants/theme';
+import { formatElapsedLong } from '@/core/format';
 import { fixtureDataSource } from '@/core/data/repository';
 import { useAsync } from '@/hooks/use-async';
 
 /**
  * A conversation — the inbox row's destination (route `/thread/[id]`).
  *
- * The thread is history only. Text bubbles, calendar-day dividers and cluster
- * clocks come from the data seam; nothing here can claim delivery, a read
- * receipt or a sent message, because none of those states are client-owned.
- * The composer hands typed text to `onSend`, which states that sending is
- * backend work and keeps the draft so nothing the member wrote is lost.
+ * The page mirrors the reference: bar with the unread pill and the peer's
+ * avatar, the peer card with its pills and photo strip, stamped history
+ * bubbles, and a two-row composer. Nothing here can claim delivery, a read
+ * receipt or a sent message beyond what the seam already confirms: the check
+ * beside the viewer's bubbles is history, not a promise, and pressing send
+ * states the backend-phase wording while the draft stays in the field.
  *
- * A strict two-party thread also keeps the screen free of viewer identity:
+ * A strict two-party thread also keeps this page free of viewer identity:
  * "mine" is simply `authorId !== peerId`.
  */
 export default function ThreadScreen() {
@@ -61,6 +57,11 @@ export default function ThreadScreen() {
 
   const send = useCallback(() => notYet('Sending'), [notYet]);
 
+  const openProfile = useCallback(
+    (peerId: string) => router.push({ pathname: '/person/[id]', params: { id: peerId } }),
+    [router],
+  );
+
   /**
    * A thread opens on its latest history, the way an inbox row should; content
    * size settles asynchronously, so the anchor rides every size change but
@@ -70,20 +71,35 @@ export default function ThreadScreen() {
     list.current?.scrollToEnd({ animated: false });
   }, []);
 
+  const ready = state.status === 'ready' ? state.data : undefined;
+
   return (
     <AppScreen padded={false} style={styles.screen}>
       <KeyboardAvoidingView behavior={Platform.select({ ios: 'padding' })} style={styles.screen}>
-        {state.status !== 'ready' ? (
+        {ready ? (
+          <>
+            <ThreadHeader
+              conversation={ready.conversation}
+              onBack={goBack}
+              onOpenProfile={() => openProfile(ready.conversation.peerId)}
+            />
+            <ThreadProfileCard
+              peer={ready.peer}
+              status={ready.peer.status}
+              presence={
+                ready.conversation.isOnline
+                  ? 'Active now'
+                  : formatElapsedLong(ready.conversation.lastMessageAt)
+              }
+              intimacyLevel={ready.intimacyLevel}
+              peerMedia={ready.peerMedia}
+              onOpenProfile={() => openProfile(ready.conversation.peerId)}
+            />
+          </>
+        ) : (
           <View style={styles.loadingBar}>
             <IconButton name="back" label="Go back" onPress={goBack} />
           </View>
-        ) : (
-          <ThreadHeader
-            conversation={state.data.conversation}
-            onBack={goBack}
-            onCall={() => notYet('Voice calls')}
-            onMore={() => notYet('Chat options')}
-          />
         )}
 
         {state.status === 'loading' ? (
@@ -98,22 +114,29 @@ export default function ThreadScreen() {
               onRetry={state.reload}
             />
           </View>
-        ) : state.status === 'ready' ? (
+        ) : ready ? (
           <ScrollView
             ref={list}
             style={styles.scroll}
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
             onContentSizeChange={anchorToLatest}
-            accessibilityLabel={`Conversation with ${state.data.conversation.peerName}`}
+            accessibilityLabel={`Conversation with ${ready.conversation.peerName}`}
           >
-            <ChatThread conversation={state.data.conversation} messages={state.data.messages} />
+            <ChatThread thread={ready} onTranslate={() => notYet('Translation')} />
           </ScrollView>
         ) : null}
 
-        {state.status === 'ready' ? (
+        {ready ? (
           <View style={{ paddingBottom: insets.bottom }}>
-            <ChatComposer onSend={send} onPickEmoji={() => notYet('Emoji picks')} />
+            <ChatComposer
+              onSend={send}
+              onProfile={() => openProfile(ready.conversation.peerId)}
+              onPhoto={() => notYet('Photo sharing')}
+              onGift={() => notYet('Gifts')}
+              onCall={() => notYet('Voice calls')}
+              onEmoji={() => notYet('Emoji picks')}
+            />
           </View>
         ) : null}
       </KeyboardAvoidingView>

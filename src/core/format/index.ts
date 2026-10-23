@@ -86,25 +86,21 @@ export function formatInboxTime(iso: string, now: number = Date.now()): string {
 }
 
 /**
- * The calendar-day separator above a thread's bubbles: `Today`, `Yesterday`,
- * then the same numeric date the inbox rows use. Shares the midnight-boundary
- * comparison with `formatInboxTime`, so the two can never disagree about which
- * day a bubble belongs to.
+ * The thread's cluster stamp, in the reference's absolute shape:
+ * `2026/10/17 17:20`. Unlike the inbox clock it never says "Yesterday" — a
+ * chat reads better with the full date above each cluster. Shares the
+ * local-date construction the other formatters use.
  */
-export function formatDayDivider(iso: string, now: number = Date.now()): string {
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) {
+export function formatClusterStamp(iso: string): string {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) {
     return '';
   }
 
-  const dayGap = calendarDayGap(then, now);
-  if (dayGap === 0) {
-    return 'Today';
-  }
-  if (dayGap === 1) {
-    return 'Yesterday';
-  }
-  return numericDate(new Date(then), (value) => String(value).padStart(2, '0'));
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${then.getFullYear()}/${pad(then.getMonth() + 1)}/${pad(then.getDate())} ${pad(
+    then.getHours(),
+  )}:${pad(then.getMinutes())}`;
 }
 
 /** Whole calendar days between two instants, compared on midnight boundaries. */

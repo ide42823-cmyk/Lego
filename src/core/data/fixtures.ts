@@ -22,6 +22,7 @@ import type {
   AvatarFrameKey,
   ChatMessage,
   ConversationSummary,
+  ConversationThread,
   FilterOption,
   Gender,
   HonorArt,
@@ -397,46 +398,6 @@ export const FIXTURE_MOMENTS = buildMoments(FIXTURE_USERS, 10);
 
 export const FIXTURE_BANNERS: PromoBanner[] = BANNERS;
 
-/**
- * The threads behind the inbox, built *from* the inbox: the last bubble of a
- * thread always is the snippet the row shows, so the two surfaces cannot
- * disagree. Timestamps walk backwards from the summary with deterministic
- * gaps, so lists stay stable across reloads.
- */
-export const FIXTURE_THREADS: Map<string, ChatMessage[]> = new Map(
-  FIXTURE_CONVERSATIONS.map((conversation, index) => {
-    const count = 5 + (index % 4);
-    const messages: ChatMessage[] = [];
-
-    for (let i = 0; i < count; i += 1) {
-      // The peer opens, then the two sides alternate — a two-party thread.
-      const isMine = i % 2 === 1;
-      // The last bubble is the snippet, so the inbox and the thread agree.
-      const text =
-        i === count - 1
-          ? conversation.snippet
-          : (THREAD_LINES[(index * 31 + i * 13) % THREAD_LINES.length] ?? THREAD_LINES[0]);
-      // Inter-bubble cadence stays over the largest jitter so the walk back
-      // from the summary is strictly ascending.
-      const cadenceMs = 45 * MINUTE;
-      const jitterMs = ((i * 29 + index * 17) % 40) * MINUTE;
-
-      messages.push({
-        id: `${conversation.id}-message-${i + 1}`,
-        conversationId: conversation.id,
-        authorId: isMine ? FIXTURE_ME_ID : conversation.peerId,
-        kind: 'text',
-        text,
-        sentAt: new Date(
-          new Date(conversation.lastMessageAt).getTime() - (count - 1 - i) * cadenceMs - jitterMs,
-        ).toISOString(),
-      });
-    }
-
-    return [conversation.id, messages] as const;
-  }),
-);
-
 export const FIXTURE_ME: MeDashboard = {
   userId: FIXTURE_ME_ID,
   displayName: 'My Account',
@@ -485,6 +446,94 @@ export const FIXTURE_ME: MeDashboard = {
     { key: 'settings', label: 'Settings' },
   ],
 };
+
+/** The peer's relationship opener, spoken once at the top of a thread. */
+const FOLLOW_NOTICES = [
+  "I've followed you. Once you follow back we can chat.",
+  'أنا قلتلك تابع، تابعني ونصير صحاب.',
+  'Follow sent. Mutual friends can talk anytime.',
+] as const;
+
+/** Server-issued relationship levels, shown as strips, never as a client count. */
+const MILESTONE_TEXT =
+  'You two reached intimacy Lv.1. Voice and video arrive with the backend phase.';
+
+/**
+ * The threads behind the inbox, built *from* the inbox: the last bubble of a
+ * thread always is the snippet the row shows, so the two surfaces cannot
+ * disagree. The peer opens with a follow notice, the sides alternate, and a
+ * server milestone strip sits mid-thread. Timestamps walk back from the
+ * summary with a cadence larger than the per-message jitter, so the list is
+ * strictly ascending across reloads.
+ */
+export const FIXTURE_THREADS: Map<string, ConversationThread> = new Map(
+  FIXTURE_CONVERSATIONS.map((conversation, index) => {
+    const peer = FIXTURE_USERS.find((user) => user.id === conversation.peerId);
+    if (!peer) {
+      throw new Error(`Conversation ${conversation.id} names a peer outside the directory.`);
+    }
+
+    const textCount = 5 + (index % 4);
+    // Milestone strip between the middle bubbles, mid-thread like the reference.
+    const count = textCount >= 6 ? textCount + 1 : textCount;
+    const messages: ChatMessage[] = [];
+
+    for (let i = 0; i < count; i += 1) {
+      const textIndex = i >= 4 && textCount >= 6 ? i - 1 : i;
+      const authorId = i === 0 ? conversation.peerId : textIndex % 2 === 1 ? FIXTURE_ME_ID : conversation.peerId;
+      const kind: ChatMessage['kind'] = i === 0 ? 'notice' : i === 4 && textCount >= 6 ? 'milestone' : 'text';
+      const isMilestone = kind === 'milestone';
+      // The last bubble is the snippet, so the inbox and the thread agree.
+      const text = isMilestone
+        ? MILESTONE_TEXT
+        : i === 0
+          ? (FOLLOW_NOTICES[index % FOLLOW_NOTICES.length] as string)
+          : textIndex === textCount - 1
+            ? conversation.snippet
+            : (THREAD_LINES[(index * 31 + textIndex * 13) % THREAD_LINES.length] ?? THREAD_LINES[0]);
+      // Inter-bubble cadence stays over the largest jitter so the walk back
+      // from the summary is strictly ascending.
+      const cadenceMs = 45 * MINUTE;
+      const jitterMs = ((i * 29 + index * 17) % 40) * MINUTE;
+
+      messages.push({
+        id: `${conversation.id}-message-${i + 1}`,
+        conversationId: conversation.id,
+        authorId,
+        kind,
+        text,
+        sentAt: new Date(
+          new Date(conversation.lastMessageAt).getTime() - (count - 1 - i) * cadenceMs - jitterMs,
+        ).toISOString(),
+      });
+    }
+
+    // Four stills for the card, deterministic per peer and never their avatar.
+    const pool = PORTRAITS[peer.gender ?? 'female'];
+    const start = (index * 5) % (pool.length - 4);
+    const peerMedia = [0, 1, 2, 3].map((offset) => (pool[start + offset] ?? pool[offset]) as string);
+
+    const thread: ConversationThread = {
+      conversation,
+      peer: {
+        id: peer.id,
+        displayName: peer.displayName,
+        status: peer.status,
+        age: peer.age,
+        gender: peer.gender,
+        vipTier: peer.vipTier,
+        locale: peer.locale,
+      },
+      peerMedia,
+      viewer: { avatarUrl: FIXTURE_ME.avatarUrl, avatarFrame: FIXTURE_ME.avatarFrame },
+      // Server-owned presentation: shown as-is, never incremented locally.
+      intimacyLevel: 1 + (index % 4),
+      messages,
+    };
+
+    return [conversation.id, thread] as const;
+  }),
+);
 
 /* -------------------------------------------------------------------------
  * Public profile fixtures (reference screens 001, 018, 021–028)

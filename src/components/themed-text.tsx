@@ -1,6 +1,7 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import { Platform, StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
 
 import { Fonts, ThemeColor } from '@/constants/theme';
+import { typefaceForWeight } from '@/constants/typography';
 import { useTheme } from '@/hooks/use-theme';
 
 export type ThemedTextProps = TextProps & {
@@ -8,21 +9,39 @@ export type ThemedTextProps = TextProps & {
   themeColor?: ThemeColor;
 };
 
+/**
+ * The theme's text. The family always comes from the bundled Cairo faces:
+ * whatever weight the merged style eventually carries (a screen's inline
+ * `fontWeight: 700` included) is matched to the exact static face, so
+ * deliberate weights render as printed rather than falling back to the OS.
+ * Sizes stay overridable inline; the reference's caption tier is 13.
+ */
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
   const theme = useTheme();
+  const flat = style ? StyleSheet.flatten(style as TextStyle) : undefined;
+  const fontFamily = typefaceForWeight(flat?.fontWeight);
 
-  return <Text style={[{ color: theme[themeColor ?? 'text'] }, styles[type], style]} {...rest} />;
+  return (
+    <Text
+      style={[{ color: theme[themeColor ?? 'text'] }, styles[type], { fontFamily }, style as TextStyle]}
+      {...rest}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
+  /**
+   * Caption tier. The reference runs its pills, counts and meta lines a notch
+   * smaller than the body and at least semi-bold.
+   */
   small: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 19,
     fontWeight: 500,
   },
   smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 19,
     fontWeight: 700,
   },
   default: {

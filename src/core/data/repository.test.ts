@@ -276,14 +276,21 @@ describe('listConversations', () => {
       expect(last.text).toBe(conversation.snippet);
     });
 
-    it('runs a strict two-party thread, with only text bubbles', async () => {
+    it('runs a strict two-party thread, with server strips being the only other voice', async () => {
       const inbox = await fixtureDataSource.listConversations('all', { limit: 50 });
       const conversation = inbox.items[0] as ConversationSummary;
       const thread = await fixtureDataSource.listMessages(conversation.id);
 
-      const authors = new Set(thread.messages.map((message) => message.authorId));
-      expect([...authors].sort()).toStrictEqual([conversation.peerId].concat('user-me').sort());
-      expect(thread.messages.every((message) => message.kind === 'text')).toBe(true);
+      const authors = new Set(
+        thread.messages
+          .filter((message) => message.kind !== 'milestone')
+          .map((message) => message.authorId),
+      );
+      expect([...authors].sort()).toStrictEqual([conversation.peerId, 'user-me'].sort());
+      // Milestones belong to nobody.
+      expect(
+        thread.messages.every((message) => message.authorId !== '' || message.kind === 'milestone'),
+      ).toBe(true);
     });
 
     it('rejects an unknown conversation id instead of an empty thread', async () => {
