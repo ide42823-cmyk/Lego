@@ -66,14 +66,18 @@ import ThumbsUp from 'lucide-react-native/icons/thumbs-up';
 import Ticket from 'lucide-react-native/icons/ticket';
 import TriangleAlert from 'lucide-react-native/icons/triangle-alert';
 import Trophy from 'lucide-react-native/icons/trophy';
+import Eraser from 'lucide-react-native/icons/eraser';
+import ListMusic from 'lucide-react-native/icons/list-music';
 import UserPlus from 'lucide-react-native/icons/user-plus';
 import UserRound from 'lucide-react-native/icons/user-round';
 import Users from 'lucide-react-native/icons/users';
 import UsersRound from 'lucide-react-native/icons/users-round';
 import Venus from 'lucide-react-native/icons/venus';
 import Video from 'lucide-react-native/icons/video';
+import VolumeX from 'lucide-react-native/icons/volume-x';
 import WavesHorizontal from 'lucide-react-native/icons/waves-horizontal';
 import Weight from 'lucide-react-native/icons/weight';
+import WandSparkles from 'lucide-react-native/icons/wand-sparkles';
 import X from 'lucide-react-native/icons/x';
 import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
@@ -179,7 +183,12 @@ export type IconName =
   | 'pencil'
   | 'apps'
   | 'megaphone'
-  | 'invite';
+  | 'invite'
+  // Room tools drawer
+  | 'mute'
+  | 'music-list'
+  | 'effects'
+  | 'clear-screen';
 
 const ICONS: Record<IconName, LucideIcon> = {
   home: House,
@@ -264,6 +273,10 @@ const ICONS: Record<IconName, LucideIcon> = {
   apps: LayoutGrid,
   megaphone: Megaphone,
   invite: UserPlus,
+  mute: VolumeX,
+  'music-list': ListMusic,
+  effects: WandSparkles,
+  'clear-screen': Eraser,
 };
 
 export interface IconProps {

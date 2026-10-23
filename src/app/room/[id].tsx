@@ -15,6 +15,7 @@ import { RoomEventCard } from '@/components/room/room-event-card';
 import { RoomExitOverlay } from '@/components/room/room-exit-overlay';
 import { RoomHeaderBar } from '@/components/room/room-header-bar';
 import { RoomSeatGrid } from '@/components/room/room-seat-grid';
+import { RoomToolsDrawer } from '@/components/room/room-tools-drawer';
 import { ErrorState, LoadingSkeleton } from '@/components/ui/states';
 import { useToast } from '@/components/ui/toast';
 import { DECORATIVE_IMAGE } from '@/components/ui/decorative-image';
@@ -45,6 +46,9 @@ export default function RoomScreen() {
   const [exitOpen, setExitOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [giftOpen, setGiftOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [chatHidden, setChatHidden] = useState(false);
+  const [composerHeight, setComposerHeight] = useState(0);
 
   const state = useAsync(
     () => fixtureDataSource.getLiveRoom(String(id ?? '')),
@@ -52,6 +56,7 @@ export default function RoomScreen() {
   );
 
   const catalogState = useAsync(() => fixtureDataSource.getGiftCatalog(), 'gift-catalog');
+  const toolsState = useAsync(() => fixtureDataSource.getRoomTools(), 'room-tools');
 
   const notYet = useCallback(
     (what: string) => toast.show(`${what} arrives with the backend phase.`),
@@ -137,12 +142,14 @@ export default function RoomScreen() {
           />
           <View style={styles.lower}>
             <View style={styles.overlayColumn}>
-              <RoomChatOverlay
-                welcomeText={room.welcomeText}
-                introduction={room.introduction}
-                eventNotices={room.eventNotices}
-                onPressEvent={() => notYet('The event')}
-              />
+              {chatHidden ? null : (
+                <RoomChatOverlay
+                  welcomeText={room.welcomeText}
+                  introduction={room.introduction}
+                  eventNotices={room.eventNotices}
+                  onPressEvent={() => notYet('The event')}
+                />
+              )}
             </View>
             <RoomEventCard
               title={room.eventCard.title}
@@ -152,16 +159,26 @@ export default function RoomScreen() {
             />
           </View>
         </ScrollView>
-        <View style={styles.composerDock}>
+        <View style={styles.composerDock} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
           <RoomComposer
             onSend={() => notYet('Sending to the room')}
             onChatList={() => notYet('The room chat list')}
-            onApps={() => notYet('Room utilities')}
+            onApps={() => setToolsOpen(true)}
             onGift={() => setGiftOpen(true)}
             unreadCount={99}
           />
         </View>
       </KeyboardAvoidingView>
+      {toolsOpen && toolsState.status === 'ready' ? (
+        <RoomToolsDrawer
+          visible
+          sections={toolsState.data}
+          composerHeight={composerHeight}
+          onClose={() => setToolsOpen(false)}
+          onBackendTool={(tool) => notYet(tool.label)}
+          onClearScreen={() => setChatHidden((hidden) => !hidden)}
+        />
+      ) : null}
       <RoomExitOverlay visible={exitOpen} onKeep={() => setExitOpen(false)} onExit={exitRoom} />
       {catalogState.status === 'ready' ? (
         <GiftPanel

@@ -346,6 +346,50 @@ export interface GiftCatalogModel {
   eventTitle: string;
 }
 
+/** What a tools-drawer entry may do in this front-end phase. */
+export type RoomToolAction =
+  /** A server-backed tool: reports the gate when pressed. */
+  | 'backend'
+  /** A client-only display toggle: hides the chat overlay in place. */
+  | 'clear-screen';
+
+/** Tool glyph meanings — the drawer maps each to a Lucide meaning. */
+export type RoomToolIcon =
+  | 'gift'
+  | 'sparkle'
+  | 'party'
+  | 'trophy'
+  | 'games'
+  | 'share'
+  | 'mute'
+  | 'music-list'
+  | 'beauty'
+  | 'effects'
+  | 'store'
+  | 'flip-camera'
+  | 'welcome'
+  | 'clear-screen';
+
+export interface RoomTool {
+  id: string;
+  label: string;
+  icon: RoomToolIcon;
+  /** The little red dot some launches carry in the reference. */
+  dot?: boolean;
+  action: RoomToolAction;
+}
+
+export interface RoomToolSection {
+  id: string;
+  title: string;
+  tools: RoomTool[];
+  /**
+   * The games row packs five compact slots across; tool grids use four
+   * roomier slots so longer labels (Special Effects Setting) fit.
+   */
+  narrow?: boolean;
+}
+
 /**
  * The live room page. The reference draws one full-bleed room canvas: host
  * header, event banners, ten numbered seats, an audience strip, a chat overlay

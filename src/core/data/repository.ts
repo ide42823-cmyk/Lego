@@ -19,6 +19,7 @@ import {
   FIXTURE_LEADERBOARDS,
   FIXTURE_LIVE_ROOMS,
   FIXTURE_GIFT_CATALOG,
+  FIXTURE_ROOM_TOOLS,
   FIXTURE_ME,
   FIXTURE_MOMENTS,
   FIXTURE_PROFILES,
@@ -49,6 +50,7 @@ import type {
   RoomMode,
   RoomRelationshipFilter,
   RoomSummary,
+  RoomToolSection,
   SearchPage,
   SearchSuggestions,
   UserProfile,
@@ -93,6 +95,8 @@ export interface DataSource {
   getLiveRoom(roomId: string): Promise<LiveRoom | null>;
   /** The gift panel's catalog; static display payloads until the backend owns it. */
   getGiftCatalog(): Promise<GiftCatalogModel>;
+  /** The room tools drawer's sections; games and paid tools report the gate. */
+  getRoomTools(): Promise<RoomToolSection[]>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -493,6 +497,10 @@ export const fixtureDataSource: DataSource = {
       // stays the room-shaped "own your copy" seam.
       return structuredClone(FIXTURE_GIFT_CATALOG);
     });
+  },
+
+  getRoomTools() {
+    return simulate(() => structuredClone(FIXTURE_ROOM_TOOLS));
   },
 
   listConversations(filter, request) {

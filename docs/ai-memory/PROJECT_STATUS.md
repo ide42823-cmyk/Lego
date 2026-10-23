@@ -33,3 +33,8 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - P9: Ranking page + device pass. P10: Home fidelity + device pass (Xiaomi, light+dark). P11: Search location gate. P12: Messages inbox fidelity (favorites chip, inbox clock, notification card, promo member stack). P13 (first cut): `/thread/[id]` thread with two-party bubbles, honest composer; native crash from web-only `accessibilityRole="form"` fixed and verified on device.
 - T002: typography/icon audit delivered read-only. T003: Cairo bundled + type scale retuned + icon fill/stroke policy (bell/gift/heart filled, stroke 2.25). T004: commit gate â€” all three earlier deliverables pushed (`7007561` + config/memory commit). T005: room shell (`/room/[id]`, captures at `Temp\opencode\thread-p1\room-*.png`, device pass pending).
 - Full verification history lives in `WORK_LOG.md` and the kit's ADRs under `docs/decisions/`.
+
+## 2026-10-23 (post-T010)
+- Approved work in progress: **None.** Last completed: T010 room tools drawer (reference 013) - web-verified, 240 tests PASS; NOT yet committed.
+- Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer.
+- Next proposed task (needs approval): commit T010; then pick - strictly-backend page (wallet/SVIP/couples) or messages inbox from room context (reference 014).

@@ -46,6 +46,7 @@ import type {
   RoomFeedNotice,
   RoomSeat,
   RoomSummary,
+  RoomToolSection,
   UserBadge,
   UserProfile,
   UserSummary,
@@ -900,6 +901,67 @@ export const FIXTURE_GIFT_CATALOG: GiftCatalogModel = {
   countdown: { days: 28, clockSegments: ['17', '22', '31'] },
   eventTitle: 'Lucky Draw Finals: Cosmic Voyage',
 };
+
+/**
+ * The room tools drawer (reference 013): the games row with a dotted launch,
+ * then the basic tools with one genuinely client-side entry (Clear Screen).
+ * Everything else reports the backend gate; shared/paid tools never pretend.
+ */
+export const FIXTURE_ROOM_TOOLS: RoomToolSection[] = [
+  {
+    id: 'section-games',
+    title: 'Interactive Games',
+    narrow: true,
+    tools: [
+      { id: 'game-lucky-bag', label: 'Lucky Bag', icon: 'gift', action: 'backend' },
+      { id: 'game-lucky-adventure', label: 'Lucky Adventure', icon: 'sparkle', action: 'backend' },
+      { id: 'game-party-square', label: 'Party Square', icon: 'party', action: 'backend' },
+      { id: 'game-super-winner', label: 'Super Winner', icon: 'trophy', action: 'backend' },
+      {
+        id: 'game-throne-expedition',
+        label: 'Throne Expedition',
+        icon: 'games',
+        dot: true,
+        action: 'backend',
+      },
+    ],
+  },
+  {
+    id: 'section-basics',
+    title: 'Basic Tools',
+    tools: [
+      { id: 'tool-share', label: 'Share', icon: 'share', action: 'backend' },
+      { id: 'tool-mute', label: 'Room Mute', icon: 'mute', action: 'backend' },
+      { id: 'tool-music', label: 'Music', icon: 'music-list', action: 'backend' },
+      { id: 'tool-beauty', label: 'Beauty', icon: 'beauty', action: 'backend' },
+      {
+        id: 'tool-effects',
+        label: 'Special Effects Setting',
+        icon: 'effects',
+        action: 'backend',
+      },
+      { id: 'tool-store', label: 'Store', icon: 'store', action: 'backend' },
+      {
+        id: 'tool-flip-camera',
+        label: 'Flip Camera',
+        icon: 'flip-camera',
+        action: 'backend',
+      },
+      {
+        id: 'tool-welcome',
+        label: 'Welcome Message',
+        icon: 'welcome',
+        action: 'backend',
+      },
+      {
+        id: 'tool-clear-screen',
+        label: 'Clear Screen',
+        icon: 'clear-screen',
+        action: 'clear-screen',
+      },
+    ],
+  },
+];
 
 /** The two helper notices under the introduction; winners come from the pool. */
 function buildLiveRoomNotices(random: () => number, users: UserSummary[]): RoomFeedNotice[] {
