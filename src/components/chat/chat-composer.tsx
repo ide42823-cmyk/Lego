@@ -35,7 +35,6 @@ export function ChatComposer({ onSend, onPickEmoji }: ChatComposerProps) {
   return (
     <View
       style={[styles.row, { backgroundColor: theme.background }]}
-      accessibilityRole="form"
       accessibilityLabel="Write a message"
     >
       <View style={[styles.field, { backgroundColor: theme.backgroundElement }]}>

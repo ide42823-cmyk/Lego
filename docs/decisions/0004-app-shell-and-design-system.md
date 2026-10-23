@@ -1379,4 +1379,12 @@ Explore states already use.
   options), bottom-anchored history with the centred day divider, per-side clock
   captions, bubbles flushed to their own edges, the composer row, no horizontal
   overflow and zero console errors.
+- **Device pass (same day, on the Xiaomi).** The first reload redboxed: the composer's
+  `accessibilityRole="form"` is a web-only value, and native Android rejects the unknown
+  role when the thread mounts — which is what made inbox rows appear dead on the phone
+  while the same click navigated fine on web. A sweep of every `accessibilityRole` in
+  the app against React Native's own `ViewAccessibility` map found `form` as the only
+  invalid value; it is now a plain labelled group. After the reload the thread opened on
+  the device: bar, `Yesterday` divider, per-side clock captions, brand and surface
+  bubbles, composer, and the inbox's banner, chips, member stack and unread pills.
 
