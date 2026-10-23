@@ -38,3 +38,8 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Approved work in progress: **None.** Last completed: T010 room tools drawer (reference 013) - web-verified, 240 tests PASS; NOT yet committed.
 - Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer.
 - Next proposed task (needs approval): commit T010; then pick - strictly-backend page (wallet/SVIP/couples) or messages inbox from room context (reference 014).
+
+## 2026-10-23 (post-T011)
+- Approved work in progress: **None.** Last completed: T010 room tools drawer, committed as `a17b1c7` and pushed (T011). Working tree clean; `origin/main` in sync.
+- Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer.
+- Next proposed task (needs approval): strictly-backend page (wallet/SVIP/couples) or messages inbox from room context (reference 014).

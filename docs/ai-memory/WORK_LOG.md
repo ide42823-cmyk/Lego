@@ -130,3 +130,11 @@
 - **Result:** complete (web-verified; device pass pending with the other queued room passes on the next cable session).
 - **Next proposal:** strictly-backend page (wallet/SVIP/couples) or the messages-inbox-from-room (reference 014), per user's choice.
 - **Stopped for approval:** yes (commit gate + next surface).
+
+### 2026-10-23 - T011: T010 room tools drawer committed (user approved "do it")
+- **Approval/scope:** user approved committing T010.
+- **Files changed / actions:** commit `a17b1c7` = "Rooms T010: room tools drawer against reference 013" (9 files, +429/-9) pushed to `origin/main`; memory rides in the same commit. Working tree clean after.
+- **Verification actually run:** `git status --short` review before staging (exactly the nine expected files), `git push` success (`031eee9..a17b1c7`).
+- **Result:** complete.
+- **Next proposal:** strictly-backend page (wallet/SVIP/couples) or messages inbox from room context (reference 014); queued device verification passes (room shell, details sheet, gift panel, tools drawer) on the next cable session.
+- **Stopped for approval:** yes (next surface).
