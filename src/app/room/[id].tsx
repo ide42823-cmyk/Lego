@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RoomAudienceStrip } from '@/components/room/room-audience-strip';
 import { RoomBannerRow } from '@/components/room/room-banner-row';
 import { RoomChatOverlay } from '@/components/room/room-chat-overlay';
+import { RoomChatSheet } from '@/components/room/room-chat-sheet';
 import { GiftPanel } from '@/components/room/gift-panel';
 import { RoomComposer } from '@/components/room/room-composer';
 import { RoomDetailsSheet } from '@/components/room/room-details-sheet';
@@ -47,6 +48,7 @@ export default function RoomScreen() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [giftOpen, setGiftOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [chatHidden, setChatHidden] = useState(false);
   const [composerHeight, setComposerHeight] = useState(0);
 
@@ -57,6 +59,7 @@ export default function RoomScreen() {
 
   const catalogState = useAsync(() => fixtureDataSource.getGiftCatalog(), 'gift-catalog');
   const toolsState = useAsync(() => fixtureDataSource.getRoomTools(), 'room-tools');
+  const inboxState = useAsync(() => fixtureDataSource.getRoomInbox(), 'room-inbox');
 
   const notYet = useCallback(
     (what: string) => toast.show(`${what} arrives with the backend phase.`),
@@ -162,13 +165,29 @@ export default function RoomScreen() {
         <View style={styles.composerDock} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
           <RoomComposer
             onSend={() => notYet('Sending to the room')}
-            onChatList={() => notYet('The room chat list')}
+            onChatList={() => setChatOpen(true)}
             onApps={() => setToolsOpen(true)}
             onGift={() => setGiftOpen(true)}
             unreadCount={99}
           />
         </View>
       </KeyboardAvoidingView>
+      {chatOpen && inboxState.status === 'ready' ? (
+        <RoomChatSheet
+          visible
+          inbox={inboxState.data}
+          onClose={() => setChatOpen(false)}
+          onOpenConversation={(conversationId) => {
+            setChatOpen(false);
+            router.push(`/thread/${conversationId}`);
+          }}
+          onOpenMoments={() => {
+            setChatOpen(false);
+            router.push('/moments');
+          }}
+          onSystemEntry={(entry) => notYet(entry.title)}
+        />
+      ) : null}
       {toolsOpen && toolsState.status === 'ready' ? (
         <RoomToolsDrawer
           visible

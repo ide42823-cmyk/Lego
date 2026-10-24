@@ -19,6 +19,7 @@ import {
   FIXTURE_LEADERBOARDS,
   FIXTURE_LIVE_ROOMS,
   FIXTURE_GIFT_CATALOG,
+  FIXTURE_ROOM_INBOX_SYSTEM,
   FIXTURE_ROOM_TOOLS,
   FIXTURE_ME,
   FIXTURE_MOMENTS,
@@ -51,6 +52,7 @@ import type {
   RoomRelationshipFilter,
   RoomSummary,
   RoomToolSection,
+  RoomInboxModel,
   SearchPage,
   SearchSuggestions,
   UserProfile,
@@ -97,6 +99,8 @@ export interface DataSource {
   getGiftCatalog(): Promise<GiftCatalogModel>;
   /** The room tools drawer's sections; games and paid tools report the gate. */
   getRoomTools(): Promise<RoomToolSection[]>;
+  /** The messages sheet opened from a room: system rows + latest conversations. */
+  getRoomInbox(): Promise<RoomInboxModel>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -501,6 +505,15 @@ export const fixtureDataSource: DataSource = {
 
   getRoomTools() {
     return simulate(() => structuredClone(FIXTURE_ROOM_TOOLS));
+  },
+
+  getRoomInbox() {
+    return simulate(() => ({
+      system: structuredClone(FIXTURE_ROOM_INBOX_SYSTEM),
+      conversations: selectConversations('all')
+        .slice(0, 5)
+        .map((conversation) => structuredClone(conversation)),
+    }));
   },
 
   listConversations(filter, request) {

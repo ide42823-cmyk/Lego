@@ -44,6 +44,7 @@ import type {
   RoomBadge,
   RoomCategory,
   RoomFeedNotice,
+  RoomInboxSystem,
   RoomSeat,
   RoomSummary,
   RoomToolSection,
@@ -1091,6 +1092,36 @@ export const FIXTURE_USERS = buildUsers(24);
 export const FIXTURE_ROOMS = buildRooms(18);
 export const FIXTURE_LIVE_ROOMS = buildLiveRooms(FIXTURE_ROOMS, FIXTURE_USERS);
 export const FIXTURE_CONVERSATIONS = buildConversations(FIXTURE_USERS, 14);
+
+/**
+ * The room chat sheet's system rows (reference 014): Interaction
+ * notifications with a real fixture member as inviter, the team account with
+ * its single server-owned unread stack, and Moments. The reference's team
+ * branding and real member names stay out; owners and copy are neutral.
+ */
+export const FIXTURE_ROOM_INBOX_SYSTEM: RoomInboxSystem[] = [
+  {
+    id: 'inbox-interactions',
+    key: 'interactions',
+    title: 'Interaction notifications',
+    subtitle: `${(FIXTURE_USERS[5] as UserSummary).displayName} invited you to become a room member`,
+    lastMessageAt: new Date(NOW - 20 * HOUR).toISOString(),
+  },
+  {
+    id: 'inbox-team',
+    key: 'team',
+    title: 'LETGO TEAM',
+    subtitle: 'System Notice: Newcomer rewards only count during your first 7 days',
+    badge: 60,
+    lastMessageAt: new Date(NOW - 2 * HOUR).toISOString(),
+  },
+  {
+    id: 'inbox-moments',
+    key: 'moments',
+    title: 'Moments',
+    subtitle: 'Share your thoughts',
+  },
+];
 export const FIXTURE_MOMENTS = buildMoments(FIXTURE_USERS, 10);
 
 export const FIXTURE_BANNERS: PromoBanner[] = BANNERS;

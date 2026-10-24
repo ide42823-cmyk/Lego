@@ -390,6 +390,27 @@ export interface RoomToolSection {
   narrow?: boolean;
 }
 
+/** The messages sheet's system-level rows (reference 014). */
+export type RoomInboxSystemKey = 'interactions' | 'team' | 'moments';
+
+export interface RoomInboxSystem {
+  id: string;
+  key: RoomInboxSystemKey;
+  title: string;
+  subtitle: string;
+  /** The team entry's red unread stack in the reference; a server-owned count. */
+  badge?: number;
+  /** ISO-8601. Only Interactions and the Team carry a clock in the reference. */
+  lastMessageAt?: string;
+}
+
+/** The messages sheet opened from inside a room, on top of the canvas. */
+export interface RoomInboxModel {
+  system: RoomInboxSystem[];
+  /** The latest conversations, newest first; the page size is the seam's. */
+  conversations: ConversationSummary[];
+}
+
 /**
  * The live room page. The reference draws one full-bleed room canvas: host
  * header, event banners, ten numbered seats, an audience strip, a chat overlay

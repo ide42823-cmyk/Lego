@@ -1,105 +1,110 @@
-import AudioLines from 'lucide-react-native/icons/audio-lines';
-import Award from 'lucide-react-native/icons/award';
-import Backpack from 'lucide-react-native/icons/backpack';
-import BadgeCheck from 'lucide-react-native/icons/badge-check';
-import Bell from 'lucide-react-native/icons/bell';
-import Briefcase from 'lucide-react-native/icons/briefcase';
-import Cake from 'lucide-react-native/icons/cake';
-import CalendarDays from 'lucide-react-native/icons/calendar-days';
-import Camera from 'lucide-react-native/icons/camera';
-import Check from 'lucide-react-native/icons/check';
-import ChevronDown from 'lucide-react-native/icons/chevron-down';
-import Circle from 'lucide-react-native/icons/circle';
-import Cloud from 'lucide-react-native/icons/cloud';
-import Flower from 'lucide-react-native/icons/flower';
-import Funnel from 'lucide-react-native/icons/funnel';
-import ChevronLeft from 'lucide-react-native/icons/chevron-left';
-import ChevronRight from 'lucide-react-native/icons/chevron-right';
-import CircleAlert from 'lucide-react-native/icons/circle-alert';
-import Clock from 'lucide-react-native/icons/clock';
-import Coins from 'lucide-react-native/icons/coins';
-import Copy from 'lucide-react-native/icons/copy';
-import SendHorizontal from 'lucide-react-native/icons/send-horizontal';
-import FaceGrinning from 'lucide-react-native/icons/face-grinning';
-import Crown from 'lucide-react-native/icons/crown';
-import Dices from 'lucide-react-native/icons/dices';
-import Ellipsis from 'lucide-react-native/icons/ellipsis';
-import Flame from 'lucide-react-native/icons/flame';
-
-import Gem from 'lucide-react-native/icons/gem';
-import Gift from 'lucide-react-native/icons/gift';
-import Globe from 'lucide-react-native/icons/globe';
-import Headset from 'lucide-react-native/icons/headset';
-import Heart from 'lucide-react-native/icons/heart';
-import HeartHandshake from 'lucide-react-native/icons/heart-handshake';
-import House from 'lucide-react-native/icons/house';
-import Inbox from 'lucide-react-native/icons/inbox';
-import ListChecks from 'lucide-react-native/icons/list-checks';
-import MapPin from 'lucide-react-native/icons/map-pin';
-import Mars from 'lucide-react-native/icons/mars';
-import Menu from 'lucide-react-native/icons/menu';
-import MessageCircle from 'lucide-react-native/icons/message-circle';
-import MessageSquare from 'lucide-react-native/icons/message-square';
-import Mic from 'lucide-react-native/icons/mic';
-import Orbit from 'lucide-react-native/icons/orbit';
-import PartyPopper from 'lucide-react-native/icons/party-popper';
-import Phone from 'lucide-react-native/icons/phone';
-import Image from 'lucide-react-native/icons/image';
-import LayoutGrid from 'lucide-react-native/icons/layout-grid';
-import Lock from 'lucide-react-native/icons/lock';
-import Megaphone from 'lucide-react-native/icons/megaphone';
-import Pencil from 'lucide-react-native/icons/pencil';
-import Plus from 'lucide-react-native/icons/plus';
-import Power from 'lucide-react-native/icons/power';
-import Radio from 'lucide-react-native/icons/radio';
-import RefreshCw from 'lucide-react-native/icons/refresh-cw';
-import Ruler from 'lucide-react-native/icons/ruler';
-import Search from 'lucide-react-native/icons/search';
-import Settings from 'lucide-react-native/icons/settings';
-import Share2 from 'lucide-react-native/icons/share-2';
-import ShieldCheck from 'lucide-react-native/icons/shield-check';
-import Sparkles from 'lucide-react-native/icons/sparkles';
-import SquarePlus from 'lucide-react-native/icons/square-plus';
-import Star from 'lucide-react-native/icons/star';
-import Store from 'lucide-react-native/icons/store';
-import ThumbsUp from 'lucide-react-native/icons/thumbs-up';
-import Ticket from 'lucide-react-native/icons/ticket';
-import TriangleAlert from 'lucide-react-native/icons/triangle-alert';
-import Trophy from 'lucide-react-native/icons/trophy';
-import Eraser from 'lucide-react-native/icons/eraser';
-import ListMusic from 'lucide-react-native/icons/list-music';
-import UserPlus from 'lucide-react-native/icons/user-plus';
-import UserRound from 'lucide-react-native/icons/user-round';
-import Users from 'lucide-react-native/icons/users';
-import UsersRound from 'lucide-react-native/icons/users-round';
-import Venus from 'lucide-react-native/icons/venus';
-import Video from 'lucide-react-native/icons/video';
-import VolumeX from 'lucide-react-native/icons/volume-x';
-import WavesHorizontal from 'lucide-react-native/icons/waves-horizontal';
-import Weight from 'lucide-react-native/icons/weight';
-import WandSparkles from 'lucide-react-native/icons/wand-sparkles';
-import X from 'lucide-react-native/icons/x';
-import type { LucideIcon } from 'lucide-react-native';
+import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react-native';
 import { View } from 'react-native';
+
+// Per-icon default imports, one subpath at a time — the same bundle-lean
+// pattern the Lucide set used. Every glyph below was verified to exist in the
+// installed free pack before being wired here; a missing file fails this build.
+
+import Add01Icon from '@hugeicons/core-free-icons/Add01Icon';
+import AddSquareIcon from '@hugeicons/core-free-icons/AddSquareIcon';
+import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon';
+import AlertCircleIcon from '@hugeicons/core-free-icons/AlertCircleIcon';
+import ArrowDown01Icon from '@hugeicons/core-free-icons/ArrowDown01Icon';
+import ArrowLeft01Icon from '@hugeicons/core-free-icons/ArrowLeft01Icon';
+import ArrowRight01Icon from '@hugeicons/core-free-icons/ArrowRight01Icon';
+import Award01Icon from '@hugeicons/core-free-icons/Award01Icon';
+import Backpack01Icon from '@hugeicons/core-free-icons/Backpack01Icon';
+import BadgeCheckIcon from '@hugeicons/core-free-icons/BadgeCheckIcon';
+import BirthdayCakeIcon from '@hugeicons/core-free-icons/BirthdayCakeIcon';
+import Briefcase01Icon from '@hugeicons/core-free-icons/Briefcase01Icon';
+import Calendar01Icon from '@hugeicons/core-free-icons/Calendar01Icon';
+import Camera01Icon from '@hugeicons/core-free-icons/Camera01Icon';
+import Cancel01Icon from '@hugeicons/core-free-icons/Cancel01Icon';
+import CircleIcon from '@hugeicons/core-free-icons/CircleIcon';
+import CloudIcon from '@hugeicons/core-free-icons/CloudIcon';
+import Comment01Icon from '@hugeicons/core-free-icons/Comment01Icon';
+import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
+import CrownIcon from '@hugeicons/core-free-icons/CrownIcon';
+import DollarCircleIcon from '@hugeicons/core-free-icons/DollarCircleIcon';
+import EraserIcon from '@hugeicons/core-free-icons/EraserIcon';
+import FilterIcon from '@hugeicons/core-free-icons/FilterIcon';
+import FlameIcon from '@hugeicons/core-free-icons/FlameIcon';
+import FlowerIcon from '@hugeicons/core-free-icons/FlowerIcon';
+import GamepadIcon from '@hugeicons/core-free-icons/GamepadIcon';
+import GemIcon from '@hugeicons/core-free-icons/GemIcon';
+import GiftIcon from '@hugeicons/core-free-icons/GiftIcon';
+import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon';
+import HandshakeIcon from '@hugeicons/core-free-icons/HandshakeIcon';
+import HeartIcon from '@hugeicons/core-free-icons/HeartIcon';
+import HistoryIcon from '@hugeicons/core-free-icons/HistoryIcon';
+import Home01Icon from '@hugeicons/core-free-icons/Home01Icon';
+import Home04Icon from '@hugeicons/core-free-icons/Home04Icon';
+import InboxIcon from '@hugeicons/core-free-icons/InboxIcon';
+import Image01Icon from '@hugeicons/core-free-icons/Image01Icon';
+import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
+import LockIcon from '@hugeicons/core-free-icons/LockIcon';
+import MarsIcon from '@hugeicons/core-free-icons/MarsIcon';
+import Megaphone02Icon from '@hugeicons/core-free-icons/Megaphone02Icon';
+import Menu01Icon from '@hugeicons/core-free-icons/Menu01Icon';
+import Message01Icon from '@hugeicons/core-free-icons/Message01Icon';
+import Mic01Icon from '@hugeicons/core-free-icons/Mic01Icon';
+import MoreHorizontalIcon from '@hugeicons/core-free-icons/MoreHorizontalIcon';
+import Notification03Icon from '@hugeicons/core-free-icons/Notification03Icon';
+import Orbit01Icon from '@hugeicons/core-free-icons/Orbit01Icon';
+import PartyPopperIcon from '@hugeicons/core-free-icons/PartyPopperIcon';
+import PencilIcon from '@hugeicons/core-free-icons/PencilIcon';
+import PhoneIcon from '@hugeicons/core-free-icons/PhoneIcon';
+import PlayListIcon from '@hugeicons/core-free-icons/PlayListIcon';
+import PowerOffIcon from '@hugeicons/core-free-icons/PowerOffIcon';
+import RadioIcon from '@hugeicons/core-free-icons/RadioIcon';
+import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
+import RulerIcon from '@hugeicons/core-free-icons/RulerIcon';
+import Search01Icon from '@hugeicons/core-free-icons/Search01Icon';
+import SecurityCheckIcon from '@hugeicons/core-free-icons/SecurityCheckIcon';
+import SentIcon from '@hugeicons/core-free-icons/SentIcon';
+import Settings01Icon from '@hugeicons/core-free-icons/Settings01Icon';
+import Share08Icon from '@hugeicons/core-free-icons/Share08Icon';
+import SmileIcon from '@hugeicons/core-free-icons/SmileIcon';
+import SparkleIcon from '@hugeicons/core-free-icons/SparkleIcon';
+import StarIcon from '@hugeicons/core-free-icons/StarIcon';
+import Store01Icon from '@hugeicons/core-free-icons/Store01Icon';
+import Task01Icon from '@hugeicons/core-free-icons/Task01Icon';
+import Tick01Icon from '@hugeicons/core-free-icons/Tick01Icon';
+import ThumbsUpIcon from '@hugeicons/core-free-icons/ThumbsUpIcon';
+import Ticket01Icon from '@hugeicons/core-free-icons/Ticket01Icon';
+import TrophyIcon from '@hugeicons/core-free-icons/TrophyIcon';
+import UserPlusIcon from '@hugeicons/core-free-icons/UserPlusIcon';
+import UserIcon from '@hugeicons/core-free-icons/UserIcon';
+import UserMultipleIcon from '@hugeicons/core-free-icons/UserMultipleIcon';
+import UserMultiple03Icon from '@hugeicons/core-free-icons/UserMultiple03Icon';
+import VenusIcon from '@hugeicons/core-free-icons/VenusIcon';
+import Video01Icon from '@hugeicons/core-free-icons/Video01Icon';
+import VoiceIcon from '@hugeicons/core-free-icons/VoiceIcon';
+import VolumeOffIcon from '@hugeicons/core-free-icons/VolumeOffIcon';
+import WandIcon from '@hugeicons/core-free-icons/WandIcon';
+import WeightScaleIcon from '@hugeicons/core-free-icons/WeightScaleIcon';
+import WavesIcon from '@hugeicons/core-free-icons/WavesIcon';
+import HeadsetIcon from '@hugeicons/core-free-icons/HeadsetIcon';
+import GridIcon from '@hugeicons/core-free-icons/GridIcon';
 
 /**
  * The app's icon vocabulary.
  *
  * Screens name an icon by *meaning* ("search", "greeting") rather than by
- * glyph, so the underlying set can be swapped without touching a single screen.
- * The set is Lucide (ISC licensed) — a thin-stroke outline family that matches
- * the reference visual language without reproducing the reference app's
- * proprietary iconography.
+ * glyph, so the underlying set can be swapped without touching a single
+ * screen — this file is now the Hugeicons (stroke-rounded) set while the API
+ * stays untouched. The free pack is ISC-style licensed and matches the
+ * reference's thin-stroke visual language without reproducing its proprietary
+ * iconography.
  *
- * Icons are imported one file at a time from Lucide's `./icons/*` export rather
- * than from the package root. The root module is a single 250 kB index of ~1,700
- * icons, and at the time of writing it also re-exports files its own dist does
- * not ship (`waves.mjs`, `smile.mjs`), which makes it unresolvable in Metro.
- * Per-icon imports pull in only what is used *and* only files proven to exist.
+ * Icons are imported one subpath at a time from
+ * `@hugeicons/core-free-icons/<Name>` rather than from the package root: the
+ * root barrel re-exports all 6,000+ icons, which Metro would bundle in full.
  *
- * To add an icon: find the kebab-case file name on lucide.dev, import it here,
- * and add a meaning to `IconName` and `ICONS` below. TypeScript checks the
- * import against Lucide's own types, so a renamed icon fails the build.
+ * To add an icon: pick the name on hugeicons.com, import its subpath here
+ * (verified against the installed pack first), and add a meaning to
+ * `IconName` and `ICONS`. TypeScript checks the import against the pack's own
+ * types, so a missing icon fails the build.
  */
 export type IconName =
   // Primary navigation
@@ -190,100 +195,103 @@ export type IconName =
   | 'effects'
   | 'clear-screen';
 
-const ICONS: Record<IconName, LucideIcon> = {
-  home: House,
-  cloud: Cloud,
-  house: House,
-  moments: Orbit,
-  rooms: AudioLines,
-  messages: MessageCircle,
+const ICONS: Record<IconName, IconSvgElement> = {
+  home: Home01Icon,
+  cloud: CloudIcon,
+  house: Home04Icon,
+  moments: Orbit01Icon,
+  rooms: VoiceIcon,
+  messages: Message01Icon,
   // The reference's account tab is a plain circle, not a face — the dot badge
   // floats on its rim.
-  me: Circle,
+  me: CircleIcon,
 
-  search: Search,
-  filter: Funnel,
-  trophy: Trophy,
-  create: SquarePlus,
-  camera: Camera,
-  menu: Menu,
-  more: Ellipsis,
-  close: X,
-  back: ChevronLeft,
-  forward: ChevronRight,
-  expand: ChevronDown,
-  check: Check,
-  refresh: RefreshCw,
-  alert: CircleAlert,
-  history: Clock,
+  search: Search01Icon,
+  filter: FilterIcon,
+  trophy: TrophyIcon,
+  create: AddSquareIcon,
+  camera: Camera01Icon,
+  menu: Menu01Icon,
+  more: MoreHorizontalIcon,
+  close: Cancel01Icon,
+  back: ArrowLeft01Icon,
+  forward: ArrowRight01Icon,
+  expand: ArrowDown01Icon,
+  check: Tick01Icon,
+  refresh: RefreshIcon,
+  alert: AlertCircleIcon,
+  history: HistoryIcon,
 
-  greeting: Heart,
-  like: ThumbsUp,
-  comment: MessageSquare,
-  gift: Gift,
-  coin: Coins,
-  crown: Crown,
-  star: Star,
-  verified: BadgeCheck,
-  trending: Flame,
-  flower: Flower,
-  sparkle: Sparkles,
-  globe: Globe,
-  video: Video,
-  mic: Mic,
-  bell: Bell,
-  live: Radio,
-  calendar: CalendarDays,
-  store: Store,
-  backpack: Backpack,
-  tasks: ListChecks,
-  friends: Users,
-  family: UsersRound,
-  games: Dices,
-  party: PartyPopper,
-  diamonds: Gem,
-  ticket: Ticket,
-  inbox: Inbox,
-  level: Award,
-  shield: ShieldCheck,
-  birthday: Cake,
-  female: Venus,
-  male: Mars,
-  account: UserRound,
-  visitors: WavesHorizontal,
-  rank: HeartHandshake,
-  settings: Settings,
-  share: Share2,
-  headset: Headset,
-  warning: TriangleAlert,
+  greeting: HeartIcon,
+  like: ThumbsUpIcon,
+  comment: Comment01Icon,
+  gift: GiftIcon,
+  coin: DollarCircleIcon,
+  crown: CrownIcon,
+  star: StarIcon,
+  verified: BadgeCheckIcon,
+  trending: FlameIcon,
+  flower: FlowerIcon,
+  sparkle: SparkleIcon,
+  globe: Globe02Icon,
+  video: Video01Icon,
+  mic: Mic01Icon,
+  bell: Notification03Icon,
+  live: RadioIcon,
+  calendar: Calendar01Icon,
+  store: Store01Icon,
+  backpack: Backpack01Icon,
+  tasks: Task01Icon,
+  friends: UserMultipleIcon,
+  // Friends and family stay two different glyphs in the free pack's user set.
+  family: UserMultiple03Icon,
+  games: GamepadIcon,
+  party: PartyPopperIcon,
+  diamonds: GemIcon,
+  ticket: Ticket01Icon,
+  inbox: InboxIcon,
+  level: Award01Icon,
+  shield: SecurityCheckIcon,
+  birthday: BirthdayCakeIcon,
+  female: VenusIcon,
+  male: MarsIcon,
+  account: UserIcon,
+  visitors: WavesIcon,
+  rank: HandshakeIcon,
+  settings: Settings01Icon,
+  share: Share08Icon,
+  headset: HeadsetIcon,
+  warning: Alert02Icon,
 
-  phone: Phone,
-  image: Image,
-  copy: Copy,
-  send: SendHorizontal,
-  smile: FaceGrinning,
-  height: Ruler,
-  weight: Weight,
-  occupation: Briefcase,
-  address: MapPin,
-  power: Power,
-  plus: Plus,
-  lock: Lock,
-  pencil: Pencil,
-  apps: LayoutGrid,
-  megaphone: Megaphone,
-  invite: UserPlus,
-  mute: VolumeX,
-  'music-list': ListMusic,
-  effects: WandSparkles,
-  'clear-screen': Eraser,
+  phone: PhoneIcon,
+  image: Image01Icon,
+  copy: Copy01Icon,
+  send: SentIcon,
+  smile: SmileIcon,
+  height: RulerIcon,
+  weight: WeightScaleIcon,
+  occupation: Briefcase01Icon,
+  address: Location01Icon,
+  power: PowerOffIcon,
+  plus: Add01Icon,
+  lock: LockIcon,
+  pencil: PencilIcon,
+  apps: GridIcon,
+  megaphone: Megaphone02Icon,
+  invite: UserPlusIcon,
+  // Hugeicons' own `MuteIcon` is a silent-face smiley, not a volume control;
+  // the drawer's Room Mute reads as the muted speaker like the reference.
+  mute: VolumeOffIcon,
+  'music-list': PlayListIcon,
+  effects: WandIcon,
+  'clear-screen': EraserIcon,
 };
 
 export interface IconProps {
   name: IconName;
   size?: number;
   color?: string;
-  /** Lucide's stroke weight. The reference set reads as ~2 at 24px. */
+  /** Stroke weight. The reference set reads as ~2 at 24px. */
   strokeWidth?: number;
   /** Solid fill, used for selected states (a liked post, the greeting heart). */
   fill?: string;
@@ -295,10 +303,12 @@ export interface IconProps {
  * A single icon. Decorative by default: the surrounding control owns the
  * accessible name, so an icon never adds a second, redundant announcement.
  *
- * The default stroke is a touch over Lucide's own 2, because the reference
- * glyph art reads heavier; identity glyphs (hearts, crowns, gift, star) are
- * additionally drawn with a fill through the `solid` style flag callers send
- * on the `solid` position in their own palette.
+ * Hugeicons draws with `react-native-svg` and forwards unknown props to the
+ * SVG root, where `accessible` is not a valid web attribute. So the glyph
+ * itself is always hidden, and a labelled icon is wrapped in a view that
+ * carries the accessible name. Calling a `fill` flips the SVG root fill — the
+ * free pack is stroke-only, so identity glyphs (hearts, crowns, gift) read as
+ * their familiar solid states through the caller's own palette color.
  */
 export function Icon({
   name,
@@ -308,19 +318,13 @@ export function Icon({
   fill = 'none',
   label,
 }: IconProps) {
-  const Glyph = ICONS[name];
-
-  // Lucide draws with `react-native-svg`, which forwards props straight to the
-  // DOM node on web, where `accessible` is not a valid HTML attribute. So the
-  // glyph itself is always hidden, and a labelled icon is wrapped in a view that
-  // carries the accessible name.
   const glyph = (
-    <Glyph
+    <HugeiconsIcon
+      icon={ICONS[name]}
       size={size}
       color={color}
       strokeWidth={strokeWidth}
       fill={fill}
-      focusable={false}
       aria-hidden
     />
   );

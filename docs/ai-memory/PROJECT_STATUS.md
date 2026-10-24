@@ -43,3 +43,14 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Approved work in progress: **None.** Last completed: T010 room tools drawer, committed as `a17b1c7` and pushed (T011). Working tree clean; `origin/main` in sync.
 - Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer.
 - Next proposed task (needs approval): strictly-backend page (wallet/SVIP/couples) or messages inbox from room context (reference 014).
+
+## 2026-10-24 (post-T012)
+- Approved work in progress: **None.** Last completed: T012 room chat sheet (reference 014) - web-verified, 243 tests PASS; NOT yet committed.
+- Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer, chat sheet.
+- Next proposed task (needs approval): commit T012; then pick - strictly-backend page (wallet/SVIP/couples) or reference 015 polish.
+- KNOWN_ISSUES #12 (Metro watcher hang) recorded 2026-10-24.
+
+## 2026-10-24 (post-T013)
+- Approved work in progress: **None.** Last completed: T013 hugeicons swap (all screens keep the meaning-named Icon API; lucide-react-native removed) - 243 tests PASS; NOT yet committed.
+- Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer, chat sheet + the icon swap (visual audit on device).
+- Next proposed task (needs approval): commit T013; then pick - strictly-backend page (wallet/SVIP/couples) or reference 015 polish.
