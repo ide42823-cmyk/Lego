@@ -818,3 +818,31 @@ describe('failure simulation', () => {
     await expect(fixtureDataSource.listMoments('recommend')).resolves.toBeDefined();
   });
 });
+
+describe('getDiamondsWallet', () => {
+  it('returns the server-owned balance and the exact exchange ladder', async () => {
+    const wallet = await fixtureDataSource.getDiamondsWallet();
+
+    // The balance is zero because no wallet state exists on this front end,
+    // and every rung must be exactly the rate the server configures.
+    expect(wallet.balance).toBe(0);
+    expect(wallet.tiers).toHaveLength(7);
+    expect(wallet.tiers.map((tier) => [tier.coins, tier.diamonds])).toEqual([
+      [6400, 20000],
+      [32000, 100000],
+      [64000, 200000],
+      [128000, 400000],
+      [320000, 1000000],
+      [640000, 2000000],
+      [1280000, 4000000],
+    ]);
+  });
+
+  it('serves a fresh copy each time — no client-mutable wallet state', async () => {
+    const first = await fixtureDataSource.getDiamondsWallet();
+    first.balance = 1000000;
+
+    const second = await fixtureDataSource.getDiamondsWallet();
+    expect(second.balance).toBe(0);
+  });
+});

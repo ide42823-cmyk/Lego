@@ -65,7 +65,12 @@ export default function MeScreen() {
               notYet(tile.active ? 'Membership management' : `${tile.label} membership`)
             }
           />
-          <MeToolsCard tools={state.data.tools} onPress={(tool) => notYet(tool.label)} />
+          <MeToolsCard
+            tools={state.data.tools}
+            onPress={(tool) =>
+              tool.key === 'diamonds' ? router.push('/wallet/diamonds') : notYet(tool.label)
+            }
+          />
           <MeGamesCard games={state.data.games} onPress={(game) => notYet(game.title)} />
           <MeMenuCard menu={state.data.menu} onPress={onMenu} />
 

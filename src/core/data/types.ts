@@ -412,6 +412,24 @@ export interface RoomInboxModel {
 }
 
 /**
+ * One rung of the coin-to-diamond exchange ladder. Both sides are
+ * server-configured financial values; the client never invents a rate or
+ * applies an exchange locally.
+ */
+export interface DiamondExchangeTier {
+  id: string;
+  coins: number;
+  diamonds: number;
+}
+
+/** The My Diamonds page: server-owned balance plus the exchange ladder. */
+export interface DiamondsWallet {
+  /** The viewer's diamond balance. No local credit ever applies. */
+  balance: number;
+  tiers: DiamondExchangeTier[];
+}
+
+/**
  * The live room page. The reference draws one full-bleed room canvas: host
  * header, event banners, ten numbered seats, an audience strip, a chat overlay
  * with welcome/system notices, a floating event card, and a composer.

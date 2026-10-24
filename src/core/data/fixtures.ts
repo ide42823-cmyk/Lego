@@ -23,6 +23,7 @@ import type {
   ChatMessage,
   ConversationSummary,
   ConversationThread,
+  DiamondsWallet,
   FilterOption,
   Gender,
   GiftCatalogModel,
@@ -1092,6 +1093,25 @@ export const FIXTURE_USERS = buildUsers(24);
 export const FIXTURE_ROOMS = buildRooms(18);
 export const FIXTURE_LIVE_ROOMS = buildLiveRooms(FIXTURE_ROOMS, FIXTURE_USERS);
 export const FIXTURE_CONVERSATIONS = buildConversations(FIXTURE_USERS, 14);
+
+/**
+ * The wallet's diamond exchange ladder (reference 057): the coins a tier
+ * costs and the diamonds the server would credit. The balance starts at zero
+ * because this front end has no wallet state to spend — the rates themselves
+ * are server-configured values the client only displays.
+ */
+export const FIXTURE_DIAMONDS_WALLET: DiamondsWallet = {
+  balance: 0,
+  tiers: [
+    { id: 'tier-6400', coins: 6400, diamonds: 20000 },
+    { id: 'tier-32000', coins: 32000, diamonds: 100000 },
+    { id: 'tier-64000', coins: 64000, diamonds: 200000 },
+    { id: 'tier-128000', coins: 128000, diamonds: 400000 },
+    { id: 'tier-320000', coins: 320000, diamonds: 1000000 },
+    { id: 'tier-640000', coins: 640000, diamonds: 2000000 },
+    { id: 'tier-1280000', coins: 1280000, diamonds: 4000000 },
+  ],
+};
 
 /**
  * The room chat sheet's system rows (reference 014): Interaction

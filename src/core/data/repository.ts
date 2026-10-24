@@ -19,6 +19,7 @@ import {
   FIXTURE_LEADERBOARDS,
   FIXTURE_LIVE_ROOMS,
   FIXTURE_GIFT_CATALOG,
+  FIXTURE_DIAMONDS_WALLET,
   FIXTURE_ROOM_INBOX_SYSTEM,
   FIXTURE_ROOM_TOOLS,
   FIXTURE_ME,
@@ -33,6 +34,7 @@ import type {
   ConversationFilter,
   ConversationSummary,
   ConversationThread,
+  DiamondsWallet,
   DirectoryFeedItem,
   GiftCatalogModel,
   Leaderboard,
@@ -50,9 +52,9 @@ import type {
   RoomFeedItem,
   RoomMode,
   RoomRelationshipFilter,
+  RoomInboxModel,
   RoomSummary,
   RoomToolSection,
-  RoomInboxModel,
   SearchPage,
   SearchSuggestions,
   UserProfile,
@@ -101,6 +103,8 @@ export interface DataSource {
   getRoomTools(): Promise<RoomToolSection[]>;
   /** The messages sheet opened from a room: system rows + latest conversations. */
   getRoomInbox(): Promise<RoomInboxModel>;
+  /** The My Diamonds page: server-owned balance + the exchange ladder. */
+  getDiamondsWallet(): Promise<DiamondsWallet>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -514,6 +518,10 @@ export const fixtureDataSource: DataSource = {
         .slice(0, 5)
         .map((conversation) => structuredClone(conversation)),
     }));
+  },
+
+  getDiamondsWallet() {
+    return simulate(() => structuredClone(FIXTURE_DIAMONDS_WALLET));
   },
 
   listConversations(filter, request) {
