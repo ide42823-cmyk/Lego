@@ -57,7 +57,8 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 
 ## 2026-10-24 (post-T014)
 - Committed `bd8389c` "Icons T013: swap the app icon system to hugeicons" — carries BOTH the T013 icon swap and the earlier-uncommitted T012 chat sheet (the T012 surface was already user-approved; flagged honestly here). Pushed to `origin/main`.
-- Last completed: **T014 My Diamonds wallet exchange (reference 057)** - `/wallet/diamonds` route + seam/fixture/tests + Me-tools routing; balance and rates display-only, tier/record presses toast; 247 tests PASS; NOT yet committed.
+- Committed `17f102d` "Wallet T014: My Diamonds exchange page against reference 057" (10 files, +485/-3) pushed to `origin/main`. Working tree clean.
+- Last completed: **T014 My Diamonds wallet exchange (reference 057)** - `/wallet/diamonds` route + seam/fixture/tests + Me-tools routing; balance and rates display-only, tier/record presses toast; 247 tests PASS.
 - Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer, chat sheet, icons swap, wallet page.
-- Next proposed task (needs approval): commit T014; then pick - the couples/relationship chooser (reference 016) or the SVIP hub references.
+- Next proposed task (needs approval): pick - the couples/relationship chooser (reference 016) or the SVIP hub references.
 
