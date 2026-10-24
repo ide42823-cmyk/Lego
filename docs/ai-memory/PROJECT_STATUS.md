@@ -62,3 +62,10 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer, chat sheet, icons swap, wallet page.
 - Next proposed task (needs approval): pick - the couples/relationship chooser (reference 016) or the SVIP hub references.
 
+## 2026-10-24 (post-T015)
+- Last completed: **T015 relationship-type chooser (references 016/017/020)** - RelationshipTypeSheet over the person profile from the Relationships tab's invite tile; Couple/Friend pills switch the card in place (per-kind fixed pastel palettes); coin prices + 24-hour terms display-only; invite/Help gated; + `heart` icon meaning; 252 tests PASS; NOT yet committed.
+- Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer, chat sheet, icons swap, wallet page, relationship chooser.
+- Next proposed task (needs approval): commit T015; then pick - the SVIP hub references or reference 015's live-room conversation-state polish.
+- KNOWN_ISSUES #12 (Metro watcher hang) recurred 2026-10-24 (blank silent pages on two routes) - workaround (kill 8081 PID, restart without `--clear`, `metro-web13.log`) restored both routes.
+
+

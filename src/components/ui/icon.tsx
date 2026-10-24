@@ -134,6 +134,7 @@ export type IconName =
   // Social and room semantics
   | 'greeting'
   | 'like'
+| 'heart'
   | 'comment'
   | 'gift'
   | 'coin'
@@ -224,6 +225,7 @@ const ICONS: Record<IconName, IconSvgElement> = {
 
   greeting: HeartIcon,
   like: ThumbsUpIcon,
+  heart: HeartIcon,
   comment: Comment01Icon,
   gift: GiftIcon,
   coin: DollarCircleIcon,

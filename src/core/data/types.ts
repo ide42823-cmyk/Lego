@@ -429,6 +429,30 @@ export interface DiamondsWallet {
   tiers: DiamondExchangeTier[];
 }
 
+/** The relationship kinds the chooser offers. */
+export type RelationshipTypeKey = 'couple' | 'friend';
+
+/**
+ * One rung of the relationship chooser: an invitation card the server prices.
+ * The coin price and the acceptance window are server-configured financial
+ * terms — the client displays them and never creates a relationship itself;
+ * a link exists only once the other member accepts.
+ */
+export interface RelationshipOffer {
+  id: RelationshipTypeKey;
+  /** The member-facing label, e.g. "Couple". */
+  label: string;
+  /** The invitation card's coin price. */
+  coins: number;
+  /** Hours an invitation stays valid before the server expires and refunds it. */
+  validityHours: number;
+}
+
+/** The chooser's offer list, in its display order. */
+export interface RelationshipOffers {
+  offers: RelationshipOffer[];
+}
+
 /**
  * The live room page. The reference draws one full-bleed room canvas: host
  * header, event banners, ten numbered seats, an audience strip, a chat overlay

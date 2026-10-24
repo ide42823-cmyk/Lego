@@ -41,6 +41,7 @@ import type {
   ProfileInfoRow,
   ProfileTag,
   PromoBanner,
+  RelationshipOffers,
   RelationshipRecord,
   RoomBadge,
   RoomCategory,
@@ -1110,6 +1111,19 @@ export const FIXTURE_DIAMONDS_WALLET: DiamondsWallet = {
     { id: 'tier-320000', coins: 320000, diamonds: 1000000 },
     { id: 'tier-640000', coins: 640000, diamonds: 2000000 },
     { id: 'tier-1280000', coins: 1280000, diamonds: 4000000 },
+  ],
+};
+
+/**
+ * The relationship chooser's offer ladder (references 016, 017, 020): the two
+ * invitation cards the server prices. Coin prices and the 24-hour acceptance
+ * window are server-configured terms the client only displays; no relationship
+ * is ever formed from this front end.
+ */
+export const FIXTURE_RELATIONSHIP_OFFERS: RelationshipOffers = {
+  offers: [
+    { id: 'couple', label: 'Couple', coins: 10000, validityHours: 24 },
+    { id: 'friend', label: 'Friend', coins: 6000, validityHours: 24 },
   ],
 };
 

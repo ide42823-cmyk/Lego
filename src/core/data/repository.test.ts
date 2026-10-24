@@ -846,3 +846,22 @@ describe('getDiamondsWallet', () => {
     expect(second.balance).toBe(0);
   });
 });
+
+describe('getRelationshipOffers', () => {
+  it('returns the two server-priced invitation cards with their terms', async () => {
+    const offers = await fixtureDataSource.getRelationshipOffers();
+
+    expect(offers.offers).toMatchObject([
+      { id: 'couple', label: 'Couple', coins: 10000, validityHours: 24 },
+      { id: 'friend', label: 'Friend', coins: 6000, validityHours: 24 },
+    ]);
+  });
+
+  it('serves a fresh copy each time; prices are not client-mutable', async () => {
+    const first = await fixtureDataSource.getRelationshipOffers();
+    first.offers[0].coins = 1;
+
+    const second = await fixtureDataSource.getRelationshipOffers();
+    expect(second.offers[0].coins).toBe(10000);
+  });
+});

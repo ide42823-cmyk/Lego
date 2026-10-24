@@ -20,6 +20,7 @@ import { ProfileCover } from '@/components/profile/profile-cover';
 import { ProfileHonorTab } from '@/components/profile/profile-honor-tab';
 import { ProfileIdentity } from '@/components/profile/profile-identity';
 import { ProfileRelationshipsTab } from '@/components/profile/profile-relationships-tab';
+import { RelationshipTypeSheet } from '@/components/relationship/relationship-type-sheet';
 import { ActionMenu, type ActionMenuItem } from '@/components/ui/action-menu';
 import { Divider } from '@/components/ui/divider';
 import { IconButton } from '@/components/ui/icon-button';
@@ -28,7 +29,7 @@ import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/states'
 import { useToast } from '@/components/ui/toast';
 import { Spacing } from '@/constants/theme';
 import { fixtureDataSource } from '@/core/data/repository';
-import type { ProfileInfoRow, UserProfile } from '@/core/data/types';
+import type { ProfileInfoRow, RelationshipTypeKey, UserProfile } from '@/core/data/types';
 import { useAsync } from '@/hooks/use-async';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -83,6 +84,9 @@ export default function ProfileScreen() {
   const [greeting, setGreeting] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [compact, setCompact] = useState(false);
+  /** The relationship chooser (references 016/017/020) and its selected kind. */
+  const [relationshipOpen, setRelationshipOpen] = useState(false);
+  const [relationshipType, setRelationshipType] = useState<RelationshipTypeKey>('friend');
   /** Optimistic like state, keyed by post. Reconciles to the confirmed counts. */
   const [likes, setLikes] = useState<Record<string, { likeCount: number; likedByMe: boolean }>>({});
 
@@ -92,6 +96,13 @@ export default function ProfileScreen() {
   const compactFlag = useSharedValue(false);
 
   const state = useAsync(() => fixtureDataSource.getProfile(userId), `profile:${userId}`);
+  /** The chooser's server-priced invitation cards, read up front. */
+  const offersState = useAsync(
+    () => fixtureDataSource.getRelationshipOffers(),
+    'relationship-offers',
+  );
+  /** The chooser pairs the viewer with the visited member on its card. */
+  const meState = useAsync(() => fixtureDataSource.getMe(), 'profile-viewer');
 
   const compactThreshold = Math.max(0, coverHeight - (insets.top + COMPACT_BAR_HEIGHT));
 
@@ -344,7 +355,11 @@ export default function ProfileScreen() {
               onOpenRecord={(record) =>
                 notYet(`${record.kind === 'couple' ? 'Couple' : 'Friend'} details`)
               }
-              onInvite={() => notYet('Relationship invitations')}
+              onInvite={() =>
+                offersState.status === 'ready' && meState.status === 'ready'
+                  ? (setRelationshipType('friend'), setRelationshipOpen(true))
+                  : notYet('Relationship invitations')
+              }
             />
           ) : (
             <ProfileAboutTab
@@ -396,6 +411,25 @@ export default function ProfileScreen() {
         onSelect={handleMenuSelect}
         onClose={() => setMenuOpen(false)}
       />
+
+      {offersState.status === 'ready' && meState.status === 'ready' ? (
+        <RelationshipTypeSheet
+          visible={relationshipOpen}
+          viewer={{ displayName: meState.data.displayName, avatarUrl: meState.data.avatarUrl }}
+          person={{ displayName: profile.displayName, avatarUrl: profile.avatarUrl }}
+          offers={offersState.data.offers}
+          selected={relationshipType}
+          onSelect={setRelationshipType}
+          onInvite={(offer) => {
+            setRelationshipOpen(false);
+            notYet(
+              `Inviting ${profile.displayName} as your ${offer.label.toLowerCase()}`,
+            );
+          }}
+          onHelp={() => notYet('The relationship help centre')}
+          onClose={() => setRelationshipOpen(false)}
+        />
+      ) : null}
     </View>
   );
 }

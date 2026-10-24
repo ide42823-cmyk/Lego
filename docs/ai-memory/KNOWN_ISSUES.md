@@ -24,3 +24,6 @@
 Symptom: after a background `expo start` run is cancelled at server restart, its log file stays locked (a new run with the same log path fails with "being used by another process"), and a fresh `--clear` run can bind port 8081 but never respond ("Failed to start watch mode"; requests time out).
 Workaround: kill the PID listening on 8081 (Get-NetTCPConnection -LocalPort 8081), restart WITHOUT `--clear`, and use a new log path. Verified working 2026-10-24.
 
+Recurrence 2026-10-24 (T015 capture): the long-running no-`--clear` server bound and even logged "Web Bundled", but had silently stopped serving new+changed modules — every route touched by the new code (/person/user-2 AND a previously-verified /wallet/diamonds) rendered BLANK with no console errors while untouched pages still booted. Diagnosis tip: when captures return empty-bodied pages, run typecheck/lint first, then test a previously-verified route before touching code — a healthy server shows it, a hung watcher does not. Same workaround applied.
+
+

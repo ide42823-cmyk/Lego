@@ -20,6 +20,7 @@ import {
   FIXTURE_LIVE_ROOMS,
   FIXTURE_GIFT_CATALOG,
   FIXTURE_DIAMONDS_WALLET,
+  FIXTURE_RELATIONSHIP_OFFERS,
   FIXTURE_ROOM_INBOX_SYSTEM,
   FIXTURE_ROOM_TOOLS,
   FIXTURE_ME,
@@ -48,6 +49,7 @@ import type {
   PeopleFilterOptions,
   PeopleFilters,
   PeopleMode,
+  RelationshipOffers,
   RoomCategory,
   RoomFeedItem,
   RoomMode,
@@ -105,6 +107,8 @@ export interface DataSource {
   getRoomInbox(): Promise<RoomInboxModel>;
   /** The My Diamonds page: server-owned balance + the exchange ladder. */
   getDiamondsWallet(): Promise<DiamondsWallet>;
+  /** The relationship chooser's invitation-card ladder. */
+  getRelationshipOffers(): Promise<RelationshipOffers>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -522,6 +526,10 @@ export const fixtureDataSource: DataSource = {
 
   getDiamondsWallet() {
     return simulate(() => structuredClone(FIXTURE_DIAMONDS_WALLET));
+  },
+
+  getRelationshipOffers() {
+    return simulate(() => structuredClone(FIXTURE_RELATIONSHIP_OFFERS));
   },
 
   listConversations(filter, request) {
