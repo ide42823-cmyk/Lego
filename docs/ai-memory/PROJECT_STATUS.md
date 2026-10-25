@@ -18,7 +18,7 @@
 
 ## Current state
 - Current phase: **Page-by-page front-end passes** (the historical Phase 0 audit is complete; see `PHASE_0_PRELIMINARY_AUDIT_AND_SETUP.md` and `docs/decisions/`).
-- Git branch/commit at last verification: `main`, through `84eb5fe` (T007 Room Details ce5fd27 + gitignore 84eb5fe), pushed to `origin/main`.
+- Git branch/commit at last verification: `main`, through `92990db` (T016-T019 membership hub + room polish + VIP rework), pushed to `origin/main`.
 - Approved work in progress: **None.** Last completed: T008 gift panel, committed as `45b8361` and pushed (T009).
 - Pending device verifications (no approval needed, next cable session): room shell `04-room-device.png` + a details-sheet deep-link pass.
 - Next proposed task (needs approval): commit T008; then pick - room tools drawer (reference 013, the `apps` button) or a strictly-backend page.
@@ -88,6 +88,7 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Next proposed task (needs approval): the per-tier membership detail pages (shared template, references 044-053) or the Aristocracy hub (references 038/039).
 
 ## 2026-10-25 (post-T019, same combined commit gate as T016 + T017 + T018)
+- Committed `92990db` "Membership T016-T019: SVIP/VIP family hub, live-room conversation polish, VIP backdrop, badges and five-rung rail against references 015/040/045-050" (28 files) and pushed to `origin/main`.
 - Last completed: **T019 VIP backdrop, badges, rail and display face** - the supplied `Sprites/background/vip_background.png` now paints the whole screen behind the page (opacity 33% at VIP1-4, 66% at VIP5-8, 100% from VIP9, with a 42%-tall wash into the page colour); the supplied `Sprites/Badges/VIP Crown Badge Collection.png` replaces the placeholder crest (one 4 x 4 sheet cropped per rung by `membership-badge.tsx`, used in the hero and the Exclusive Badge tile); the rail always shows five rungs clamped to the ladder's ends and draws its names in the supplied `calfimer-masquet` face at 14; Recharge is a 12-radius rect and the lock/current/store chips are 6-radius. The full sixteen-frame XP ladder is now pinned exactly (16000 … 8742264000) and printed as raw digits, matching the references.
 - Fixture/data: `MembershipVipHub.hero.backgroundUrl` carries `asset:media/backgrounds/vip-hero.png`; `membership-crest.tsx` deleted; `mediaRef` accepts a file extension; display face registered in `typography.ts` and loaded in `_layout.tsx`.
 - Verification: typecheck PASS, lint PASS, jest **34 suites / 265 tests PASS**; captures `34-vip1-top.png` … `38-vip16-expanded-bottom.png` show the five-marker rail (VIP1-5, VIP12-16), the badge art, the new radii and the tiered backdrop; a CDP probe confirms the display face is loaded and applied; zero console problems. **Device pass blocked:** no ADB device attached this session.
