@@ -155,6 +155,42 @@ export function formatElapsedLong(iso: string, now: number = Date.now()): string
   return `Active ${date.getDate()} ${SHORT_MONTHS[date.getMonth()]}`;
 }
 
+/**
+ * A post's age in the Moments feed's own shape: `Just now`, `5 minutes ago`,
+ * `16 hours ago`, `2 days ago`, then a bare `MM-DD` for anything older.
+ *
+ * The wording matches `formatElapsedLong`, but a post is not a presence
+ * statement: past a week the reference prints only the date, with no `Active`
+ * prefix. `now` is injectable so tests do not depend on the wall clock.
+ */
+export function formatMomentStamp(iso: string, now: number = Date.now()): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) {
+    return '';
+  }
+
+  const elapsed = Math.max(0, now - then);
+  if (elapsed < MINUTE) {
+    return 'Just now';
+  }
+
+  const plural = (value: number, unit: string) => `${value} ${unit}${value === 1 ? '' : 's'} ago`;
+
+  if (elapsed < HOUR) {
+    return plural(Math.floor(elapsed / MINUTE), 'minute');
+  }
+  if (elapsed < DAY) {
+    return plural(Math.floor(elapsed / HOUR), 'hour');
+  }
+  if (elapsed < 7 * DAY) {
+    return plural(Math.floor(elapsed / DAY), 'day');
+  }
+
+  const date = new Date(then);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 /** `1234` → `1.2k`. Used for follower and participant counts. */
 export function formatCompactCount(value: number): string {
   if (!Number.isFinite(value)) {

@@ -761,6 +761,16 @@ export interface MomentPost {
   avatarUrl?: string;
   /** The author's avatar frame, mirroring their directory entry. */
   avatarFrame?: AvatarFrameKey;
+  /**
+   * Author presence, mirrored from the same member's directory row. Optional:
+   * an absent value draws no dot rather than claiming the author is offline.
+   */
+  authorOnline?: boolean;
+  /**
+   * Bucketed distance from the viewer, mirrored from the author's directory
+   * row. The feed prints it beside the post's age; it is never precise.
+   */
+  distanceKm?: number;
   badges: UserBadge[];
   text: string;
   mediaUrl?: string;

@@ -310,8 +310,10 @@ function buildUsers(count: number): UserSummary[] {
       badges,
       isOnline: random() > 0.45,
       // Coarse buckets only. The reference prints a rough distance on every
-      // directory row, and a bucket is never a position.
-      distanceKm: 2 + Math.floor(distance() * 90) * 11,
+      // directory row, and a bucket is never a position. Kept inside the
+      // directory's own 0-100km filter, since a "nearby" member cannot sit
+      // hundreds of kilometres away.
+      distanceKm: 1 + distance() * 95,
       language: language() > 0.5 ? 'ar' : 'en',
     };
   });
@@ -375,6 +377,12 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
     const gender = author.gender ?? 'female';
     const posts = POST_PHOTOS[gender];
     const hasMedia = index % 3 !== 1;
+    // Ages spread over a month and are drawn from the shared stream. The first
+    // post is minutes old so the feed opens on the reference's "5 minutes ago"
+    // form, and later ones fall past a week so its bare `08-31` form appears.
+    // The draw happens for every index, so widening the spread cannot renumber
+    // any other generated field.
+    const ageDays = random() * 30;
     return {
       id: `moment-${index + 1}`,
       authorId: author.id,
@@ -385,6 +393,8 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
       authorGender: author.gender,
       avatarUrl: author.avatarUrl,
       avatarFrame: author.avatarFrame,
+      authorOnline: author.isOnline,
+      distanceKm: author.distanceKm,
       badges: author.badges,
       hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
       hasMedia,
@@ -392,7 +402,7 @@ function buildMoments(users: UserSummary[], count: number): MomentPost[] {
       // face as the author's post.
       mediaUrl: hasMedia ? posts[index % posts.length] : undefined,
       text: pick(random, MOMENT_TEXTS),
-      createdAt: new Date(NOW - Math.floor(random() * 3 * DAY)).toISOString(),
+      createdAt: new Date(index === 0 ? NOW - 5 * 60_000 : NOW - ageDays * DAY).toISOString(),
       likeCount: Math.floor(random() * 320),
       commentCount: Math.floor(random() * 48),
       likedByMe: false,
@@ -1925,6 +1935,8 @@ function buildProfileMoments(user: UserSummary, random: () => number): MomentPos
       authorGender: user.gender,
       avatarUrl: user.avatarUrl,
       avatarFrame: user.avatarFrame,
+      authorOnline: user.isOnline,
+      distanceKm: user.distanceKm,
       badges: user.badges,
       hashtag: MOMENT_HASHTAGS[index % MOMENT_HASHTAGS.length],
       hasMedia,

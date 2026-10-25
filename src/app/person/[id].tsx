@@ -334,7 +334,9 @@ export default function ProfileScreen() {
                 />
               </View>
             ) : (
-              <View style={styles.padded}>
+              // No horizontal padding here: the card owns it so the rule between
+              // posts can run edge to edge, as in reference 024.
+              <View>
                 {posts.map((post) => (
                   <View key={post.id}>
                     <MomentCard

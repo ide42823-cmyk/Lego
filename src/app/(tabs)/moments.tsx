@@ -157,6 +157,8 @@ const styles = StyleSheet.create({
   tabs: { flex: 1, paddingStart: Spacing.two },
   actions: { flexDirection: 'row', alignItems: 'center' },
   padded: { paddingHorizontal: Spacing.three },
-  listContent: { paddingHorizontal: Spacing.three, paddingBottom: Spacing.six },
-  footer: { paddingTop: Spacing.three },
+  // The cards carry their own horizontal padding so the rule between posts can
+  // run edge to edge, as it does in the reference feed.
+  listContent: { paddingBottom: Spacing.six },
+  footer: { paddingTop: Spacing.three, paddingHorizontal: Spacing.three },
 });

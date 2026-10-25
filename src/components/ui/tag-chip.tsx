@@ -17,10 +17,22 @@ export interface TagChipProps extends ViewProps {
    * `medium` is the profile tag pill, which is a full-height rounded chip.
    */
   size?: 'small' | 'medium';
+  /** Overrides the leading glyph's colour, e.g. the purple `#` on a hashtag. */
+  emojiColor?: string;
+  /** Overrides the label colour when the chip needs more weight than metadata. */
+  labelColor?: string;
 }
 
 /** Static classification chip. Read-only — never a control. */
-export function TagChip({ label, emoji, size = 'small', style, ...rest }: TagChipProps) {
+export function TagChip({
+  label,
+  emoji,
+  size = 'small',
+  emojiColor,
+  labelColor,
+  style,
+  ...rest
+}: TagChipProps) {
   const theme = useTheme();
   const medium = size === 'medium';
 
@@ -35,14 +47,20 @@ export function TagChip({ label, emoji, size = 'small', style, ...rest }: TagChi
       {...rest}
     >
       {emoji ? (
-        <Text style={[styles.emoji, medium && styles.emojiMedium]} accessible={false}>
+        <Text
+          style={[styles.emoji, medium && styles.emojiMedium, emojiColor ? { color: emojiColor } : null]}
+          accessible={false}
+        >
           {emoji}
         </Text>
       ) : null}
       <ThemedText
         type="small"
-        themeColor="textSecondary"
-        style={medium ? styles.labelMedium : styles.label}
+        themeColor={labelColor ? undefined : 'textSecondary'}
+        style={[
+          medium ? styles.labelMedium : styles.label,
+          labelColor ? { color: labelColor } : null,
+        ]}
       >
         {label}
       </ThemedText>
@@ -59,7 +77,9 @@ const styles = StyleSheet.create({
   },
   medium: {
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+    // The reference's topic pill is a 23dp capsule on 13dp type, not a
+    // full-height button.
+    paddingVertical: Spacing.one,
     borderRadius: Radius.pill,
   },
   label: { fontSize: 11, lineHeight: 16, fontWeight: '600' },

@@ -5,6 +5,7 @@ import {
   formatDistanceKm,
   formatElapsedLong,
   formatInboxTime,
+  formatMomentStamp,
   formatRelativeTime,
 } from './index';
 
@@ -43,6 +44,40 @@ describe('formatRelativeTime', () => {
 
   it('returns an empty string for an unparseable timestamp', () => {
     expect(formatRelativeTime('not-a-date', NOW)).toBe('');
+  });
+});
+
+describe('formatMomentStamp', () => {
+  it('opens with "Just now" under a minute', () => {
+    expect(formatMomentStamp(at(45 * SECOND), NOW)).toBe('Just now');
+  });
+
+  it('counts minutes and hours in words', () => {
+    expect(formatMomentStamp(at(5 * MINUTE), NOW)).toBe('5 minutes ago');
+    expect(formatMomentStamp(at(16 * HOUR), NOW)).toBe('16 hours ago');
+  });
+
+  it('keeps a singular unit singular', () => {
+    expect(formatMomentStamp(at(MINUTE), NOW)).toBe('1 minute ago');
+    expect(formatMomentStamp(at(HOUR), NOW)).toBe('1 hour ago');
+    expect(formatMomentStamp(at(DAY), NOW)).toBe('1 day ago');
+  });
+
+  it('counts days up to a week', () => {
+    expect(formatMomentStamp(at(2 * DAY), NOW)).toBe('2 days ago');
+  });
+
+  it('prints a bare MM-DD past a week, with no "Active" prefix', () => {
+    // 18 Oct minus 48 days is 31 Aug, the reference's own old-post stamp.
+    expect(formatMomentStamp(at(48 * DAY), NOW)).toBe('08-31');
+  });
+
+  it('treats a future timestamp as "Just now"', () => {
+    expect(formatMomentStamp(new Date(NOW + HOUR).toISOString(), NOW)).toBe('Just now');
+  });
+
+  it('returns an empty string for an unparseable timestamp', () => {
+    expect(formatMomentStamp('not-a-date', NOW)).toBe('');
   });
 });
 
