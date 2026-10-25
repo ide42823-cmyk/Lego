@@ -102,8 +102,9 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Pending device verifications (no approval needed, next cable session): room shell, details sheet, gift panel, tools drawer, chat sheet, icons swap, wallet page (header fix included), relationship chooser, membership hub (both families, incl. the new backdrop/badges/display face), room conversation polish.
 - Next proposed task (needs approval): the per-tier membership detail pages (shared template, references 044-053) or the Aristocracy hub (references 038/039).
 
-## 2026-10-25 (post-T021, awaiting the commit gate)
+## 2026-10-25 (post-T021, committed 67e14c4)
 
+- Committed `67e14c4` "Aristocracy T021: rank ladder and shared privilege catalogue against references 038/039" (14 files, +884/-1) and pushed to `origin/main`; working tree clean.
 - Last completed: **T021 Aristocracy hub (references 038/039)** - `/aristocracy` is a fixed night-and-gold hero (back / "Aristocracy" / help bar, horizontally scrolling Knight-to-Duke tabs with a gold dash, our own shield crest with one metal per rung, the rung name in gold) over a white rounded sheet: "Exclusive Privileges x/20" between laurels, a three-column peach tile grid where tiles above the viewed rung wash out, and a fixed footer with the rung's coin price and the gold Activate pill. The Me wallet's Aristocracy tile now opens it.
 - Fixture honesty: the dashboard grants VIP only, so `currentRank` is null and every rung offers Activate; a held rung would render "Active" and cannot be re-activated (covered by a test). Knight 7/20 + 7840 coins and Viscount 10/20 + 22400 coins are the reference's own figures; Count/Marquis/Duke and eleven of the twenty catalogue labels are fixture values in the same shape.
 - Verification: typecheck PASS, lint PASS, jest **35 suites / 272 tests PASS**; captures `39-aristocracy-knight.png` (7/20, 7840, thirteen tiles locked), `40-aristocracy-viscount.png` (10/20, 22400, ten locked), `41-aristocracy-duke.png` (20/20, 84000, none locked), `42-aristocracy-gate.png` (activation toast); zero console problems, no overflow.
