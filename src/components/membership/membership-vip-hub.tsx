@@ -12,7 +12,7 @@ import type {
   MembershipStoreItem,
   MembershipVipHub,
 } from '@/core/data/types';
-import { imageSource } from '@/core/media/images';
+import { imageSource, frameSource } from '@/core/media/images';
 
 import { GradientFill } from '../ui/gradient-fill';
 import { Icon, type IconName } from '../ui/icon';
@@ -27,7 +27,6 @@ const INK = {
   card: '#241A13',
   cardLocked: '#211811',
   cardBorder: 'rgba(201, 169, 110, 0.10)',
-  panel: '#221812',
   cream: '#F5E9D6',
   creamSoft: '#E7D8C3',
   muted: '#8B7A68',
@@ -62,13 +61,13 @@ const GLYPHS: Record<MembershipBenefitGlyph, IconName> = {
   silence: 'ghost',
 };
 
-/** Our own art for store categories — the reference's product renders stay out. */
+/** Our own art for store categories â€” the reference's product renders stay out. */
 const CATEGORY_GLYPHS: Record<string, IconName> = {
   Vehicles: 'gift',
   Frames: 'crown',
 };
 
-/** Rung order helper: "VIP7" → 7. Labels are server strings, never computed copy. */
+/** Rung order helper: "VIP7" â†’ 7. Labels are server strings, never computed copy. */
 function rungScore(label: string): number {
   const digits = label.replace(/\D/g, '');
   return digits ? Number(digits) : 0;
@@ -103,7 +102,7 @@ export interface MembershipVipHubViewProps {
  *
  * The ladder, the XP targets, the unlock rungs, the points and every price are
  * server-owned entitlement data. Nothing on this page grants a tier, spends
- * points or starts a purchase — those presses report to the page's gate.
+ * points or starts a purchase â€” those presses report to the page's gate.
  */
 export function MembershipVipHubView({
   hub,
@@ -248,11 +247,11 @@ export function MembershipVipHubView({
         </View>
 
         <View style={styles.benefitsHeader}>
-          <Icon name="sparkle" size={13} color={INK.muted} />
+          <Icon name="laurel-left" size={18} color={INK.muted} strokeWidth={1.6} />
           <Text style={styles.benefitsTitle}>
             {`${selectedTier.label} Benefits (${unlockedCount}/${hub.benefits.length})`}
           </Text>
-          <Icon name="sparkle" size={13} color={INK.muted} />
+          <Icon name="laurel-right" size={18} color={INK.muted} strokeWidth={1.6} />
         </View>
 
         <View style={styles.benefitGrid}>
@@ -446,6 +445,18 @@ function BenefitArt({ benefit, level }: { benefit: MembershipBenefit; level: str
 
   if (benefit.art === 'crest') {
     return <MembershipBadge level={level} width={62} />;
+  }
+
+  if (benefit.art === 'frame') {
+    // The avatar frames are already bundled for profiles; the gold one is the
+    // membership frame the reference draws in this tile.
+    return (
+      <Image
+        source={frameSource('wings')}
+        style={styles.frameArt}
+        contentFit="contain"
+      />
+    );
   }
 
   if (benefit.art === 'entry') {
@@ -771,6 +782,10 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     fontWeight: '900',
   },
+  frameArt: {
+    width: 64,
+    height: 64,
+  },
   entryArt: {    alignItems: 'center',
     gap: 3,
   },
@@ -873,10 +888,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: Spacing.four,
     marginTop: Spacing.two,
-    paddingHorizontal: Spacing.three,
+    paddingHorizontal: Spacing.one,
     paddingVertical: Spacing.two,
-    borderRadius: 16,
-    backgroundColor: INK.panel,
   },
   pointsLeft: {
     flexDirection: 'row',
@@ -992,5 +1005,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
 
 

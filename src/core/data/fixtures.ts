@@ -1184,7 +1184,7 @@ export const FIXTURE_MEMBERSHIP_HUBS: Record<MembershipFamilyKey, MembershipHub>
       { id: 'vip-viewed', label: 'Who viewed me', glyph: 'eye', unlockLevel: 'VIP1' },
       { id: 'vip-following', label: 'More Following', glyph: 'user-check', unlockLevel: 'VIP1' },
       { id: 'vip-create-room', label: 'Create chat room', glyph: 'house', unlockLevel: 'VIP1' },
-      { id: 'vip-frame', label: 'Exclusive Frame', glyph: 'crown', unlockLevel: 'VIP1' },
+      { id: 'vip-frame', label: 'Exclusive Frame', art: 'frame', unlockLevel: 'VIP1' },
       { id: 'vip-badge', label: 'Exclusive Badge', art: 'crest', unlockLevel: 'VIP1' },
       { id: 'vip-entry', label: 'Entry Effect', art: 'entry', unlockLevel: 'VIP1' },
       { id: 'vip-background', label: 'Room Background', glyph: 'image', unlockLevel: 'VIP1' },

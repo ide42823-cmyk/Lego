@@ -493,6 +493,7 @@ export interface MembershipTierLevel {
 export type MembershipBenefitArt =
   | 'label'
   | 'crest'
+  | 'frame'
   | 'entry'
   | 'room-followed'
   | 'room-joined'

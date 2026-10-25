@@ -230,3 +230,10 @@
 - **Result:** complete on web; device confirmation pending (no device attached).
 - **Next proposal:** per-tier membership detail pages (references 044-053) or the Aristocracy hub (038/039); per user's pick.
 - **Stopped for approval:** yes (the same combined gate now covers T016 + T017 + T018 + T019).
+
+### 2026-10-25 - T020: VIP benefit ornaments, the real frame art and a flat points row
+- **Approval/scope:** the three fidelity follow-ups offered with the T019 report, taken as approved: laurel ornaments around the benefits header, the supplied gold frame in the "Exclusive Frame" tile, and the flat My Points row the 17:02 reference draws. Display-only; no new press affordances.
+- **Files changed:** `src/components/ui/icon.tsx` (+ `laurel-left` / `laurel-right` meanings over hugeicons' `LaurelWreathLeft02` / `Right02`), `src/core/data/types.ts` (`MembershipBenefitArt` gains `frame`), `src/core/data/fixtures.ts` and `membership-vip-hub.test.tsx` (the frame benefit now carries `art: 'frame'`), `src/components/membership/membership-vip-hub.tsx` (laurels flank the counted title at 18; the frame tile draws `frameSource('wings')` - the gold ring already bundled for avatar frames, so no new asset; the points row loses its panel colour and 16-radius, and the now-unused `INK.panel` is gone).
+- **Verification actually run:** typecheck PASS, lint PASS, jest **34 suites / 265 tests PASS**; web captures `34-vip1-top.png`, `35-vip3-top.png`, `36-vip3-expanded-bottom.png` show the laurels at both counts, the gold ring in the frame tile, and the points row sitting flat on the page with the gem and `0` at the right; zero console problems. Device pass still queued (no ADB device attached).
+- **Result:** complete on web.
+- **Stopped for approval:** yes (commit gate for T020).

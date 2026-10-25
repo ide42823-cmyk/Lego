@@ -43,6 +43,8 @@ import Home01Icon from '@hugeicons/core-free-icons/Home01Icon';
 import Home04Icon from '@hugeicons/core-free-icons/Home04Icon';
 import InboxIcon from '@hugeicons/core-free-icons/InboxIcon';
 import Image01Icon from '@hugeicons/core-free-icons/Image01Icon';
+import LaurelWreathLeft02Icon from '@hugeicons/core-free-icons/LaurelWreathLeft02Icon';
+import LaurelWreathRight02Icon from '@hugeicons/core-free-icons/LaurelWreathRight02Icon';
 import Location01Icon from '@hugeicons/core-free-icons/Location01Icon';
 import LockIcon from '@hugeicons/core-free-icons/LockIcon';
 import MarsIcon from '@hugeicons/core-free-icons/MarsIcon';
@@ -149,6 +151,8 @@ export type IconName =
   | 'trending'
   | 'flower'
   | 'sparkle'
+  | 'laurel-left'
+  | 'laurel-right'
   | 'globe'
   | 'video'
   | 'mic'
@@ -246,6 +250,8 @@ const ICONS: Record<IconName, IconSvgElement> = {
   trending: FlameIcon,
   flower: FlowerIcon,
   sparkle: SparkleIcon,
+  'laurel-left': LaurelWreathLeft02Icon,
+  'laurel-right': LaurelWreathRight02Icon,
   globe: Globe02Icon,
   video: Video01Icon,
   mic: Mic01Icon,

@@ -28,7 +28,7 @@ const hub: MembershipVipHub = {
     { id: 'b-viewed', label: 'Who viewed me', glyph: 'eye', unlockLevel: 'VIP1' },
     { id: 'b-following', label: 'More Following', glyph: 'user-check', unlockLevel: 'VIP1' },
     { id: 'b-room', label: 'Create chat room', glyph: 'house', unlockLevel: 'VIP1' },
-    { id: 'b-frame', label: 'Exclusive Frame', glyph: 'crown', unlockLevel: 'VIP1' },
+    { id: 'b-frame', label: 'Exclusive Frame', art: 'frame', unlockLevel: 'VIP1' },
     { id: 'b-badge', label: 'Exclusive Badge', art: 'crest', unlockLevel: 'VIP1' },
     { id: 'b-nickname', label: 'More nickname changes', glyph: 'pencil', unlockLevel: 'VIP2' },
     { id: 'b-lucky', label: 'Send lucky bag', glyph: 'gift', unlockLevel: 'VIP3' },
