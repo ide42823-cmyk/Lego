@@ -113,8 +113,9 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Next proposed task (needs approval): pick the next surface (Moments/profile fidelity or another gated backend-phase page), or run the queued device pass once the phone is reconnected.
 - KNOWN_ISSUES #14 records the dev-only Expo FAB overlay in web captures.
 
-## 2026-10-25 (post-T022, awaiting the commit gate)
+## 2026-10-25 (post-T022, committed fb6bee4)
 
+- Committed `fb6bee4` "Aristocracy T022: six-rank ladder, twenty-label catalogue, exact reference prices" (9 files, +173/-63) and pushed to `origin/main`; working tree clean.
 - Last completed: **T022 Aristocracy completed against references 029-039** - the ladder is six rungs, not five: Knight 7/20 (7840), Viscount 10/20 (22400), Count 11/20 (84000), Marquis 14/20 (280000), Duke 16/20 (700000), King 20/20 (1820000), every figure read off its own captured frame. The catalogue is the reference's own twenty labels in its grid order (the eleven after Exclusive Gifts are Incognito Access, Online Invisibility, Room Bubble, Full-room Access, Hide Distance, Stealth Mode, Invisible Entry, Golden Name, Animated Nickname, Anti-banning, Kick Protection), with the unlock prefix 7 + 3 + 1 + 3 + 2 + 4 = 20. The King rung gets its own gold-to-red metal; Count is royal blue and Duke magenta, matching their frames. The rank tab row now pans on selection so the chosen rung stays visible (King was previously selected off-screen).
 - Supersedes T021's five-rung ladder and eleven invented labels; the T021 entry remains as history.
 - Verification: typecheck PASS, lint PASS, jest **35 suites / 272 tests PASS**; captures `39-aristocracy-knight.png` (7/20, 7840, 13 locked), `40-aristocracy-viscount.png` (10/20, 22400, Incognito live), `41-aristocracy-count.png` (11/20, 84000, Online Invisibility live), `42-aristocracy-duke.png` (16/20, 700000, Invisible Entry live, Golden Name locked), `43-aristocracy-king.png` (20/20, 1820000, row panned to King), `44-aristocracy-gate.png`; zero console problems, no overflow.
