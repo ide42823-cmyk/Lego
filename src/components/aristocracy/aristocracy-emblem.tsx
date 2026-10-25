@@ -23,10 +23,11 @@ export interface AristocracyMetal {
 
 export const ARISTOCRACY_METALS: Record<string, AristocracyMetal> = {
   knight: { core: '#5ACB86', deep: '#1E7A46', edge: '#EAFFF1', gem: '#B8F5C9' },
-  viscount: { core: '#59ABEC', deep: '#1D5F9E', edge: '#E9F6FF', gem: '#B6DCFF' },
-  count: { core: '#A377EC', deep: '#5B2FA8', edge: '#F3EBFF', gem: '#D2B8FF' },
-  marquis: { core: '#E87A6E', deep: '#9E2E26', edge: '#FFEEEA', gem: '#FFC0B4' },
-  duke: { core: '#E6BC5C', deep: '#9C6E14', edge: '#FFF7E0', gem: '#FFE3A0' },
+  viscount: { core: '#7EC4F2', deep: '#3A7FB0', edge: '#EAF7FF', gem: '#C6E7FF' },
+  count: { core: '#4E7FE8', deep: '#24459C', edge: '#E9EFFF', gem: '#A9C0FF' },
+  marquis: { core: '#A377EC', deep: '#5B2FA8', edge: '#F3EBFF', gem: '#D2B8FF' },
+  duke: { core: '#E86FA8', deep: '#9C2E63', edge: '#FFEAF4', gem: '#FFB6D6' },
+  king: { core: '#E8C15C', deep: '#A02A22', edge: '#FFF4D2', gem: '#FFD98A' },
 };
 
 const FALLBACK: AristocracyMetal = ARISTOCRACY_METALS.knight as AristocracyMetal;

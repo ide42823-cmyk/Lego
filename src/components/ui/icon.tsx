@@ -96,6 +96,10 @@ import GridIcon from '@hugeicons/core-free-icons/GridIcon';
 import Car03Icon from '@hugeicons/core-free-icons/Car03Icon';
 import IdCardIcon from '@hugeicons/core-free-icons/IdCardIcon';
 import CircleQuestionMarkIcon from '@hugeicons/core-free-icons/CircleQuestionMarkIcon';
+import IncognitoIcon from '@hugeicons/core-free-icons/IncognitoIcon';
+import EyeOffIcon from '@hugeicons/core-free-icons/EyeOffIcon';
+import UserBlock01Icon from '@hugeicons/core-free-icons/UserBlock01Icon';
+import Door01Icon from '@hugeicons/core-free-icons/Door01Icon';
 
 /**
  * The app's icon vocabulary.
@@ -216,7 +220,11 @@ export type IconName =
   // Aristocracy privilege matrix
   | 'vehicle'
   | 'id-card'
-  | 'help';
+  | 'help'
+  | 'incognito'
+  | 'eye-off'
+  | 'user-block'
+  | 'door';
 
 const ICONS: Record<IconName, IconSvgElement> = {
   home: Home01Icon,
@@ -319,6 +327,10 @@ const ICONS: Record<IconName, IconSvgElement> = {
   vehicle: Car03Icon,
   'id-card': IdCardIcon,
   help: CircleQuestionMarkIcon,
+  incognito: IncognitoIcon,
+  'eye-off': EyeOffIcon,
+  'user-block': UserBlock01Icon,
+  door: Door01Icon,
 };
 
 export interface IconProps {

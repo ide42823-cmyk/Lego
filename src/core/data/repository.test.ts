@@ -934,7 +934,7 @@ describe('getMembershipHub', () => {
 });
 
 describe('getAristocracyHub', () => {
-  it('serves the five ranks with the reference prices and counts', async () => {
+  it('serves the six ranks with the reference prices and counts', async () => {
     const hub = await fixtureDataSource.getAristocracyHub();
 
     expect(hub.ranks.map((rank) => rank.label)).toEqual([
@@ -943,10 +943,14 @@ describe('getAristocracyHub', () => {
       'Count',
       'Marquis',
       'Duke',
+      'King',
     ]);
-    // The two captured rungs carry the reference's own figures.
-    expect(hub.ranks[0]).toMatchObject({ priceCoins: 7840, validityDays: 7, unlockedCount: 7 });
-    expect(hub.ranks[1]).toMatchObject({ priceCoins: 22400, validityDays: 7, unlockedCount: 10 });
+    // Every price and count is read off the six captured rank states.
+    expect(hub.ranks.map((rank) => rank.priceCoins)).toEqual([
+      7840, 22400, 84000, 280000, 700000, 1820000,
+    ]);
+    expect(hub.ranks.map((rank) => rank.unlockedCount)).toEqual([7, 10, 11, 14, 16, 20]);
+    expect(hub.ranks.every((rank) => rank.validityDays === 7)).toBe(true);
     // The viewer holds no rank while the dashboard grants VIP only.
     expect(hub.currentRank).toBeNull();
   });
@@ -970,13 +974,16 @@ describe('getAristocracyHub', () => {
       'Room Lock',
       'Advanced Filter',
     ]);
-    // The two tiles the Knight frame washes out are the Viscount pair.
+    // Viscount adds the name card, the gifts and incognito access.
     const viscount = hub.privileges.filter((privilege) => privilege.unlockRank === 'viscount');
     expect(viscount.map((privilege) => privilege.label)).toEqual([
       'Aristocrat Name Card',
       'Exclusive Gifts',
-      'Priority Entry',
+      'Incognito Access',
     ]);
+    // Count adds exactly one, which is why its frame lights Online Invisibility.
+    const count = hub.privileges.filter((privilege) => privilege.unlockRank === 'count');
+    expect(count.map((privilege) => privilege.label)).toEqual(['Online Invisibility']);
 
     // Every count matches the prefix it describes.
     const rankOrder = hub.ranks.map((rank) => rank.key);

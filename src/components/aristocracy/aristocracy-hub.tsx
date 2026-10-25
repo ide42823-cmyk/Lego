@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -6,6 +6,7 @@ import {
   Text,
   useWindowDimensions,
   View,
+  type ScrollViewInstance,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
@@ -58,16 +59,17 @@ const GLYPHS: Record<AristocracyPrivilegeGlyph, IconName> = {
   filter: 'filter',
   'name-card': 'id-card',
   gifts: 'gift',
-  priority: 'user-check',
-  spotlight: 'star',
-  visitors: 'visitors',
-  stickers: 'smile',
-  accent: 'effects',
-  monthly: 'calendar',
-  entrance: 'megaphone',
+  incognito: 'incognito',
+  invisible: 'eye-off',
   bubble: 'comment',
-  attendant: 'account',
-  hall: 'house',
+  'full-room': 'house',
+  distance: 'address',
+  stealth: 'ghost',
+  'invisible-entry': 'door',
+  'golden-name': 'id-card',
+  nickname: 'pencil',
+  'anti-ban': 'shield',
+  'kick-protection': 'user-block',
 };
 
 export interface AristocracyHubViewProps {
@@ -107,6 +109,15 @@ export function AristocracyHubView({
   // rather than a flat panel.
   const glowId = `aristo-glow-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
+  // The tab row is wider than a phone once all six rungs are drawn, so the
+  // selected rung is scrolled into view - the references show the row panned to
+  // the right when Duke or King is selected.
+  const tabsRef = useRef<ScrollViewInstance>(null);
+  const tabOffsets = useRef<Record<string, number>>({});
+  const tabWidths = useRef<Record<string, number>>({});
+  const tabsViewport = useRef(0);
+  const revealed = useRef(false);
+
   const selectedIndex = Math.max(
     0,
     hub.ranks.findIndex((rank) => rank.key === selectedKey),
@@ -120,6 +131,20 @@ export function AristocracyHubView({
   const rankIndex = (key: string) => hub.ranks.findIndex((rank) => rank.key === key);
   const rankLabel = (key: string) => hub.ranks[rankIndex(key)]?.label ?? key;
   const held = hub.currentRank === selected.key;
+
+  /** Pans the tab row just far enough to keep the chosen rung fully visible. */
+  const revealRank = (key: string) => {
+    const viewport = tabsViewport.current || windowWidth;
+    const x = tabOffsets.current[key];
+    const width = tabWidths.current[key];
+    if (x === undefined || width === undefined) {
+      return;
+    }
+    tabsRef.current?.scrollTo({
+      x: Math.max(0, x + width + 20 - viewport),
+      animated: true,
+    });
+  };
 
   // The reference's emblem is the tallest fixed element; on short phones it
   // gives up height so the sheet still shows two full rows of privileges.
@@ -153,9 +178,20 @@ export function AristocracyHubView({
 
         <View style={[styles.tabs, { paddingTop: insets.top + 56 }]}>
           <ScrollView
+            ref={tabsRef}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.tabsRow}
+            onLayout={(event) => {
+              tabsViewport.current = event.nativeEvent.layout.width;
+            }}
+            onContentSizeChange={() => {
+              if (revealed.current) {
+                return;
+              }
+              revealed.current = true;
+              revealRank(selected.key);
+            }}
           >
             {hub.ranks.map((rank) => {
               const active = rank.key === selected.key;
@@ -165,7 +201,14 @@ export function AristocracyHubView({
                   accessibilityRole="radio"
                   accessibilityLabel={`Rank ${rank.label}`}
                   accessibilityState={{ checked: active }}
-                  onPress={() => setSelectedKey(rank.key)}
+                  onLayout={(event) => {
+                    tabOffsets.current[rank.key] = event.nativeEvent.layout.x;
+                    tabWidths.current[rank.key] = event.nativeEvent.layout.width;
+                  }}
+                  onPress={() => {
+                    setSelectedKey(rank.key);
+                    revealRank(rank.key);
+                  }}
                   style={styles.tab}
                 >
                   <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>

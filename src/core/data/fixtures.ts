@@ -1265,13 +1265,14 @@ export const FIXTURE_MEMBERSHIP_HUBS: Record<MembershipFamilyKey, MembershipHub>
 };
 
 /**
- * The aristocracy page (references 038/039): five ranks above one shared
+ * The aristocracy page (references 029-039): six ranks above one shared
  * privilege catalogue, priced per rank by the server.
  *
- * Knight's 7/20, Viscount's 10/20 and both coin prices are the reference's own
- * server figures. The three higher rungs and the eleven catalogue tiles the
- * captures never scrolled to are fixture values in the same shape, so the
- * server can replace them one for one without a screen change.
+ * Every count and every coin price below is the reference's own figure, read
+ * off the six captured rank states: Knight 7/20 - 7840, Viscount 10/20 - 22400,
+ * Count 11/20 - 84000, Marquis 14/20 - 280000, Duke 16/20 - 700000, King
+ * 20/20 - 1820000. The catalogue's twenty labels are the reference's too, in
+ * its own grid order; only the art is ours.
  *
  * The viewer holds no rank (FIXTURE_ME grants VIP only), so `currentRank` is
  * null and every rung offers Activate. Nothing here grants a title.
@@ -1281,14 +1282,17 @@ export const FIXTURE_ARISTOCRACY: AristocracyHub = {
   ranks: [
     { key: 'knight', label: 'Knight', priceCoins: 7840, validityDays: 7, unlockedCount: 7 },
     { key: 'viscount', label: 'Viscount', priceCoins: 22400, validityDays: 7, unlockedCount: 10 },
-    { key: 'count', label: 'Count', priceCoins: 39200, validityDays: 7, unlockedCount: 13 },
-    { key: 'marquis', label: 'Marquis', priceCoins: 61600, validityDays: 7, unlockedCount: 16 },
-    { key: 'duke', label: 'Duke', priceCoins: 84000, validityDays: 7, unlockedCount: 20 },
+    { key: 'count', label: 'Count', priceCoins: 84000, validityDays: 7, unlockedCount: 11 },
+    { key: 'marquis', label: 'Marquis', priceCoins: 280000, validityDays: 7, unlockedCount: 14 },
+    { key: 'duke', label: 'Duke', priceCoins: 700000, validityDays: 7, unlockedCount: 16 },
+    { key: 'king', label: 'King', priceCoins: 1820000, validityDays: 7, unlockedCount: 20 },
   ],
   // The catalogue runs in unlock order, so a rung holds a prefix of it: seven
-  // at Knight, ten at Viscount, then three more at each higher rung. The first
-  // nine labels are the reference's own tiles in its own order; the rest are
-  // ours.
+  // at Knight, then three, one, three, two and four more at each rung above.
+  // That reproduces every captured counter (7, 10, 11, 14, 16, 20) and the
+  // washed tiles in each frame - Viscount lights Incognito Access only, Count
+  // adds Online Invisibility, Duke lights Invisible Entry while the King four
+  // stay dim.
   privileges: [
     { id: 'aristo-label', label: 'Exclusive Label', glyph: 'label', unlockRank: 'knight' },
     { id: 'aristo-badge', label: 'Aristocrat Badge', glyph: 'badge', unlockRank: 'knight' },
@@ -1299,17 +1303,17 @@ export const FIXTURE_ARISTOCRACY: AristocracyHub = {
     { id: 'aristo-filter', label: 'Advanced Filter', glyph: 'filter', unlockRank: 'knight' },
     { id: 'aristo-name-card', label: 'Aristocrat Name Card', glyph: 'name-card', unlockRank: 'viscount' },
     { id: 'aristo-gifts', label: 'Exclusive Gifts', glyph: 'gifts', unlockRank: 'viscount' },
-    { id: 'aristo-priority', label: 'Priority Entry', glyph: 'priority', unlockRank: 'viscount' },
-    { id: 'aristo-nameplate', label: 'Ranked Nameplate', glyph: 'name-card', unlockRank: 'count' },
-    { id: 'aristo-spotlight', label: 'Room Spotlight', glyph: 'spotlight', unlockRank: 'count' },
-    { id: 'aristo-visitors', label: 'Visitor Priority', glyph: 'visitors', unlockRank: 'count' },
-    { id: 'aristo-stickers', label: 'Exclusive Stickers', glyph: 'stickers', unlockRank: 'marquis' },
-    { id: 'aristo-accent', label: 'Profile Accent', glyph: 'accent', unlockRank: 'marquis' },
-    { id: 'aristo-monthly', label: 'Monthly Gift', glyph: 'monthly', unlockRank: 'marquis' },
-    { id: 'aristo-entrance', label: 'Crown Entrance', glyph: 'entrance', unlockRank: 'duke' },
-    { id: 'aristo-bubble', label: 'Golden Chat Bubble', glyph: 'bubble', unlockRank: 'duke' },
-    { id: 'aristo-attendant', label: 'Personal Attendant', glyph: 'attendant', unlockRank: 'duke' },
-    { id: 'aristo-hall', label: 'Aristocracy Hall', glyph: 'hall', unlockRank: 'duke' },
+    { id: 'aristo-incognito', label: 'Incognito Access', glyph: 'incognito', unlockRank: 'viscount' },
+    { id: 'aristo-invisible', label: 'Online Invisibility', glyph: 'invisible', unlockRank: 'count' },
+    { id: 'aristo-bubble', label: 'Room Bubble', glyph: 'bubble', unlockRank: 'marquis' },
+    { id: 'aristo-full-room', label: 'Full-room Access', glyph: 'full-room', unlockRank: 'marquis' },
+    { id: 'aristo-distance', label: 'Hide Distance', glyph: 'distance', unlockRank: 'marquis' },
+    { id: 'aristo-stealth', label: 'Stealth Mode', glyph: 'stealth', unlockRank: 'duke' },
+    { id: 'aristo-invisible-entry', label: 'Invisible Entry', glyph: 'invisible-entry', unlockRank: 'duke' },
+    { id: 'aristo-golden-name', label: 'Golden Name', glyph: 'golden-name', unlockRank: 'king' },
+    { id: 'aristo-nickname', label: 'Animated Nickname', glyph: 'nickname', unlockRank: 'king' },
+    { id: 'aristo-anti-ban', label: 'Anti-banning', glyph: 'anti-ban', unlockRank: 'king' },
+    { id: 'aristo-kick', label: 'Kick Protection', glyph: 'kick-protection', unlockRank: 'king' },
   ],
 };
 

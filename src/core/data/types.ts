@@ -597,16 +597,17 @@ export type AristocracyPrivilegeGlyph =
   | 'filter'
   | 'name-card'
   | 'gifts'
-  | 'priority'
-  | 'spotlight'
-  | 'visitors'
-  | 'stickers'
-  | 'accent'
-  | 'monthly'
-  | 'entrance'
+  | 'incognito'
+  | 'invisible'
   | 'bubble'
-  | 'attendant'
-  | 'hall';
+  | 'full-room'
+  | 'distance'
+  | 'stealth'
+  | 'invisible-entry'
+  | 'golden-name'
+  | 'nickname'
+  | 'anti-ban'
+  | 'kick-protection';
 
 /** One tile in the aristocracy catalogue. */
 export interface AristocracyPrivilege {
