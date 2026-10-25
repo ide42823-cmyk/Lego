@@ -122,8 +122,9 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Pending device verifications (no approval needed, next cable session): the same backlog plus the aristocracy page (six rungs).
 - Next proposed task (needs approval): pick the next surface (Moments/profile fidelity or another gated backend-phase page), or run the queued device pass once the phone is reconnected.
 
-## 2026-10-25 (post-T023, awaiting the commit gate)
+## 2026-10-25 (post-T023, committed f3d8457)
 
+- Committed `f3d8457` "Moments T023: post card anatomy against references 024/085" (11 files, +348/-72) and pushed to `origin/main`; working tree clean.
 - Last completed: **T023 Moments post card (references 024 + 085)** - one shared card now carries the reference anatomy on both surfaces: a 48dp avatar with a presence dot, the name row with badges, the age/VIP pills under the name, a pink Hi pill at the far end (feed only), and a body that hangs off the name column - caption, portrait media at 34% with a 12 radius, a 13dp `#` topic pill with a brand-purple hash, an age stamp plus the author's bucketed distance (`5 minutes ago · 77.1km`, `09-30 · 91.3km`), and a row with "..." at the start and like/comment counts at the end. The rule between posts now runs edge to edge.
 - New `formatMomentStamp`: `Just now`, `5 minutes ago`, `16 hours ago`, `2 days ago`, then a bare `MM-DD` past a week (the reference's own old-post form). Zero like/comment counts print no number. The Hi pill only renders where the feed wires a greeting, because a member's profile already carries the sticky Say hi bar.
 - `MomentPost` gains optional `authorOnline` and `distanceKm`, borrowed from the same member's directory row. Feed ages now spread over a month (first post minutes old, later ones past a week) without shifting any other generated field. The directory's distance bucket was reaching 981km, outside its own 0-100km filter; it is now 1-96km.
