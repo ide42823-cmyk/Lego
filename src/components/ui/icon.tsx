@@ -93,6 +93,9 @@ import WeightScaleIcon from '@hugeicons/core-free-icons/WeightScaleIcon';
 import WavesIcon from '@hugeicons/core-free-icons/WavesIcon';
 import HeadsetIcon from '@hugeicons/core-free-icons/HeadsetIcon';
 import GridIcon from '@hugeicons/core-free-icons/GridIcon';
+import Car03Icon from '@hugeicons/core-free-icons/Car03Icon';
+import IdCardIcon from '@hugeicons/core-free-icons/IdCardIcon';
+import CircleQuestionMarkIcon from '@hugeicons/core-free-icons/CircleQuestionMarkIcon';
 
 /**
  * The app's icon vocabulary.
@@ -209,7 +212,11 @@ export type IconName =
   | 'user-check'
   | 'ribbon'
   | 'ghost'
-  | 'records';
+  | 'records'
+  // Aristocracy privilege matrix
+  | 'vehicle'
+  | 'id-card'
+  | 'help';
 
 const ICONS: Record<IconName, IconSvgElement> = {
   home: Home01Icon,
@@ -309,6 +316,9 @@ const ICONS: Record<IconName, IconSvgElement> = {
   ribbon: RibbonIcon,
   ghost: GhostIcon,
   records: Note01Icon,
+  vehicle: Car03Icon,
+  'id-card': IdCardIcon,
+  help: CircleQuestionMarkIcon,
 };
 
 export interface IconProps {

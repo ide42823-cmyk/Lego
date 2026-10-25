@@ -66,6 +66,10 @@ export default function MeScreen() {
                 router.push({ pathname: '/membership/[family]', params: { family: 'svip' } });
                 return;
               }
+              if (tile.key === 'aristocracy') {
+                router.push('/aristocracy');
+                return;
+              }
               notYet(tile.active ? 'Membership management' : `${tile.label} membership`);
             }}
           />

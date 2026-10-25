@@ -54,6 +54,8 @@ export default function RootLayout() {
               {/* Wallets and membership hubs carry their own fixed-identity bars. */}
               <Stack.Screen name="wallet/diamonds" options={{ headerShown: false }} />
               <Stack.Screen name="membership/[family]" options={{ headerShown: false }} />
+              {/* The aristocracy page draws its own night-and-gold bar. */}
+              <Stack.Screen name="aristocracy" options={{ headerShown: false }} />
               <Stack.Screen name="dev/rtc-spike" options={{ title: 'RTC spike (dev only)' }} />
             </Stack>
           </ToastProvider>

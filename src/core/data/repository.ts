@@ -22,6 +22,7 @@ import {
   FIXTURE_DIAMONDS_WALLET,
   FIXTURE_RELATIONSHIP_OFFERS,
   FIXTURE_MEMBERSHIP_HUBS,
+  FIXTURE_ARISTOCRACY,
   FIXTURE_ROOM_INBOX_SYSTEM,
   FIXTURE_ROOM_TOOLS,
   FIXTURE_ME,
@@ -32,6 +33,7 @@ import {
   FIXTURE_USERS,
 } from './fixtures';
 import type {
+  AristocracyHub,
   ContactsFilter,
   ConversationFilter,
   ConversationSummary,
@@ -114,6 +116,8 @@ export interface DataSource {
   getRelationshipOffers(): Promise<RelationshipOffers>;
   /** The membership hub for one family: ladder, points and store. */
   getMembershipHub(family: MembershipFamilyKey): Promise<MembershipHub>;
+  /** The aristocracy page: rank ladder, privilege catalogue and held rank. */
+  getAristocracyHub(): Promise<AristocracyHub>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -539,6 +543,10 @@ export const fixtureDataSource: DataSource = {
 
   getMembershipHub(family: MembershipFamilyKey) {
     return simulate(() => structuredClone(FIXTURE_MEMBERSHIP_HUBS[family]));
+  },
+
+  getAristocracyHub() {
+    return simulate(() => structuredClone(FIXTURE_ARISTOCRACY));
   },
 
   listConversations(filter, request) {

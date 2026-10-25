@@ -32,3 +32,8 @@ Recurrence 2026-10-24 (T015 capture): the long-running no-`--clear` server bound
 Symptom: on the Xiaomi, `/membership/[family]` rendered under a native header titled "membership/[family]" while the same route was full-bleed on web. Cause: the root `<Stack>` in `src/app/_layout.tsx` registers screens explicitly, so routes added this cycle (`wallet/diamonds`, `membership/[family]`) fell back to the native default header.
 Fix: register both with `options={{ headerShown: false }}` (done 2026-10-24, verified by device capture).
 Lesson: any new non-tab route must be added to the root Stack, and only the device screenshot reveals the omission - web captures never show the native header.
+
+## #14 Expo dev-only FAB overlays the bottom-left of web captures (2026-10-25, capture-only)
+Symptom: on `/aristocracy` the web capture showed a black rounded square with a white lightning glyph over the footer's coin/price row, hiding the leading digits of "7840 Coins/7 days". The DOM probe proved the price row itself lays out correctly (coin at x=20, text at x=44) and the FAB is a dev-only Expo overlay, not app UI.
+Workaround used in `capture-aristocracy.js`: before each shot, `document.elementFromPoint(29, 819)` then climb to the outermost ancestor no wider than 60px and set `display: none`. Alternative: build a production web bundle for captures.
+Note: it is invisible in production and does not affect device builds.

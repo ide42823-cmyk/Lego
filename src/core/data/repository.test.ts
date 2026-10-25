@@ -932,3 +932,68 @@ describe('getMembershipHub', () => {
     expect(fresh.levels[0].label).toBe('VIP1');
   });
 });
+
+describe('getAristocracyHub', () => {
+  it('serves the five ranks with the reference prices and counts', async () => {
+    const hub = await fixtureDataSource.getAristocracyHub();
+
+    expect(hub.ranks.map((rank) => rank.label)).toEqual([
+      'Knight',
+      'Viscount',
+      'Count',
+      'Marquis',
+      'Duke',
+    ]);
+    // The two captured rungs carry the reference's own figures.
+    expect(hub.ranks[0]).toMatchObject({ priceCoins: 7840, validityDays: 7, unlockedCount: 7 });
+    expect(hub.ranks[1]).toMatchObject({ priceCoins: 22400, validityDays: 7, unlockedCount: 10 });
+    // The viewer holds no rank while the dashboard grants VIP only.
+    expect(hub.currentRank).toBeNull();
+  });
+
+  it('keeps the catalogue in unlock order so each rung holds a prefix', async () => {
+    const hub = await fixtureDataSource.getAristocracyHub();
+
+    expect(hub.privileges).toHaveLength(20);
+    for (let index = 1; index < hub.ranks.length; index += 1) {
+      expect(hub.ranks[index].unlockedCount).toBeGreaterThan(hub.ranks[index - 1].unlockedCount);
+    }
+
+    // Knight's seven tiles are exactly the reference's first seven.
+    const knight = hub.privileges.filter((privilege) => privilege.unlockRank === 'knight');
+    expect(knight.map((privilege) => privilege.label)).toEqual([
+      'Exclusive Label',
+      'Aristocrat Badge',
+      'Aristocrat Frame',
+      'Entry Effect',
+      'Aristocrat Vehicle',
+      'Room Lock',
+      'Advanced Filter',
+    ]);
+    // The two tiles the Knight frame washes out are the Viscount pair.
+    const viscount = hub.privileges.filter((privilege) => privilege.unlockRank === 'viscount');
+    expect(viscount.map((privilege) => privilege.label)).toEqual([
+      'Aristocrat Name Card',
+      'Exclusive Gifts',
+      'Priority Entry',
+    ]);
+
+    // Every count matches the prefix it describes.
+    const rankOrder = hub.ranks.map((rank) => rank.key);
+    hub.ranks.forEach((rank) => {
+      const reached = rankOrder.indexOf(rank.key);
+      const unlocked = hub.privileges.filter(
+        (privilege) => rankOrder.indexOf(privilege.unlockRank) <= reached,
+      );
+      expect(unlocked).toHaveLength(rank.unlockedCount);
+    });
+  });
+
+  it('serves a fresh copy each time', async () => {
+    const hub = await fixtureDataSource.getAristocracyHub();
+    hub.privileges[0].label = 'tampered';
+
+    const fresh = await fixtureDataSource.getAristocracyHub();
+    expect(fresh.privileges[0].label).toBe('Exclusive Label');
+  });
+});

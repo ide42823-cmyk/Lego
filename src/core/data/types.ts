@@ -568,6 +568,64 @@ export interface MembershipSvipHub {
 /** The membership hub for one family. The family field discriminates the design. */
 export type MembershipHub = MembershipVipHub | MembershipSvipHub;
 
+/**
+ * The aristocracy page (references 038/039): a rank ladder above one shared
+ * privilege catalogue, priced per rank by the server. Nothing here is granted
+ * by the client — the page only displays the ladder and its counts.
+ */
+export interface AristocracyRank {
+  /** Stable key, e.g. "knight". */
+  key: string;
+  /** The tab and hero label, e.g. "Knight". */
+  label: string;
+  /** Coins the server charges for the period; the client never computes it. */
+  priceCoins: number;
+  /** Server-configured validity, in days. */
+  validityDays: number;
+  /** How many of the catalogue's privileges this rank holds. */
+  unlockedCount: number;
+}
+
+/** The glyph a privilege tile draws, as a meaning rather than borrowed art. */
+export type AristocracyPrivilegeGlyph =
+  | 'label'
+  | 'badge'
+  | 'frame'
+  | 'entry'
+  | 'vehicle'
+  | 'room-lock'
+  | 'filter'
+  | 'name-card'
+  | 'gifts'
+  | 'priority'
+  | 'spotlight'
+  | 'visitors'
+  | 'stickers'
+  | 'accent'
+  | 'monthly'
+  | 'entrance'
+  | 'bubble'
+  | 'attendant'
+  | 'hall';
+
+/** One tile in the aristocracy catalogue. */
+export interface AristocracyPrivilege {
+  id: string;
+  label: string;
+  glyph: AristocracyPrivilegeGlyph;
+  /** The rung that unlocks the tile; higher tiles dim at lower ranks. */
+  unlockRank: string;
+}
+
+/** The aristocracy page's data: the ladder, the catalogue and the held rank. */
+export interface AristocracyHub {
+  /** The rung the viewer holds, or null when they hold none. */
+  currentRank: string | null;
+  /** Lowest first; the tab row scrolls on compact widths. */
+  ranks: AristocracyRank[];
+  privileges: AristocracyPrivilege[];
+}
+
 
 /**
  * The live room page. The reference draws one full-bleed room canvas: host
