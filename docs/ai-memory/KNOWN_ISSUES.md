@@ -27,3 +27,8 @@ Workaround: kill the PID listening on 8081 (Get-NetTCPConnection -LocalPort 8081
 Recurrence 2026-10-24 (T015 capture): the long-running no-`--clear` server bound and even logged "Web Bundled", but had silently stopped serving new+changed modules — every route touched by the new code (/person/user-2 AND a previously-verified /wallet/diamonds) rendered BLANK with no console errors while untouched pages still booted. Diagnosis tip: when captures return empty-bodied pages, run typecheck/lint first, then test a previously-verified route before touching code — a healthy server shows it, a hung watcher does not. Same workaround applied.
 
 
+
+## #13 Native default header on unregistered Stack routes (2026-10-24, resolved)
+Symptom: on the Xiaomi, `/membership/[family]` rendered under a native header titled "membership/[family]" while the same route was full-bleed on web. Cause: the root `<Stack>` in `src/app/_layout.tsx` registers screens explicitly, so routes added this cycle (`wallet/diamonds`, `membership/[family]`) fell back to the native default header.
+Fix: register both with `options={{ headerShown: false }}` (done 2026-10-24, verified by device capture).
+Lesson: any new non-tab route must be added to the root Stack, and only the device screenshot reveals the omission - web captures never show the native header.

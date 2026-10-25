@@ -21,6 +21,7 @@ import {
   FIXTURE_GIFT_CATALOG,
   FIXTURE_DIAMONDS_WALLET,
   FIXTURE_RELATIONSHIP_OFFERS,
+  FIXTURE_MEMBERSHIP_HUBS,
   FIXTURE_ROOM_INBOX_SYSTEM,
   FIXTURE_ROOM_TOOLS,
   FIXTURE_ME,
@@ -49,6 +50,8 @@ import type {
   PeopleFilterOptions,
   PeopleFilters,
   PeopleMode,
+  MembershipFamilyKey,
+  MembershipHub,
   RelationshipOffers,
   RoomCategory,
   RoomFeedItem,
@@ -109,6 +112,8 @@ export interface DataSource {
   getDiamondsWallet(): Promise<DiamondsWallet>;
   /** The relationship chooser's invitation-card ladder. */
   getRelationshipOffers(): Promise<RelationshipOffers>;
+  /** The membership hub for one family: ladder, points and store. */
+  getMembershipHub(family: MembershipFamilyKey): Promise<MembershipHub>;
   listConversations(
     filter: ConversationFilter,
     request?: PageRequest,
@@ -530,6 +535,10 @@ export const fixtureDataSource: DataSource = {
 
   getRelationshipOffers() {
     return simulate(() => structuredClone(FIXTURE_RELATIONSHIP_OFFERS));
+  },
+
+  getMembershipHub(family: MembershipFamilyKey) {
+    return simulate(() => structuredClone(FIXTURE_MEMBERSHIP_HUBS[family]));
   },
 
   listConversations(filter, request) {

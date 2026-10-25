@@ -27,11 +27,13 @@ import Copy01Icon from '@hugeicons/core-free-icons/Copy01Icon';
 import CrownIcon from '@hugeicons/core-free-icons/CrownIcon';
 import DollarCircleIcon from '@hugeicons/core-free-icons/DollarCircleIcon';
 import EraserIcon from '@hugeicons/core-free-icons/EraserIcon';
+import EyeIcon from '@hugeicons/core-free-icons/EyeIcon';
 import FilterIcon from '@hugeicons/core-free-icons/FilterIcon';
 import FlameIcon from '@hugeicons/core-free-icons/FlameIcon';
 import FlowerIcon from '@hugeicons/core-free-icons/FlowerIcon';
 import GamepadIcon from '@hugeicons/core-free-icons/GamepadIcon';
 import GemIcon from '@hugeicons/core-free-icons/GemIcon';
+import GhostIcon from '@hugeicons/core-free-icons/GhostIcon';
 import GiftIcon from '@hugeicons/core-free-icons/GiftIcon';
 import Globe02Icon from '@hugeicons/core-free-icons/Globe02Icon';
 import HandshakeIcon from '@hugeicons/core-free-icons/HandshakeIcon';
@@ -50,6 +52,7 @@ import Message01Icon from '@hugeicons/core-free-icons/Message01Icon';
 import Mic01Icon from '@hugeicons/core-free-icons/Mic01Icon';
 import MoreHorizontalIcon from '@hugeicons/core-free-icons/MoreHorizontalIcon';
 import Notification03Icon from '@hugeicons/core-free-icons/Notification03Icon';
+import Note01Icon from '@hugeicons/core-free-icons/Note01Icon';
 import Orbit01Icon from '@hugeicons/core-free-icons/Orbit01Icon';
 import PartyPopperIcon from '@hugeicons/core-free-icons/PartyPopperIcon';
 import PencilIcon from '@hugeicons/core-free-icons/PencilIcon';
@@ -58,6 +61,7 @@ import PlayListIcon from '@hugeicons/core-free-icons/PlayListIcon';
 import PowerOffIcon from '@hugeicons/core-free-icons/PowerOffIcon';
 import RadioIcon from '@hugeicons/core-free-icons/RadioIcon';
 import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
+import RibbonIcon from '@hugeicons/core-free-icons/RibbonIcon';
 import RulerIcon from '@hugeicons/core-free-icons/RulerIcon';
 import Search01Icon from '@hugeicons/core-free-icons/Search01Icon';
 import SecurityCheckIcon from '@hugeicons/core-free-icons/SecurityCheckIcon';
@@ -77,6 +81,7 @@ import UserPlusIcon from '@hugeicons/core-free-icons/UserPlusIcon';
 import UserIcon from '@hugeicons/core-free-icons/UserIcon';
 import UserMultipleIcon from '@hugeicons/core-free-icons/UserMultipleIcon';
 import UserMultiple03Icon from '@hugeicons/core-free-icons/UserMultiple03Icon';
+import UserCheck01Icon from '@hugeicons/core-free-icons/UserCheck01Icon';
 import VenusIcon from '@hugeicons/core-free-icons/VenusIcon';
 import Video01Icon from '@hugeicons/core-free-icons/Video01Icon';
 import VoiceIcon from '@hugeicons/core-free-icons/VoiceIcon';
@@ -194,7 +199,13 @@ export type IconName =
   | 'mute'
   | 'music-list'
   | 'effects'
-  | 'clear-screen';
+  | 'clear-screen'
+  // Membership benefit matrix
+  | 'eye'
+  | 'user-check'
+  | 'ribbon'
+  | 'ghost'
+  | 'records';
 
 const ICONS: Record<IconName, IconSvgElement> = {
   home: Home01Icon,
@@ -287,6 +298,11 @@ const ICONS: Record<IconName, IconSvgElement> = {
   'music-list': PlayListIcon,
   effects: WandIcon,
   'clear-screen': EraserIcon,
+  eye: EyeIcon,
+  'user-check': UserCheck01Icon,
+  ribbon: RibbonIcon,
+  ghost: GhostIcon,
+  records: Note01Icon,
 };
 
 export interface IconProps {

@@ -14,6 +14,8 @@ export interface RoomBannerRowProps {
   /** Free headline shown in the marquee-adjacent group. */
   progressLabel: string;
   countdownLabel: string;
+  /** The winner ribbon (reference 015): a server event announcement, display-only. */
+  headline?: string;
   freeDraw: boolean;
   coverUrl?: string;
   /** Rank, ticker and draw are event furniture; all report the backend gate. */
@@ -32,6 +34,7 @@ export function RoomBannerRow({
   rankLabel,
   progressLabel,
   countdownLabel,
+  headline,
   freeDraw,
   coverUrl,
   onPressRank,
@@ -40,37 +43,47 @@ export function RoomBannerRow({
 }: RoomBannerRowProps) {
   return (
     <View style={styles.wrap}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Room ranking: ${rankLabel}`}
-        accessibilityHint="Opens the room ranking"
-        onPress={onPressRank}
-        style={({ pressed }) => [styles.rank, pressed && { opacity: 0.85 }]}
-      >
-        <Icon name="trophy" size={18} color={RoomPalette.gold} fill={RoomPalette.gold} />
-        <ThemedText type="small" style={styles.rankText}>
-          {rankLabel}
-        </ThemedText>
-      </Pressable>
-      <View style={styles.flexible} />
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`Draw board at ${progressLabel}, next draw in ${countdownLabel}`}
-        accessibilityHint="States whether draws are available yet"
-        onPress={onPressTicker}
-        style={({ pressed }) => [styles.ticker, styles.row, pressed && { opacity: 0.85 }]}
-      >
-        <View style={styles.dot} />
-        <ThemedText type="small" numberOfLines={1} style={styles.progress}>
-          {progressLabel}
-        </ThemedText>
-        <ThemedText type="small" style={styles.clock}>
-          {countdownLabel}
-        </ThemedText>
-      </Pressable>
-      {freeDraw ? (
-        <PressableBanner source={coverUrl} label="Free draw" onPress={onPressFreeDraw} />
+      {headline ? (
+        <View style={styles.marquee}>
+          <Icon name="trophy" size={15} color={RoomPalette.gold} fill={RoomPalette.gold} />
+          <ThemedText type="small" numberOfLines={1} style={styles.marqueeText}>
+            {headline}
+          </ThemedText>
+        </View>
       ) : null}
+      <View style={styles.band}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Room ranking: ${rankLabel}`}
+          accessibilityHint="Opens the room ranking"
+          onPress={onPressRank}
+          style={({ pressed }) => [styles.rank, pressed && { opacity: 0.85 }]}
+        >
+          <Icon name="trophy" size={18} color={RoomPalette.gold} fill={RoomPalette.gold} />
+          <ThemedText type="small" style={styles.rankText}>
+            {rankLabel}
+          </ThemedText>
+        </Pressable>
+        <View style={styles.flexible} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Draw board at ${progressLabel}, next draw in ${countdownLabel}`}
+          accessibilityHint="States whether draws are available yet"
+          onPress={onPressTicker}
+          style={({ pressed }) => [styles.ticker, styles.row, pressed && { opacity: 0.85 }]}
+        >
+          <View style={styles.dot} />
+          <ThemedText type="small" numberOfLines={1} style={styles.progress}>
+            {progressLabel}
+          </ThemedText>
+          <ThemedText type="small" style={styles.clock}>
+            {countdownLabel}
+          </ThemedText>
+        </Pressable>
+        {freeDraw ? (
+          <PressableBanner source={coverUrl} label="Free draw" onPress={onPressFreeDraw} />
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -106,10 +119,30 @@ function PressableBanner({
 
 const styles = StyleSheet.create({
   wrap: {
+    gap: Spacing.half,
+    marginBottom: Spacing.three,
+  },
+  band: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.half,
-    marginBottom: Spacing.three,
+  },
+  /** The winner ribbon (reference 015): server event copy, display-only. */
+  marquee: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 28,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(214, 31, 79, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 202, 88, 0.75)',
+  },
+  marqueeText: {
+    flex: 1,
+    color: '#FFE9B8',
+    fontWeight: 700,
   },
   row: {
     flexDirection: 'row',

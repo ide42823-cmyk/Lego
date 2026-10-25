@@ -42,6 +42,14 @@ describe('RoomComposer', () => {
     expect(screen.queryByText('99+')).toBeNull();
   });
 
+  it('marks the utilities control when the server flags news there', async () => {
+    await render(<RoomComposer {...handlers()} toolsAttention />);
+    expect(screen.getByLabelText('Room utilities. New in the tools')).toBeTruthy();
+
+    await render(<RoomComposer {...handlers()} />);
+    expect(screen.getByLabelText('Room utilities')).toBeTruthy();
+  });
+
   it('routes the chat list, utilities and gift to their owners', async () => {
     const action = handlers();
     await render(<RoomComposer {...action} />);

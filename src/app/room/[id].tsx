@@ -131,6 +131,7 @@ export default function RoomScreen() {
             rankLabel={room.rankLabel}
             progressLabel={room.ticker.progressLabel}
             countdownLabel={room.ticker.countdownLabel}
+            headline={room.ticker.headline}
             freeDraw={room.freeDraw}
             coverUrl={room.coverUrl}
             onPressTicker={() => notYet('Draw board')}
@@ -168,7 +169,8 @@ export default function RoomScreen() {
             onChatList={() => setChatOpen(true)}
             onApps={() => setToolsOpen(true)}
             onGift={() => setGiftOpen(true)}
-            unreadCount={99}
+            unreadCount={room.chatUnread}
+            toolsAttention={room.toolsAttention}
           />
         </View>
       </KeyboardAvoidingView>

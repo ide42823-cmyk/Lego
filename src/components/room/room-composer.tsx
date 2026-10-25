@@ -18,6 +18,8 @@ export interface RoomComposerProps {
   onGift: () => void;
   /** Unread badge value on the chat bubble entry; hidden when zero. */
   unreadCount: number;
+  /** The utilities control's announcement dot; a server attention state. */
+  toolsAttention?: boolean;
 }
 
 /**
@@ -26,7 +28,14 @@ export interface RoomComposerProps {
  * bag. Round-room messages send nowhere yet, exactly like the thread
  * composer: the draft is kept, pressing the field's send states the gate.
  */
-export function RoomComposer({ onSend, onChatList, onApps, onGift, unreadCount }: RoomComposerProps) {
+export function RoomComposer({
+  onSend,
+  onChatList,
+  onApps,
+  onGift,
+  unreadCount,
+  toolsAttention = false,
+}: RoomComposerProps) {
   const [draft, setDraft] = useState('');
 
   const commit = () => {
@@ -71,7 +80,15 @@ export function RoomComposer({ onSend, onChatList, onApps, onGift, unreadCount }
           </View>
         ) : null}
       </View>
-      <IconButton name="apps" label="Room utilities" onPress={onApps} size={22} />
+      <View style={styles.utilities}>
+        <IconButton
+          name="apps"
+          label={toolsAttention ? 'Room utilities. New in the tools' : 'Room utilities'}
+          onPress={onApps}
+          size={22}
+        />
+        {toolsAttention ? <View style={styles.noticeDot} /> : null}
+      </View>
       <IconButton
         name="gift"
         label="Send a gift"
@@ -110,6 +127,18 @@ const styles = StyleSheet.create({
   },
   bubble: {
     position: 'relative',
+  },
+  utilities: {
+    position: 'relative',
+  },
+  noticeDot: {
+    position: 'absolute',
+    top: 0,
+    end: -2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E11D48',
   },
   badge: {
     position: 'absolute',

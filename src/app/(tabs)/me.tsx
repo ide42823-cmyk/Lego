@@ -61,9 +61,13 @@ export default function MeScreen() {
           <MeWalletCard
             me={state.data}
             onRecharge={() => notYet('Recharge')}
-            onJoin={(tile) =>
-              notYet(tile.active ? 'Membership management' : `${tile.label} membership`)
-            }
+            onJoin={(tile) => {
+              if (tile.key === 'vip') {
+                router.push({ pathname: '/membership/[family]', params: { family: 'svip' } });
+                return;
+              }
+              notYet(tile.active ? 'Membership management' : `${tile.label} membership`);
+            }}
           />
           <MeToolsCard
             tools={state.data.tools}

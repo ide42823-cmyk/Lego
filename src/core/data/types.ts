@@ -453,6 +453,121 @@ export interface RelationshipOffers {
   offers: RelationshipOffer[];
 }
 
+/** The two membership families the hub tab bar serves. */
+export type MembershipFamilyKey = 'vip' | 'svip';
+
+/** One privilege the served SVIP level grants or previews. */
+export interface MembershipPrivilege {
+  id: string;
+  /** Neutral client label; proprietary feature art stays out. */
+  label: string;
+  /** The level the privilege belongs to, e.g. "SVIP7". */
+  requiredLevel: string;
+}
+
+/** One purchasable premium asset in the store panel. */
+export interface MembershipStoreItem {
+  id: string;
+  /** Display category, e.g. "Vehicles" or "Frames". */
+  category: string;
+  /** The minimum level badge shown on the card, when the item has one. */
+  requiredLevel?: string;
+  /** Server price in membership points. The client never computes a price. */
+  price: number;
+  /** Server-configured validity, in days. */
+  validityDays: number;
+}
+
+/** One rung of the VIP ladder: label plus the XP target that unlocks it. */
+export interface MembershipTierLevel {
+  label: string;
+  /** Server-configured XP target; 0 for the entry rung (any recharge). */
+  xp: number;
+}
+
+/**
+ * The art a VIP benefit tile paints when it is not a plain glyph. These are
+ * layout families, not borrowed illustrations — the view draws each one with
+ * its own geometry.
+ */
+export type MembershipBenefitArt =
+  | 'label'
+  | 'crest'
+  | 'entry'
+  | 'room-followed'
+  | 'room-joined'
+  | 'gift-art';
+
+/** The plain-glyph meanings a VIP benefit tile can carry. */
+export type MembershipBenefitGlyph =
+  | 'eye'
+  | 'user-check'
+  | 'house'
+  | 'crown'
+  | 'image'
+  | 'store'
+  | 'filter'
+  | 'pencil'
+  | 'gift'
+  | 'friends'
+  | 'silence';
+
+/** One VIP benefit tile. Locking is derived from the viewed rung. */
+export interface MembershipBenefit {
+  id: string;
+  /** Neutral client label; proprietary feature art stays out. */
+  label: string;
+  /** A glyph tile; omitted when `art` paints the tile instead. */
+  glyph?: MembershipBenefitGlyph;
+  /** A composed art tile; takes precedence over `glyph`. */
+  art?: MembershipBenefitArt;
+  /** The rung that unlocks the benefit, e.g. "VIP5". */
+  unlockLevel: string;
+}
+
+/** The VIP family's designed page: hero, ladder, benefit matrix, store. */
+export interface MembershipVipHub {
+  family: 'vip';
+  /** Server-owned points balance, display-only. */
+  points: number;
+  /** The viewer's identity for the hero row. */
+  hero: {
+    displayName: string;
+    avatarUrl: string;
+    /** The warm scene the hero sits on; a media ref or a remote URL. */
+    backgroundUrl: string;
+    /** The heart the reference floats beside the name. */
+    heart: boolean;
+  };
+  /** The rung the viewer holds; every other crest reads Locked. */
+  currentLevel: string;
+  /** The full ladder; the view windows it around the selection. */
+  levels: MembershipTierLevel[];
+  benefits: MembershipBenefit[];
+  store: MembershipStoreItem[];
+}
+
+/** One level in the SVIP ladder, with its privileges. */
+export interface MembershipLevelGroup {
+  label: string;
+  /** Server fact: whether the viewer holds this level right now. */
+  current: boolean;
+  privileges: MembershipPrivilege[];
+}
+
+/** The SVIP family's page: crest level band, privilege cards, store. */
+export interface MembershipSvipHub {
+  family: 'svip';
+  /** Server-owned points balance, display-only. */
+  points: number;
+  levels: MembershipLevelGroup[];
+  store: MembershipStoreItem[];
+}
+
+/** The membership hub for one family. The family field discriminates the design. */
+export type MembershipHub = MembershipVipHub | MembershipSvipHub;
+
+
 /**
  * The live room page. The reference draws one full-bleed room canvas: host
  * header, event banners, ten numbered seats, an audience strip, a chat overlay
@@ -482,6 +597,10 @@ export interface LiveRoom {
   ticker: { headline: string; progressLabel: string; countdownLabel: string };
   /** Whether the gold free-draw banner shows (event phase is backend-gated). */
   freeDraw: boolean;
+  /** The composer badge's chat unread. Server-owned, display-only. */
+  chatUnread: number;
+  /** The utilities control's announcement dot. Server attention state, display-only. */
+  toolsAttention: boolean;
   welcomeText: string;
   introduction: string;
   /** Event notices render under the introduction with a GO affordance. */

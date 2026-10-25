@@ -36,6 +36,18 @@ export const TYPEFACES: Record<TypefaceKey, typeof Regular400> = {
   Cairo_900Black: Black900,
 };
 
+/**
+ * Display faces, loaded alongside the body family but used only where the
+ * reference leaves the body sans behind: the VIP rail's rung names are drawn in
+ * a calligraphic face, so the tier labels carry it and nothing else does.
+ */
+export const DISPLAY_FACES = {
+  CalfimerMasquet: require('../assets/fonts/calfimer-masquet.otf'),
+} as const;
+
+/** The display family's name, as registered with `useFonts`. */
+export const DISPLAY_FAMILY = 'CalfimerMasquet';
+
 /** Integer weight a style requested; undefined → body default. */
 export function typefaceForWeight(weight?: number | string | null): TypefaceKey {
   switch (weight) {

@@ -41,6 +41,8 @@ import type {
   ProfileInfoRow,
   ProfileTag,
   PromoBanner,
+  MembershipFamilyKey,
+  MembershipHub,
   RelationshipOffers,
   RelationshipRecord,
   RoomBadge,
@@ -1047,6 +1049,11 @@ function buildLiveRooms(rooms: RoomSummary[], users: UserSummary[]): LiveRoom[] 
         countdownLabel: LIVE_ROOM_CLOCKS[index % LIVE_ROOM_CLOCKS.length],
       },
       freeDraw: index % 4 !== 3,
+      // Reference 015's conversation state: one busy room carries the 99+
+      // badge and the utilities announcement dot; the rest stay quiet so the
+      // hidden states render too. Both are server facts, displayed only.
+      chatUnread: index === 0 ? 99 : 0,
+      toolsAttention: index === 0,
       welcomeText: LIVE_ROOM_WELCOME,
       introduction: pick(random, LIVE_ROOM_INTRODUCTIONS),
       eventNotices: buildLiveRoomNotices(random, users),
@@ -1125,6 +1132,135 @@ export const FIXTURE_RELATIONSHIP_OFFERS: RelationshipOffers = {
     { id: 'couple', label: 'Couple', coins: 10000, validityHours: 24 },
     { id: 'friend', label: 'Friend', coins: 6000, validityHours: 24 },
   ],
+};
+
+/**
+ * The membership hubs (reference 040 and the tier-detail family 044-053), one
+ * per family. Level ladders, point balances and store prices are
+ * server-configured entitlement data; the client only displays them. The
+ * `current` flags mirror what FIXTURE_ME says the viewer holds (VIP active,
+ * SVIP available but not held), so the hub never claims a tier the dashboard
+ * does not.
+ */
+export const FIXTURE_MEMBERSHIP_HUBS: Record<MembershipFamilyKey, MembershipHub> = {
+  vip: {
+    family: 'vip',
+    points: 0,
+    // The hero mirrors FIXTURE_ME: the viewer holds VIP, so the entry rung is
+    // the held one and every other crest reads Locked.
+    hero: {
+      displayName: 'My Account',
+      avatarUrl: mediaRef('portraits', 'self'),
+      backgroundUrl: mediaRef('backgrounds', 'vip-hero', 'png'),
+      heart: true,
+    },
+    currentLevel: 'VIP1',
+    // VIP1-VIP16. Every figure from VIP2 up is the reference's own server
+    // value, read off the sixteen captured frames; the client never derives or
+    // interpolates an XP target.
+    levels: [
+      { label: 'VIP1', xp: 0 },
+      { label: 'VIP2', xp: 16000 },
+      { label: 'VIP3', xp: 64000 },
+      { label: 'VIP4', xp: 304000 },
+      { label: 'VIP5', xp: 1408000 },
+      { label: 'VIP6', xp: 6544000 },
+      { label: 'VIP7', xp: 18472000 },
+      { label: 'VIP8', xp: 55996000 },
+      { label: 'VIP9', xp: 167698000 },
+      { label: 'VIP10', xp: 321280000 },
+      { label: 'VIP11', xp: 503240000 },
+      { label: 'VIP12', xp: 722224000 },
+      { label: 'VIP13', xp: 1021072000 },
+      { label: 'VIP14', xp: 2079008000 },
+      { label: 'VIP15', xp: 4079008000 },
+      { label: 'VIP16', xp: 8742264000 },
+    ],
+    // Seventeen benefits: twelve at the entry rung, then one each at VIP2 and
+    // VIP3, two at VIP5 and the last at VIP7. That reproduces the reference's
+    // 12/17, 13/17, 14/17 and 17/17 counters, and its three lock chips at VIP3.
+    benefits: [
+      { id: 'vip-label', label: 'VIP Label', art: 'label', unlockLevel: 'VIP1' },
+      { id: 'vip-viewed', label: 'Who viewed me', glyph: 'eye', unlockLevel: 'VIP1' },
+      { id: 'vip-following', label: 'More Following', glyph: 'user-check', unlockLevel: 'VIP1' },
+      { id: 'vip-create-room', label: 'Create chat room', glyph: 'house', unlockLevel: 'VIP1' },
+      { id: 'vip-frame', label: 'Exclusive Frame', glyph: 'crown', unlockLevel: 'VIP1' },
+      { id: 'vip-badge', label: 'Exclusive Badge', art: 'crest', unlockLevel: 'VIP1' },
+      { id: 'vip-entry', label: 'Entry Effect', art: 'entry', unlockLevel: 'VIP1' },
+      { id: 'vip-background', label: 'Room Background', glyph: 'image', unlockLevel: 'VIP1' },
+      { id: 'vip-points-store', label: 'Points Store', glyph: 'store', unlockLevel: 'VIP1' },
+      {
+        id: 'vip-rooms-followed',
+        label: 'More Rooms Followed',
+        art: 'room-followed',
+        unlockLevel: 'VIP1',
+      },
+      {
+        id: 'vip-rooms-joined',
+        label: 'More Rooms Joined',
+        art: 'room-joined',
+        unlockLevel: 'VIP1',
+      },
+      { id: 'vip-language', label: 'Language Filter', glyph: 'filter', unlockLevel: 'VIP1' },
+      {
+        id: 'vip-nickname',
+        label: 'More nickname changes',
+        glyph: 'pencil',
+        unlockLevel: 'VIP2',
+      },
+      { id: 'vip-lucky-bag', label: 'Send lucky bag', glyph: 'gift', unlockLevel: 'VIP3' },
+      {
+        id: 'vip-friends-display',
+        label: 'More Friends Display',
+        glyph: 'friends',
+        unlockLevel: 'VIP5',
+      },
+      { id: 'vip-gifts', label: 'Exclusive Gifts', art: 'gift-art', unlockLevel: 'VIP5' },
+      { id: 'vip-dnd', label: 'Do Not Disturb', glyph: 'silence', unlockLevel: 'VIP7' },
+    ],
+    store: [
+      { id: 'vip-store-frame-a', category: 'Frames', requiredLevel: 'VIP2', price: 10500, validityDays: 7 },
+      { id: 'vip-store-vehicle-a', category: 'Vehicles', requiredLevel: 'VIP3', price: 30000, validityDays: 7 },
+      { id: 'vip-store-frame-b', category: 'Frames', price: 24000, validityDays: 7 },
+      { id: 'vip-store-vehicle-b', category: 'Vehicles', requiredLevel: 'VIP2', price: 100000, validityDays: 7 },
+    ],
+  },
+  svip: {
+    family: 'svip',
+    points: 0,
+    levels: [
+      {
+        label: 'SVIP6',
+        current: false,
+        privileges: [
+          { id: 'svip6-entrance', label: 'Entrance effects', requiredLevel: 'SVIP6' },
+          { id: 'svip6-bubble', label: 'Room bubble', requiredLevel: 'SVIP6' },
+        ],
+      },
+      {
+        label: 'SVIP7',
+        current: false,
+        privileges: [
+          { id: 'svip7-broadcast', label: 'Broadcast gift privilege', requiredLevel: 'SVIP7' },
+          { id: 'svip7-unique-id', label: 'Alphabetic unique ID', requiredLevel: 'SVIP7' },
+        ],
+      },
+      {
+        label: 'SVIP8',
+        current: false,
+        privileges: [
+          { id: 'svip8-animated', label: 'Animated gifts', requiredLevel: 'SVIP8' },
+          { id: 'svip8-renewal', label: 'Renewal packs', requiredLevel: 'SVIP8' },
+        ],
+      },
+    ],
+    store: [
+      { id: 'svip-store-vehicle-a', category: 'Vehicles', requiredLevel: 'SVIP3', price: 100000, validityDays: 7 },
+      { id: 'svip-store-vehicle-b', category: 'Vehicles', requiredLevel: 'SVIP3', price: 100000, validityDays: 7 },
+      { id: 'svip-store-frame-a', category: 'Frames', requiredLevel: 'SVIP2', price: 10500, validityDays: 7 },
+      { id: 'svip-store-frame-b', category: 'Frames', price: 30000, validityDays: 7 },
+    ],
+  },
 };
 
 /**

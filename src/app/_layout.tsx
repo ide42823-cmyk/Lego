@@ -7,7 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ToastProvider } from '@/components/ui/toast';
-import { TYPEFACES } from '@/constants/typography';
+import { DISPLAY_FACES, TYPEFACES } from '@/constants/typography';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,7 +25,7 @@ SplashScreen.preventAutoHideAsync();
  */
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [fontsLoaded, fontsError] = useFonts(TYPEFACES);
+  const [fontsLoaded, fontsError] = useFonts({ ...TYPEFACES, ...DISPLAY_FACES });
 
   if (!fontsLoaded && !fontsError) {
     // The native splash stays up until the faces are ready and the overlay
@@ -51,6 +51,9 @@ export default function RootLayout() {
               <Stack.Screen name="thread/[id]" options={{ headerShown: false }} />
               {/* Rooms draw their own full-bleed canvas. */}
               <Stack.Screen name="room/[id]" options={{ headerShown: false }} />
+              {/* Wallets and membership hubs carry their own fixed-identity bars. */}
+              <Stack.Screen name="wallet/diamonds" options={{ headerShown: false }} />
+              <Stack.Screen name="membership/[family]" options={{ headerShown: false }} />
               <Stack.Screen name="dev/rtc-spike" options={{ title: 'RTC spike (dev only)' }} />
             </Stack>
           </ToastProvider>

@@ -865,3 +865,70 @@ describe('getRelationshipOffers', () => {
     expect(second.offers[0].coins).toBe(10000);
   });
 });
+
+describe('getMembershipHub', () => {
+  it('serves the SVIP ladder and the reference store with exact prices', async () => {
+    const hub = await fixtureDataSource.getMembershipHub('svip');
+    if (hub.family !== 'svip') {
+      throw new Error('expected the SVIP hub');
+    }
+
+    expect(hub.family).toBe('svip');
+    expect(hub.points).toBe(0);
+    expect(hub.levels.map((level) => level.label)).toEqual(['SVIP6', 'SVIP7', 'SVIP8']);
+    // Nothing in the SVIP ladder is held while SVIP is only "available" on the
+    // dashboard, so no level may flag itself current.
+    expect(hub.levels.every((level) => !level.current)).toBe(true);
+    expect(hub.store).toMatchObject([
+      { category: 'Vehicles', requiredLevel: 'SVIP3', price: 100000, validityDays: 7 },
+      { category: 'Vehicles', requiredLevel: 'SVIP3', price: 100000, validityDays: 7 },
+      { category: 'Frames', requiredLevel: 'SVIP2', price: 10500, validityDays: 7 },
+      { category: 'Frames', price: 30000, validityDays: 7 },
+    ]);
+  });
+
+  it('serves the VIP ladder, benefit gates and store from the reference', async () => {
+    const vip = await fixtureDataSource.getMembershipHub('vip');
+    if (vip.family !== 'vip') {
+      throw new Error('expected the VIP hub');
+    }
+
+    // The dashboard holds VIP, so the entry rung is the current one.
+    expect(vip.currentLevel).toBe('VIP1');
+    expect(vip.levels).toHaveLength(16);
+    // Every target is the reference's own server figure, read off its frames.
+    expect(vip.levels.map((level) => level.xp)).toEqual([
+      0, 16000, 64000, 304000, 1408000, 6544000, 18472000, 55996000, 167698000, 321280000,
+      503240000, 722224000, 1021072000, 2079008000, 4079008000, 8742264000,
+    ]);
+    for (let index = 1; index < vip.levels.length; index += 1) {
+      expect(vip.levels[index].xp).toBeGreaterThan(vip.levels[index - 1].xp);
+    }
+    // The hero is painted on the supplied backdrop.
+    expect(vip.hero.backgroundUrl).toBe('asset:media/backgrounds/vip-hero.png');
+
+    // 17 benefits: twelve at VIP1, then the gates that produce the reference's
+    // 12/17, 13/17, 14/17 and 17/17 counters.
+    expect(vip.benefits).toHaveLength(17);
+    expect(vip.benefits.filter((benefit) => benefit.unlockLevel === 'VIP1')).toHaveLength(12);
+    expect(vip.benefits.filter((benefit) => benefit.unlockLevel === 'VIP2')).toHaveLength(1);
+    expect(vip.benefits.filter((benefit) => benefit.unlockLevel === 'VIP3')).toHaveLength(1);
+    expect(vip.benefits.filter((benefit) => benefit.unlockLevel === 'VIP5')).toHaveLength(2);
+    expect(vip.benefits.filter((benefit) => benefit.unlockLevel === 'VIP7')).toHaveLength(1);
+
+    expect(vip.store).toMatchObject([
+      { category: 'Frames', requiredLevel: 'VIP2', price: 10500, validityDays: 7 },
+      { category: 'Vehicles', requiredLevel: 'VIP3', price: 30000, validityDays: 7 },
+      { category: 'Frames', price: 24000, validityDays: 7 },
+      { category: 'Vehicles', requiredLevel: 'VIP2', price: 100000, validityDays: 7 },
+    ]);
+  });
+
+  it('serves a fresh copy each time; the ladder is not client-mutable', async () => {
+    const hub = await fixtureDataSource.getMembershipHub('vip');
+    hub.levels[0].label = 'tampered';
+
+    const fresh = await fixtureDataSource.getMembershipHub('vip');
+    expect(fresh.levels[0].label).toBe('VIP1');
+  });
+});
