@@ -88,6 +88,7 @@ Do not start a new surface (room shell, wallet, SVIP, couples) or change archite
 - Next proposed task (needs approval): the per-tier membership detail pages (shared template, references 044-053) or the Aristocracy hub (references 038/039).
 
 ## 2026-10-25 (post-T020)
+- Committed `aef3cb0` "VIP T020: laurel benefit ornaments, supplied gold frame in the frame tile, flat points row against references 045-050" (7 files) and pushed to `origin/main`.
 - Last completed: **T020 VIP benefit ornaments, frame art, flat points row** - the benefits header is flanked by laurel branches (new `laurel-left` / `laurel-right` icon meanings), the "Exclusive Frame" tile draws the gold ring frame already bundled for avatar frames (`frameSource('wings')`, no new asset), and the My Points row is flat on the page as the 17:02 reference draws it.
 - Verification: typecheck PASS, lint PASS, jest **34 suites / 265 tests PASS**; captures `34-vip1-top.png`, `35-vip3-top.png`, `36-vip3-expanded-bottom.png` confirm all three; zero console problems. Device pass still queued (no ADB device attached).
 - Next proposed task (needs approval): the per-tier membership detail pages (shared template, references 044-053) or the Aristocracy hub (references 038/039).
